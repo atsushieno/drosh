@@ -1,0 +1,50 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="default.css" />
+</head>
+
+<body>
+if (DroshWebContext.NewUserConfirmation) {
+  <h1>Confirm user registration</h1>
+} else if (DroshWebContext.LoggedUser == null) {
+  <h1>New user registration</h1>
+} else {
+  <h1>Manage account</h1>
+}
+
+<!-- For registration, it is editable. Otherwise not -->
+<form target="/user/register" enabled="@(DroshWebContext.ConfirmNewRegistration)">
+
+<table>
+  <tr>
+    <td>Account Name</td><td><input type="text" id="username" name="username" /><br/>(only alphabet and numbers are accepted)</td>
+  </tr><tr>
+    <td>OpenID URL</td><td><input type="text" id="openid" name="openid" size="80" /></td>
+@if (DroshWebContext.UserAccountEditable) {
+  </tr><tr>
+    <td>Email </td><td><input type="text" id="email" name="email" size="40" /><br/>(used for verification and possible administration contacts)</td>
+  </tr><tr>
+    <td>Confirm email</td><td><input type="text" id="email-verified" name="email-verified" size="40" /></td>
+  </tr><tr>
+    <td>Password</td><td><input type="password" id="password" name="password" /></td>
+  </tr><tr>
+    <td>Confirm password</td><td><input type="password" id="password-verified" name="password-verified" /></td>
+}
+  </tr><tr>
+    <td>Profile (free text)</td><td><textarea id="profile" name="profile" cols="50" rows="3"></textarea></td>
+  </tr>
+</table>
+
+<p>
+<input type="submit" value="Confirm | Register | Update" />
+</p>
+<p>
+if (DroshWebContext.LoggedUser.Id == user.Id) {
+  <input type="submit" value="Delete This Account" />
+}
+</p>
+
+</form>
+
+</body>
+</html>

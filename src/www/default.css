@@ -1,0 +1,7 @@
+a { text-decoration: none }
+h1 { font-size: 1.5em; color: #666699; border-bottom: 2px solid; margin: 0px; margin-bottom: 1em; padding: 0px; padding-left: 1em }
+h2 { font-size: 1em; color: #666699; border-bottom: 1px solid; margin: 0px; margin-bottom: 1em; padding: 0px; padding-left: 1em }
+td { border-top: 1px solid #CCCCCC; border-left: 1px solid #CCCCCC }
+td,th { vertical-align: top }
+textarea, input { background-color: #E0E0E0 }
+#login, #logout { font-size: 0.8em }

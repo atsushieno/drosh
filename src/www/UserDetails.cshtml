@@ -1,0 +1,49 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="default.css" />
+</head>
+<body>
+
+<div id="logout" name="logout" style="float: right">
+<form target="/Logout">
+Logged in as @(DroshWebContext.LoggedUser.Name)<br />
+<input type="submit" value="Logout" />
+</form>
+</div>
+<div style="clear: left"></div>
+
+<h1>Drosh User profile</h1>
+
+<div id="notification" name="notification">
+<!-- notification area -->
+</div>
+
+<h2>@(user.Name)</h2>
+
+<!-- import non-editable user details here -->
+
+@if (DroshWebContext.LoggedUser.Id == user.Id) {
+<p>
+  <a href="/registration/user">manage account</a>
+</p>
+}
+
+<div id="projects" name="projects">
+
+<h2>Involved projects</h2>
+
+<table>
+@foreach (var project in ownedProjects) {
+  <tr>
+    <td><img alt="Owner" src="/images/owner.png"/><a href="/project/@(project.Name)">@(project.Name)</a></td>
+  </tr>
+}
+@foreach (var project in contributingProjects) {
+  <tr>
+    <td><img alt="Builder" src="/images/non-owner.png"/><a href="/project/@(project.Name)">@(project.Name)</a></td>
+  </tr>
+}
+</table>
+
+</div>
+

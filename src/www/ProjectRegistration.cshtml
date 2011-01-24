@@ -1,0 +1,125 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="default.css" />
+</head>
+<body>
+
+<div id="logout" name="logout" style="float: right">
+<form target="/Logout">
+Logged in as @(DroshWebContext.LoggedUser.Name)<br />
+<input type="submit" value="Logout" />
+</form>
+</div>
+<div style="clear: left"></div>
+
+@if (DroshWebContext.ConfirmNewProject) {
+  <h1>New Project Confirmation</h1>
+} else if (project != null) {
+  <h1>Manage Project @(project.Name)</h1>
+} else {
+  <h1>New Project Registration</h1>
+}
+
+<div id="notification" name="notification">
+<!-- notification area -->
+</div>
+
+<form target="/register/project/confirm">
+
+<table>
+  <tr>
+    <td>Name: </td><td><input id="name" name="name" /></td>
+  </tr><tr>
+    <td>Brief Description: </td><td><textarea id="desc" name="desc" rows="2" cols="80"></textarea></td>
+  </tr><tr>
+    <td>Project WebSite</td><td><input type="text" id="website" name="website" /size="80" ></td>
+  </tr><tr>
+    <td>Dependencies:</td>
+    <td><input type="text" id="deps" name="deps" size="80" /><br />enter whitespace-separated list of project names</td>
+    </td>
+  </tr><tr>
+    <td>Builder Users:</td>
+    <td><input type="text" id="builders" name="builders" size="80" /><br />enter whitespace-separated list of user names</td>
+  </tr><tr>
+    <td>Build Type: </td>
+    <td>
+      <select id="build-type" name="build-type">
+        <option value="prebuilt">prebuilt</option>
+        <option value="ndk-build">ndk-build</option>
+        <option value="autotools">autotools</option>
+        <option value="cmake">cmake</option>
+      </select>
+    </td>
+  </tr><tr>
+    <td>Target NDK: </td>
+    <td>
+      <input type="checkbox" id="target-ndk-r5" name="target-ndk-r5" checked="@(project != null && (project.TargetNDKs & TargetNDK.R5 != 0) ? "checked" : "")" />r5
+      <input type="checkbox" id="target-ndk-crystaxR4b" name="target-ndk-crystaxR4b" checked="@(project != null && (project.TargetNDKs & TargetNDK.CrystaxR4b != 0) ? "checked" : "")" />crystax r4b
+      <input type="checkbox" id="target-ndk-r4b" name="target-ndk-r4b" checked="@(project != null && (project.TargetNDKs & TargetNDK.R4b != 0) ? "checked" : "")" />r4b
+    </td>
+  </tr><tr>
+    <td>Target Arch: </td>
+    <td>
+      <input type="checkbox" id="target-arch-arm" name="target-arch-arm" checked="@(project != null && (project.TargetArchs & TargetArch.Arm != 0) ? "checked" : "")" />armeabi
+      <input type="checkbox" id="target-arch-armV7a" name="target-arch-armV7a" checked="@(project != null && (project.TargetArchs & TargetArch.ArmV7a != 0) ? "checked" : "")" />armeabi-v7a
+      <input type="checkbox" id="target-arch-x86" name="target-arch-x86" checked="@(project != null && (project.TargetArchs & TargetArch.X86 != 0) ? "checked" : "")" />x86
+    </td>
+  </tr><tr>
+    <td>Source: </td><td><input type="file" id="source-archive" name="source-archive" /></td>
+  </tr><tr>
+    <td>Patches: </td>
+    <td>
+      NDK version:
+      <input type="checkbox" id="patch-target-ndk-r5" name="patch-target-ndk-r5" checked="@(project != null && (project.TargetNDKs & TargetNDK.R5 != 0) ? "checked" : "")" />r5
+      <input type="checkbox" id="patch-target-ndk-crystaxR4b" name="patch-target-ndk-crystaxR4b" checked="@(project != null && (project.TargetNDKs & TargetNDK.CrystaxR4b != 0) ? "checked" : "")" />crystax r4b
+      <input type="checkbox" id="patch-target-ndk-r4b" name="patch-target-ndk-r4b" checked="@(project != null && (project.TargetNDKs & TargetNDK.R4b != 0) ? "checked" : "")" />r4b
+      <br />
+      Arch:
+      <input type="checkbox" id="patch-target-arch-arm" name="patch-target-arch-arm" checked="@(project != null && (project.TargetArchs & TargetArch.Arm != 0) ? "checked" : "")" />armeabi
+      <input type="checkbox" id="patch-target-arch-armV7a" name="patch-target-arch-armV7a" checked="@(project != null && (project.TargetArchs & TargetArch.ArmV7a != 0) ? "checked" : "")" />armeabi-v7a
+      <input type="checkbox" id="patch-target-arch-x86" name="patch-target-arch-x86" checked="@(project != null && (project.TargetArchs & TargetArch.X86 != 0) ? "checked" : "")" />x86
+      <br />
+      <textarea cols="80" rows="5" id="patch-text" name="patch-text"></textarea><br />
+      <input type="button" value="TODO: Add more..." />
+    </td>
+  </tr><tr>
+    <td>Build Script:</td>
+    <td>
+      Phase:
+      <select id="script-target" name="script-target">
+        <option value="build">build</option>
+        <option value="preinstall">preinstall</option>
+        <option value="install">install</option>
+        <option value="postinstall">postinstall</option>
+      </select><br />
+      NDK version:
+      <input type="checkbox" id="script-target-ndk-r5" name="script-target-ndk-r5" checked="@(project != null && (project.TargetNDKs & TargetNDK.R5 != 0) ? "checked" : "")" />r5
+      <input type="checkbox" id="script-target-ndk-crystaxR4b" name="script-target-ndk-crystaxR4b" checked="@(project != null && (project.TargetNDKs & TargetNDK.CrystaxR4b != 0) ? "checked" : "")" />crystax r4b
+      <input type="checkbox" id="script-target-ndk-r4b" name="script-target-ndk-r4b" checked="@(project != null && (project.TargetNDKs & TargetNDK.R4b != 0) ? "checked" : "")" />r4b
+      <br />
+      Arch:
+      <input type="checkbox" id="script-target-arch-arm" name="script-target-arch-arm" checked="@(project != null && (project.TargetArchs & TargetArch.Arm != 0) ? "checked" : "")" />armeabi
+      <input type="checkbox" id="script-target-arch-armV7a" name="script-target-arch-armV7a" checked="@(project != null && (project.TargetArchs & TargetArch.ArmV7a != 0) ? "checked" : "")" />armeabi-v7a
+      <input type="checkbox" id="script-target-arch-x86" name="script-target-arch-x86" checked="@(project != null && (project.TargetArchs & TargetArch.X86 != 0) ? "checked" : "")" />x86
+      <br />
+      <textarea cols="80" rows="5" id="script-text" name="script-text"></textarea><br />
+      <input type="button" value="TODO: Add more..." />
+    </td>
+  </tr><tr>
+    <td>files by package</td>
+    <td>
+      <textarea cols="50" rows="5" id="filesbypkg" name="filesbypkg"></textarea><br />
+      If you want to limit packaged files, enter the list of files, one for each line.<br />Only relative subpaths from installation directory are accepted.
+    </td>
+  </tr>
+</table>
+
+<input type="submit" value="confirm" />
+
+</form>
+
+</div>
+
+
+</body>
+</html>
