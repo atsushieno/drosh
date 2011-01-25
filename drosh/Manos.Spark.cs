@@ -79,6 +79,10 @@ namespace Manos.Spark {
 
 	public abstract class ManosSparkTemplate : AbstractSparkView {
 
+		public ManosSparkTemplate ViewData {
+			get { return this; }
+		}
+
 		public object Data {
 			get;
 			set;

@@ -1,4 +1,5 @@
 <use master="base.spark" />
+<viewdata User="drosh.User" ManagementMode = "drosh.UserManagementMode" />
 
 <content name="body">
 
