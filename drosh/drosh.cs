@@ -88,8 +88,10 @@ Console.Error.WriteLine ("get cookie : " + sessionId);
 			var userid = ctx.Request.Data ["userid"];
 			var passraw = ctx.Request.Data ["password"];
 			var user = DataStore.GetUser (userid);
-			if (user == null || user.PasswordHash != DataStore.HashPassword (passraw))
+			if (user == null || user.PasswordHash != DataStore.HashPassword (passraw)) {
 				Index (ctx, "Wrong user name or password");
+				return;
+			}
 			string sessionId = Guid.NewGuid ().ToString ();
 			var session = new DroshSession (sessionId, user);
 			Cache.Set (sessionId, session, TimeSpan.FromMinutes (60));
