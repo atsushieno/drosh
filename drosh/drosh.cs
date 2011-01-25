@@ -53,7 +53,7 @@ namespace drosh
 
 		void AssertLoggedIn (IManosContext ctx, Action<IManosContext,DroshSession> action)
 		{
-			var session = GetSessionCache (ctx.Request.Data ["session"]);
+			var session = GetSessionCache (ctx.Request.Cookies.Get ("session"));
 			if (session == null || session.User == null)
 				Index (ctx, "Login status expired or not logged in");
 			else
@@ -68,14 +68,17 @@ namespace drosh
 		}
 
 		[Route ("/login")]
-		public void Login (IManosContext ctx, string userid, string password, string link)
+		public void Login (IManosContext ctx, string link)
 		{
+			var userid = ctx.Request.Data ["userid"];
+			var passraw = ctx.Request.Data ["password"];
 			var user = DataStore.GetUser (userid);
-			if (user == null || user.PasswordHash != DataStore.HashPassword (password))
+			if (user == null || user.PasswordHash != DataStore.HashPassword (passraw))
 				Index (ctx, "Wrong user name or password");
 			string sessionId = Guid.NewGuid ().ToString ();
 			var session = new DroshSession (sessionId, user);
 			Cache.Set (sessionId, session, TimeSpan.FromMinutes (60));
+			ctx.Response.SetCookie ("session", sessionId, DateTime.Now.AddMinutes (60));
 			if (link != null)
 				ctx.Response.Redirect (link);
 			else
@@ -96,17 +99,6 @@ namespace drosh
 
 		// User registration
 
-		User GetLoggedUser (IManosContext ctx)
-		{
-			var sessionId = ctx.Request.Data ["session"];
-			if (sessionId != null) {
-				var session = GetSessionCache (sessionId);
-				return session.User;
-			}
-			else
-				return null;
-		}
-		
 		[Route ("/register/user/new")]
 		public void StartUserRegistration (IManosContext ctx, string notification)
 		{
@@ -140,6 +132,8 @@ namespace drosh
 			string sessionId = Guid.NewGuid ().ToString ();
 			var session = new DroshSession (sessionId, user);
 			Cache.Set (sessionId, session, TimeSpan.FromMinutes (60));
+			ctx.Response.SetCookie ("session", sessionId, DateTime.Now.AddMinutes (60));
+
 			LoggedHome (ctx, session, "You are now registered");
 #endif
 		}

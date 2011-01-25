@@ -3,6 +3,7 @@
 <use namespace="drosh" />
 <use namespace="System.Collections.Generic" />
 <viewdata
+  Session="DroshSession"
   User="User"
   ManagementMode="UserManagementMode"
   Editable="bool"
