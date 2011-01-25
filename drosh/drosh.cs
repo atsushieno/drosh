@@ -86,7 +86,7 @@ Console.Error.WriteLine ("get cookie : " + sessionId);
 		public void Login (IManosContext ctx, string link)
 		{
 			var userid = ctx.Request.Data ["login_user"];
-			var passraw = ctx.Request.Data ["loging_password"];
+			var passraw = ctx.Request.Data ["login_password"];
 			var user = DataStore.GetUser (userid);
 			if (user == null || user.PasswordHash != DataStore.HashPassword (passraw)) {
 				Index (ctx, String.Format ("User name '{0}' does not exist or password is wrong", userid));
@@ -186,7 +186,7 @@ Console.Error.WriteLine ("set cookie : " + sessionId);
 			ctx.Response.End ();
 		}
 
-		[Route ("/register/user/recovery")]
+		[Route ("/register/user/recovery/execute")]
 		public void ExecutePasswordRecovery (IManosContext ctx)
 		{
 			var name = ctx.Request.Data ["userid"];
