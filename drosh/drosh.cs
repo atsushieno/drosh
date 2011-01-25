@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using Manos;
+using Manos.Http;
 using Manos.Spark;
 
 namespace drosh
@@ -53,14 +54,12 @@ namespace drosh
 
 		void AssertLoggedIn (IManosContext ctx, Action<IManosContext,DroshSession> action)
 		{
-			var sessionId = ctx.Request.Cookies.Get ("session");
-Console.Error.WriteLine ("get cookie : " + sessionId);
+			var sessionId = ctx.Request.Cookies.Get ("drosh-session");
 			var session = GetSessionCache (sessionId);
 			if (session == null || session.User == null)
 				Index (ctx, "Login status expired or not logged in");
 			else {
-				ctx.Response.SetCookie ("session", sessionId, DateTime.Now.AddMinutes (60));
-Console.Error.WriteLine ("set cookie : " + sessionId);
+				ctx.Response.SetCookie ("drosh-session", new HttpCookie ("drosh-session", sessionId) {Path = "/", Expires = DateTime.Now.AddMinutes (60)});
 				action (ctx, session);
 			}
 		}
@@ -96,7 +95,7 @@ Console.Error.WriteLine ("get cookie : " + sessionId);
 			string sessionId = Guid.NewGuid ().ToString ();
 			var session = new DroshSession (sessionId, user);
 			Cache.Set (sessionId, session, TimeSpan.FromMinutes (60));
-			ctx.Response.SetCookie ("session", sessionId, TimeSpan.FromMinutes (60));
+			ctx.Response.SetCookie ("drosh-session", new HttpCookie ("drosh-session", sessionId) {Path = "/", Expires = DateTime.Now.AddMinutes (60)});
 			if (link != null)
 				ctx.Response.Redirect (link);
 			else
@@ -150,8 +149,7 @@ Console.Error.WriteLine ("get cookie : " + sessionId);
 			string sessionId = Guid.NewGuid ().ToString ();
 			var session = new DroshSession (sessionId, user);
 			Cache.Set (sessionId, session, TimeSpan.FromMinutes (60));
-			ctx.Response.SetCookie ("session", sessionId, TimeSpan.FromMinutes (60));
-Console.Error.WriteLine ("set cookie : " + sessionId);
+			ctx.Response.SetCookie ("drosh-session", new HttpCookie ("drosh-session", sessionId) {Path = "/", Expires = DateTime.Now.AddMinutes (60)});
 
 			LoggedHome (ctx, session, "You are now registered");
 #endif
