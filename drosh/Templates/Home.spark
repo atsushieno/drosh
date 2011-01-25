@@ -16,7 +16,6 @@
 
 <div id="logout" name="logout" style="float: right">
 <form action="/logout">
-<input type="hidden" name="session" id="session" value="${Session.Id}">
 Logged in as ${LoggedUser.Name}<br />
 <input type="submit" value="Logout" />
 </form>

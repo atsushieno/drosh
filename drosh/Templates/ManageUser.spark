@@ -28,7 +28,6 @@
 </else><else>
   <form action="/register/user/update">
 </else>
-<input type="hidden" name="session" id="session" value="${Session.Id}">
 
 <div id="notification" name="notification"><p>$!{Notification}</p></div>
 
@@ -93,7 +92,6 @@
 
 <test if="ManagementMode == UserManagementMode.Update">
 <form target="/delete/user">
-<input type="hidden" name="session" id="session" value="${Session.Id}">
 <p>
   <input type="submit" value="Delete This Account" />
   Check here if you are really sure: <input type="checkbox" value="delete" />
