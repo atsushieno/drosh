@@ -85,11 +85,11 @@ Console.Error.WriteLine ("get cookie : " + sessionId);
 		[Route ("/login")]
 		public void Login (IManosContext ctx, string link)
 		{
-			var userid = ctx.Request.Data ["userid"];
-			var passraw = ctx.Request.Data ["password"];
+			var userid = ctx.Request.Data ["login_user"];
+			var passraw = ctx.Request.Data ["loging_password"];
 			var user = DataStore.GetUser (userid);
 			if (user == null || user.PasswordHash != DataStore.HashPassword (passraw)) {
-				Index (ctx, "Wrong user name or password");
+				Index (ctx, String.Format ("User name '{0}' does not exist or password is wrong", userid));
 				return;
 			}
 			string sessionId = Guid.NewGuid ().ToString ();
