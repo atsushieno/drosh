@@ -99,22 +99,29 @@ namespace drosh
 		}
 		
 		[Route ("/register/user/new")]
-		public void StartUserRegistration (IManosContext ctx)
+		public void StartUserRegistration (IManosContext ctx, string notification)
 		{
-			this.RenderSparkView (ctx, "ManageUser.spark", new {ManagementMode = UserManagementMode.New, Editable = true});
+			this.RenderSparkView (ctx, "ManageUser.spark", new {ManagementMode = UserManagementMode.New, Editable = true, Notification = notification});
 			ctx.Response.End ();
 		}
 
 		[Route ("/register/user/confirm")]
 		public void ConfirmUserRegistration (IManosContext ctx)
 		{
-			this.RenderSparkView (ctx, "ManageUser.spark", new {ManagementMode = UserManagementMode.Confirm, User = CreateUserFromForm (ctx), Editable = false});
-			ctx.Response.End ();
+			// FIXME: validate inputs more.
+			if (ctx.Request.Data ["password"] != ctx.Request.Data ["password-verified"])
+				StartUserRegistration (ctx, "Password inputs don't match.");
+			else {
+				this.RenderSparkView (ctx, "ManageUser.spark", new {ManagementMode = UserManagementMode.Confirm, User = CreateUserFromForm (ctx), Editable = false});
+				ctx.Response.End ();
+			}
 		}
 
 		[Route ("/register/user/register")]
 		void ExecuteUserRegistration (IManosContext ctx)
 		{
+			// FIXME: validate inputs.
+
 			var user = CreateUserFromForm (ctx);
 			DataStore.RegisterUser (user);
 #if MAIL

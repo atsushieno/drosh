@@ -43,8 +43,6 @@ namespace Manos.Spark {
 				SetupEngine ();
 
 			var descriptor = new SparkViewDescriptor ().AddTemplate (template).AddTemplate ("base.spark");
-Console.Error.WriteLine (engine.CreateEntry (descriptor).SourceCode);
-Console.Error.WriteLine ("---------------------------------------");
 			var view = (ManosSparkTemplate) engine.CreateInstance (descriptor);
 
 			view.Data = data;
