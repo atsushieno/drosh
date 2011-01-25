@@ -48,14 +48,14 @@ Logged in as ${LoggedUser.Name}<br />
   </tr><tr>
     <td>Brief Description: </td><td><textarea id="desc" name="desc" rows="2" cols="80">$!{Project.Description}</textarea></td>
   </tr><tr>
-    <td>Project WebSite</td><td><input type="text" id="website" name="website" /size="80" value="$!{Project.PrimaryLink}"></td>
+    <td>Project WebSite</td><td><input type="text" id="website" name="website"size="80" value="$!{Project.PrimaryLink}" "readonly=?{!Editable}" /></td>
   </tr><tr>
     <td>Dependencies:</td>
-    <td><input type="text" id="deps" name="deps" size="80" value="$!{string.Join (" ", Project.Dependencies.ToArray ())}" /><br />enter whitespace-separated list of project names</td>
+    <td><input type="text" id="deps" name="deps" size="80" value="$!{string.Join (" ", Project.Dependencies.ToArray ())}" readonly="?{!Editable}" /><br />enter whitespace-separated list of project names</td>
     </td>
   </tr><tr>
     <td>Builder Users:</td>
-    <td><input type="text" id="builders" name="builders" size="80" value="${Contributors != null ? string.Join (" ", (from c in Contributors select c.User).ToArray ()) : null}" /><br />enter whitespace-separated list of user names</td>
+    <td><input type="text" id="builders" name="builders" size="80" value="${Contributors != null ? string.Join (" ", (from c in Contributors select c.User).ToArray ()) : null}" readonly="?{!Editable}" /><br />enter whitespace-separated list of user names</td>
   </tr><tr>
     <td>Build Type: </td>
     <td>
@@ -70,25 +70,31 @@ Logged in as ${LoggedUser.Name}<br />
   </tr><tr>
     <td>Target NDK: </td>
     <td>
-      <input type="checkbox" id="target-ndk-r5" name="target-ndk-r5" checked="?{Project == null && (Project.TargetNDKs & NDKType.R5) != 0}" disabled="?{!Editable}" />r5
+      <input type="checkbox" id="target-ndk-r5" name="target-ndk-r5" checked="?{Project == null || (Project.TargetNDKs & NDKType.R5) != 0}" disabled="?{!Editable}" />r5
       <input type="checkbox" id="target-ndk-crystaxR4b" name="target-ndk-crystaxR4b"  checked="?{Project == null || (Project.TargetNDKs & NDKType.CrystaxR4b) != 0}" disabled="?{!Editable}" />crystax r4b
       <input type="checkbox" id="target-ndk-r4b" name="target-ndk-r4b"  checked="?{Project == null || (Project.TargetNDKs & NDKType.R4b) != 0}" disabled="?{!Editable}" />r4b
     </td>
   </tr><tr>
     <td>Target Arch: </td>
     <td>
-      <input type="checkbox" id="target-arch-arm" name="target-arch-arm" checked="?{Project == null || (Project.TargetArchs & ArchType.Arm) != 0}" readonly="?{!Editable}" />armeabi
-      <input type="checkbox" id="target-arch-armV7a" name="target-arch-armV7a"  checked="?{Project == null || (Project.TargetArchs & ArchType.ArmV7a) != 0}" readonly="?{!Editable}" />armeabi-v7a
-      <input type="checkbox" id="target-arch-x86" name="target-arch-x86" checked="?{Project == null || (Project.TargetArchs & ArchType.X86) != 0}" readonly="?{!Editable}" />x86
+      <input type="checkbox" id="target-arch-arm" name="target-arch-arm" checked="?{Project == null || (Project.TargetArchs & ArchType.Arm) != 0}" disabled="?{!Editable}" />armeabi
+      <input type="checkbox" id="target-arch-armV7a" name="target-arch-armV7a"  checked="?{Project == null || (Project.TargetArchs & ArchType.ArmV7a) != 0}" disabled="?{!Editable}" />armeabi-v7a
+      <input type="checkbox" id="target-arch-x86" name="target-arch-x86" checked="?{Project == null || (Project.TargetArchs & ArchType.X86) != 0}" disabled="?{!Editable}" />x86
     </td>
   </tr><tr>
-    <td>Source: </td><td><input type="file" id="source-archive" name="source-archive" /></td>
+    <td>Source: </td>
+    <td>
+<test if="Editable">
+      <input type="file" id="source-archive" name="source-archive" />
+</test>
+<else>$!{Project.SourceArchiveName}</else>
+    </td>
   </tr>
 
   <tr>
     <td>Patches: </td>
     <td>
-<test if="Project != null || Project.Patches != null">
+<test if="Project != null && Project.Patches != null">
 <for each="var patch in Project.Patches">
       <div>
       <!-- patch #${++n_patch} -->
@@ -127,7 +133,7 @@ Logged in as ${LoggedUser.Name}<br />
   <tr>
     <td>Build Script:</td>
     <td>
-<test if="Project != null || Project.Scripts != null">
+<test if="Project != null && Project.Scripts != null">
 <for each="var script in Project.Scripts">
       <!-- script #${++n_script} -->
       <div>
