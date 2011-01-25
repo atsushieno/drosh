@@ -51,7 +51,7 @@ Console.Error.WriteLine ("---------------------------------------");
 
 			try {
 				view.RenderView (ctx.Response.Writer);
-				//ctx.Response.Writer.Flush ();
+				ctx.Response.Writer.Flush ();
 			} catch (Exception e) {
 				Console.WriteLine ("Exception while writing template.");
 				Console.WriteLine (e);
