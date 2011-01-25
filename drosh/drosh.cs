@@ -93,7 +93,7 @@ Console.Error.WriteLine ("get cookie : " + sessionId);
 			string sessionId = Guid.NewGuid ().ToString ();
 			var session = new DroshSession (sessionId, user);
 			Cache.Set (sessionId, session, TimeSpan.FromMinutes (60));
-			ctx.Response.SetCookie ("session", sessionId, DateTime.Now.AddMinutes (60));
+			ctx.Response.SetCookie ("session", sessionId, "www19337u.sakura.ne.jp", TimeSpan.FromMinutes (60));
 			if (link != null)
 				ctx.Response.Redirect (link);
 			else
@@ -147,8 +147,8 @@ Console.Error.WriteLine ("get cookie : " + sessionId);
 			string sessionId = Guid.NewGuid ().ToString ();
 			var session = new DroshSession (sessionId, user);
 			Cache.Set (sessionId, session, TimeSpan.FromMinutes (60));
-			ctx.Response.SetCookie ("session", sessionId, DateTime.Now.AddMinutes (60));
-Console.Error.WriteLine ("set cookie");
+			ctx.Response.SetCookie ("session", sessionId, "www19337u.sakura.ne.jp", TimeSpan.FromMinutes (60));
+Console.Error.WriteLine ("set cookie : " + sessionId);
 
 			LoggedHome (ctx, session, "You are now registered");
 #endif
