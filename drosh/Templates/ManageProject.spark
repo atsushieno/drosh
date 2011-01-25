@@ -1,28 +1,33 @@
-<html>
-<head>
-<link rel="stylesheet" type="text/css" href="default.css" />
-</head>
-<body>
+<use master="base.spark" />
+<use assembly="drosh" />
+<use namespace="drosh" />
+<use namespace="System.Collections.Generic" />
+<viewdata
+  User="User"
+  ManagementMode="ProjectManagementMode"
+  Editable="bool"
+  Notification="string" />
+
+<content name="body">
 
 <div id="logout" name="logout" style="float: right">
-<form target="/Logout">
-Logged in as @(DroshWebContext.LoggedUser.Name)<br />
+<form action="/logout">
+Logged in as ${LoggedUser.Name}<br />
 <input type="submit" value="Logout" />
 </form>
 </div>
+
 <div style="clear: left"></div>
 
-@if (DroshWebContext.ConfirmNewProject) {
+<test if="ManagementMode == ProjectManagementMode.Confirm">
   <h1>New Project Confirmation</h1>
-} else if (project != null) {
-  <h1>Manage Project @(project.Name)</h1>
-} else {
+</test><else if="ManagementMode == ProjectManagementMode.New">
   <h1>New Project Registration</h1>
-}
+</else><else>
+  <h1>Manage Project ${project.Name}</h1>
+</else>
 
-<div id="notification" name="notification">
-<!-- notification area -->
-</div>
+<div id="notification" name="notification"><p>$!{Notification}</p></div>
 
 <form target="/register/project/confirm">
 
@@ -121,5 +126,4 @@ Logged in as @(DroshWebContext.LoggedUser.Name)<br />
 </div>
 
 
-</body>
-</html>
+</content>

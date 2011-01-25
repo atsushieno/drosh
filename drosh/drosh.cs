@@ -15,6 +15,13 @@ namespace drosh
 		Update
 	}
 
+	public enum ProjectManagementMode
+	{
+		New,
+		Confirm,
+		Update
+	}
+
 	public class DroshSession
 	{
 		public DroshSession (string id, User user)
@@ -208,6 +215,85 @@ namespace drosh
 			this.RenderSparkView (ctx, "Home.spark", new { LoggedUser = session.User, Notification = notification, Builds = DataStore.GetLatestBuildsByUser (session.User.Name, 0), Projects = DataStore.GetProjectsByUser (session.User.Name) });
 			ctx.Response.End ();
 		}
+		
+		// Projects
+		
+		[Route ("/register/project/new")]
+		public void StartProjectRegistration (IManosContext ctx, string notification)
+		{
+			AssertLoggedIn (ctx, (c, session) => StartProjectRegistration (c, session, notification));
+		}
+		
+		void StartProjectRegistration (IManosContext ctx, DroshSession session, string notification)
+		{
+			this.RenderSparkView (ctx, "ManageProject.spark", new {ManagementMode = ProjectManagementMode.New, Editable = true, Notification = notification, LoggedUser = session.User});
+			ctx.Response.End ();
+		}
+
+		[Route ("/register/project/confirm")]
+		public void ConfirmProjectRegistration (IManosContext ctx)
+		{
+			AssertLoggedIn (ctx, (c, session) => ConfirmProjectRegistration (c, session));
+		}
+		
+		void ConfirmProjectRegistration (IManosContext ctx, DroshSession session)
+		{
+			// FIXME: validate inputs more.
+			this.RenderSparkView (ctx, "ManageProject.spark", new {ManagementMode = ProjectManagementMode.Confirm, LoggedUser = session.User, Editable = false});
+			ctx.Response.End ();
+		}
+
+		[Route ("/register/project/register")]
+		public void ExecuteProjectRegistration (IManosContext ctx)
+		{
+			AssertLoggedIn (ctx, (c, session) => ExecuteProjectRegistration (c, session));
+		}
+		
+		void ExecuteProjectRegistration (IManosContext ctx, DroshSession session)
+		{
+			// FIXME: validate inputs.
+
+			var user = session.User;
+			var project = CreateProjectFromForm (session, ctx);
+			DataStore.RegisterProject (user.Name, project);
+			LoggedHome (ctx, session, String.Format ("Registered project '{0}'", project.Name));
+		}
+
+		[Route ("/register/project/edit")]
+		public void StartProjectUpdate (IManosContext ctx, DroshSession session)
+		{
+			this.RenderSparkView (ctx, "ManageProject.spark", new {ManagementMode = ProjectManagementMode.Update, LoggedUser = session.User, Editable = true, Project = CreateProjectFromForm (session, ctx)});
+			ctx.Response.End ();
+		}
+
+		[Route ("/register/project/update")]
+		public void ExecuteProjectUpdate (IManosContext ctx, DroshSession session)
+		{
+			var project = CreateProjectFromForm (session, ctx);
+			DataStore.UpdateProject (session.User.Name, project);
+			this.RenderSparkView (ctx, "ManageProject.spark", new {ManagementMode = ProjectManagementMode.Update, Project = project, LoggedUser = session.User, Editable = true, Notification = "updated!"});
+			ctx.Response.End ();
+		}
+
+		Project CreateProjectFromForm (DroshSession session, IManosContext ctx)
+		{
+			var user = session.User.Name;
+			var name = ctx.Request.Data ["project"];
+			var p = new Project ();
+			var existing = name != null ? DataStore.GetProject (user, name) : null;
+			if (existing != null) {
+				p.RegisteredTimestamp = existing.RegisteredTimestamp;
+				// FIXME: fill everything else appropriated
+			}
+			p.Name = name;
+			p.Description = ctx.Request.Data ["description"];
+			p.PrimaryLink = ctx.Request.Data ["website"];
+			p.Owner = user;
+
+			// FIXME: fill everything else appropriated
+
+			return p;
+		}
 	}
 
 	public class Html
@@ -262,9 +348,9 @@ namespace drosh
 			users.Add (user);
 		}
 
-		public static void RegisterProject (User user, Project project)
+		public static void RegisterProject (string user, Project project)
 		{
-			if (projects.Any (p => p.Owner == user.Name && p.Name == project.Name))
+			if (projects.Any (p => p.Owner == user && p.Name == project.Name))
 				throw new Exception ("duplicate project name");
 			projects.Add (project);
 		}

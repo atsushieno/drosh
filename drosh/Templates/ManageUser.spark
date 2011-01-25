@@ -1,7 +1,12 @@
 <use master="base.spark" />
 <use assembly="drosh" />
 <use namespace="drosh" />
-<viewdata User="drosh.User" ManagementMode = "drosh.UserManagementMode" Editable="bool" />
+<use namespace="System.Collections.Generic" />
+<viewdata
+  User="User"
+  ManagementMode="UserManagementMode"
+  Editable="bool"
+  Notification="string" />
 
 <content name="body">
 
@@ -22,6 +27,8 @@
 </else><else>
   <form action="/register/user/update">
 </else>
+
+<div id="notification" name="notification"><p>$!{Notification}</p></div>
 
 <table>
   <tr>

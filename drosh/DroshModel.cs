@@ -67,7 +67,7 @@ namespace drosh
 		public NDKType TargetNDKs { get; set; }
 		public ArchType TargetArchs { get; set; }
 		public IList<string> FilesByPackage { get; set; }
-		public DateTime CreatedTimestamp { get; set; }
+		public DateTime RegisteredTimestamp { get; set; }
 		public DateTime LastUpdatedTimestamp { get; set; }
 	}
 
