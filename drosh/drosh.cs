@@ -147,7 +147,7 @@ namespace drosh
 		[Route ("/register/user/edit")]
 		public void StartUserUpdate (IManosContext ctx, DroshSession session)
 		{
-			this.RenderSparkView (ctx, "ManageUser.spark", new {ManagementMode = UserManagementMode.Update, User = session.User, Editable = true});
+			this.RenderSparkView (ctx, "ManageUser.spark", new {Session = session, ManagementMode = UserManagementMode.Update, User = session.User, Editable = true});
 			ctx.Response.End ();
 		}
 
@@ -158,7 +158,7 @@ namespace drosh
 			// process password change request with care: check existing password
 			var rawpwd = ctx.Request.Data ["old-password"];
 			if (ctx.Request.Data ["password"] != null && ctx.Request.Data ["password"] != ctx.Request.Data ["password-verified"] || rawpwd != null && DataStore.HashPassword (rawpwd) != user.PasswordHash) {
-				this.RenderSparkView (ctx, "ManageUser.spark", new {ManagementMode = UserManagementMode.Update, User = user, Editable = true, Notification = "Password didn't match"});
+				this.RenderSparkView (ctx, "ManageUser.spark", new {Session = session, ManagementMode = UserManagementMode.Update, User = user, Editable = true, Notification = "Password didn't match"});
 			} else {
 				user.PasswordHash = DataStore.HashPassword (ctx.Request.Data ["password"]) ?? user.PasswordHash;
 				DataStore.Update (user);
@@ -212,7 +212,7 @@ namespace drosh
 
 		void LoggedHome (IManosContext ctx, DroshSession session, string notification)
 		{
-			this.RenderSparkView (ctx, "Home.spark", new { LoggedUser = session.User, Notification = notification, Builds = DataStore.GetLatestBuildsByUser (session.User.Name, 0), Projects = DataStore.GetProjectsByUser (session.User.Name) });
+			this.RenderSparkView (ctx, "Home.spark", new { Session = session, LoggedUser = session.User, Notification = notification, Builds = DataStore.GetLatestBuildsByUser (session.User.Name, 0), Projects = DataStore.GetProjectsByUser (session.User.Name) });
 			ctx.Response.End ();
 		}
 		
@@ -226,7 +226,7 @@ namespace drosh
 		
 		void StartProjectRegistration (IManosContext ctx, DroshSession session, string notification)
 		{
-			this.RenderSparkView (ctx, "ManageProject.spark", new {ManagementMode = ProjectManagementMode.New, Editable = true, Notification = notification, LoggedUser = session.User});
+			this.RenderSparkView (ctx, "ManageProject.spark", new {Session = session, ManagementMode = ProjectManagementMode.New, Editable = true, Notification = notification, LoggedUser = session.User});
 			ctx.Response.End ();
 		}
 
@@ -239,7 +239,7 @@ namespace drosh
 		void ConfirmProjectRegistration (IManosContext ctx, DroshSession session)
 		{
 			// FIXME: validate inputs more.
-			this.RenderSparkView (ctx, "ManageProject.spark", new {ManagementMode = ProjectManagementMode.Confirm, LoggedUser = session.User, Editable = false});
+			this.RenderSparkView (ctx, "ManageProject.spark", new {Session = session, ManagementMode = ProjectManagementMode.Confirm, LoggedUser = session.User, Editable = false});
 			ctx.Response.End ();
 		}
 
@@ -262,7 +262,7 @@ namespace drosh
 		[Route ("/register/project/edit")]
 		public void StartProjectUpdate (IManosContext ctx, DroshSession session)
 		{
-			this.RenderSparkView (ctx, "ManageProject.spark", new {ManagementMode = ProjectManagementMode.Update, LoggedUser = session.User, Editable = true, Project = CreateProjectFromForm (session, ctx)});
+			this.RenderSparkView (ctx, "ManageProject.spark", new {Session = session, ManagementMode = ProjectManagementMode.Update, LoggedUser = session.User, Editable = true, Project = CreateProjectFromForm (session, ctx)});
 			ctx.Response.End ();
 		}
 
@@ -271,7 +271,7 @@ namespace drosh
 		{
 			var project = CreateProjectFromForm (session, ctx);
 			DataStore.UpdateProject (session.User.Name, project);
-			this.RenderSparkView (ctx, "ManageProject.spark", new {ManagementMode = ProjectManagementMode.Update, Project = project, LoggedUser = session.User, Editable = true, Notification = "updated!"});
+			this.RenderSparkView (ctx, "ManageProject.spark", new {Session = session, ManagementMode = ProjectManagementMode.Update, Project = project, LoggedUser = session.User, Editable = true, Notification = "updated!"});
 			ctx.Response.End ();
 		}
 
