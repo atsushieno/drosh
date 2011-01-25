@@ -43,6 +43,8 @@ namespace Manos.Spark {
 				SetupEngine ();
 
 			var descriptor = new SparkViewDescriptor ().AddTemplate (template).AddTemplate ("base.spark");
+Console.Error.WriteLine (engine.CreateEntry (descriptor).SourceCode);
+Console.Error.WriteLine ("---------------------------------------");
 			var view = (ManosSparkTemplate) engine.CreateInstance (descriptor);
 
 			view.Data = data;
@@ -60,7 +62,9 @@ namespace Manos.Spark {
 
 		public static void SetupEngine ()
 		{
-			engine = new SparkViewEngine ();
+			var settings = new SparkSettings ();
+			settings.SetDebug (true);
+			engine = new SparkViewEngine (settings);
 			engine.DefaultPageBaseType = "Manos.Spark.ManosSparkTemplate";
 
 			var vf = new FileSystemViewFolder ("Templates");
@@ -83,31 +87,32 @@ namespace Manos.Spark {
 
 		public object Eval (string expression)
 		{
-			string value = GetValue (expression);
+			object value = GetValue (expression);
 			return value;
 		}
 
 		public string Eval (string expression, string format)
 		{
-			string value = GetValue (expression);
+			object value = GetValue (expression);
 			return String.Format (format, value);
 		}
 
-		public string GetValue (string expression)
+		public object GetValue (string expression)
 		{
 			PropertyInfo prop = Data.GetType ().GetProperty (expression);
 
 			if (prop == null)
-				return String.Empty;
+				return null;
 
 			object value = prop.GetValue (Data, null);
 			if (value == null)
-				return String.Empty;
+				return prop.PropertyType.IsClass ? null : FormatterServices.GetUninitializedObject (prop.PropertyType);
 
-			return value.ToString ();
+			return value;
 		}
 
 	}
 }
+
 
 
