@@ -37,6 +37,8 @@ namespace drosh
 
 		DroshSession GetSessionCache (string key)
 		{
+			if (key == null)
+				return null;
 			object ret = null;
 			Cache.Get (key, delegate (string k, object value) { ret = value; });
 			return (DroshSession) ret;
@@ -203,7 +205,8 @@ namespace drosh
 
 		void LoggedHome (IManosContext ctx, DroshSession session, string notification)
 		{
-			this.RenderSparkView (ctx, "Home.spark", new { LoggedUser = session.User, Notification = notification});
+			this.RenderSparkView (ctx, "Home.spark", new { LoggedUser = session.User, Notification = notification, Builds = DataStore.GetLatestBuildsByUser (session.User.Name, 0), Projects = DataStore.GetProjectsByUser (session.User.Name) });
+			ctx.Response.End ();
 		}
 	}
 
@@ -228,6 +231,7 @@ namespace drosh
 
 		static List<User> users = new List<User> ();
 		static List<Project> projects = new List<Project> ();
+		static List<ProjectSubscription> subscriptions = new List<ProjectSubscription> ();
 		static List<BuildRecord> builds = new List<BuildRecord> ();
 
 		public static void RegisterUser (User user)
@@ -248,6 +252,44 @@ namespace drosh
 				throw new Exception ("The user does not exist");
 			users.Remove (GetUser (user.Name));
 			users.Add (user);
+		}
+
+		public static void UpdateUser (User user)
+		{
+			if (!users.Any (u => u.Name == user.Name))
+				throw new Exception ("The user does not exist");
+			users.Remove (GetUser (user.Name));
+			users.Add (user);
+		}
+
+		public static void RegisterProject (User user, Project project)
+		{
+			if (projects.Any (p => p.Owner == user.Name && p.Name == project.Name))
+				throw new Exception ("duplicate project name");
+			projects.Add (project);
+		}
+
+		public static Project GetProject (string user, string name)
+		{
+			return projects.FirstOrDefault (p => p.Owner == user && p.Name == name);
+		}
+
+		public static void UpdateProject (string user, Project project)
+		{
+			if (!projects.Any (p => p.Owner == user && p.Name == project.Name))
+				throw new Exception ("The project does not exist");
+			projects.Remove (GetProject (user, project.Name));
+			projects.Add (project);
+		}
+
+		public static IEnumerable<Project> GetProjectsByUser (string user)
+		{
+			return projects.Where (p => p.Owner == user || subscriptions.Any (s => s.Project == p.Id && s.User == user));
+		}
+
+		public static IEnumerable<BuildRecord> GetLatestBuildsByUser (string user, int skip)
+		{
+			return builds.OrderBy (b => b.BuildStartedTimestamp).Skip (skip).Take (10);
 		}
 	}
 

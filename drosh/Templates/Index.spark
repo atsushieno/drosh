@@ -1,4 +1,7 @@
 <use master="base.spark" />
+<viewdata
+  Notification="string" />
+
 
 <content name="body">
 
@@ -14,9 +17,7 @@ Password<input type="password" id="login_password" name="login_password" />
 </form>
 </div>
 
-<div id="notification" name="notification">
-<!-- notification area -->
-</div>
+<div id="notification" name="notification"><p>$!{Notification}</p></div>
 
 <div id="project-search" name="project-search">
 <form target="/projects/search">

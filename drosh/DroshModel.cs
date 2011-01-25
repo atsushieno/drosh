@@ -54,6 +54,7 @@ namespace drosh
 	
 	public class Project
 	{
+		public string Id { get; set; } // FIXME: it should replace usage of Name as identity (Name is not unique without Owner).
 		public string Name { get; set; }
 		public string Description { get; set; }
 		public string PrimaryLink { get; set; }
@@ -115,8 +116,9 @@ namespace drosh
 	public class BuildRecord
 	{
 		public string BuildId { get; set; }
+		public ProjectReference Project { get; set; }
 		public ProjectRevisionReference ProjectRevision { get; set; }
-		public NDKType TargetNdk { get; set; }
+		public NDKType TargetNDK { get; set; }
 		public ArchType TargetArch { get; set; }
 		public UserReference Builder { get; set; }
 		public DateTime BuildStartedTimestamp { get; set; }

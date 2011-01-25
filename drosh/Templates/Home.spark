@@ -1,18 +1,21 @@
 <use master="base.spark" />
 <use assembly="drosh" />
 <use namespace="drosh" />
+<use namespace="System.Collections.Generic" />
+
 <viewdata
-  User="drosh.User"
-  Projects="IEnumerable{{Project}}"
-  Builds="IEnumerable{{Build}}" />
+  Notification="string"
+  LoggedUser="drosh.User"
+  Projects="IEnumerable[[Project]]"
+  Builds="IEnumerable[[BuildRecord]]" />
 
 <content name="body">
 
 <h1>Drosh: Android Shared Library House</h1>
 
 <div id="logout" name="logout" style="float: right">
-<form target="/logout">
-Logged in as ${User.Name}<br />
+<form action="/logout">
+Logged in as ${LoggedUser.Name}<br />
 <input type="submit" value="Logout" />
 </form>
 </div>
@@ -38,7 +41,6 @@ Logged in as ${User.Name}<br />
 
 <!-- FIXME: do we need this? -->
 <div id="recent-builds" name="recent-builds">
-<form>
 
 <!-- list of builds -->
 
@@ -46,22 +48,19 @@ Logged in as ${User.Name}<br />
 
 <table>
 <for each="var build in Builds">
-<tr id="build-${build.Id}" name="build-${build.Id}">
-  <td style="color: ${build.Status == BuildStatus.Failure ? "red" : build.Status == BuildStatus.OK ? "green" : build.Status == BuildStatus.Ongoing ? "yellow" : null}">${build.Status}</td>
-  <td>${build.StartedTime}</td>
-  <td><a href="/project/${build.Project.Id}/${build.Revision}">${build.Project.Name}</td>
-  <td>${build.Revision}</td>
+<tr id="build-${build.BuildId}" name="build-${build.BuildId}">
+  <td style="color: ${build.Status == BuildStatus.Failure ? "red" : build.Status == BuildStatus.Success ? "green" : build.Status == BuildStatus.Ongoing ? "yellow" : null}">${build.Status}</td>
+  <td>${build.BuildStartedTimestamp}</td>
+  <td><a href="/project/${build.Project}/${build.ProjectRevision}">${DataStore.GetProject (LoggedUser.Name, build.Project).Name}</td>
+  <td>${build.ProjectRevision}</td>
   <td>${build.TargetNDK}</td>
   <td>${build.TargetArch}</td>
 </tr>
-}
+</for>
 </table>
 
 <!-- TODO: page controller links -->
 
-</form>
 </div>
 
-
-</body>
-</html>
+</content>
