@@ -34,7 +34,7 @@ Logged in as ${LoggedUser.Name}<br />
 
 <div id="notification" name="notification"><p>$!{Notification}</p></div>
 
-<form target="/register/project/confirm">
+<form action="/register/project/confirm">
 
 <table>
   <tr>
@@ -49,7 +49,7 @@ Logged in as ${LoggedUser.Name}<br />
     </td>
   </tr><tr>
     <td>Builder Users:</td>
-    <td><input type="text" id="builders" name="builders" size="80" value="${Contributors != null ? string.Join (" ", (from c in Contributors select c.User).ToArray ()) : null})}" /><br />enter whitespace-separated list of user names</td>
+    <td><input type="text" id="builders" name="builders" size="80" value="${Contributors != null ? string.Join (" ", (from c in Contributors select c.User).ToArray ()) : null}" /><br />enter whitespace-separated list of user names</td>
   </tr><tr>
     <td>Build Type: </td>
     <td>
@@ -82,6 +82,7 @@ Logged in as ${LoggedUser.Name}<br />
   <tr>
     <td>Patches: </td>
     <td>
+<test if="Project != null && Project.Patches != null">
 <for each="var patch in Project.Patches">
       <div>
       <!-- patch #${++n_patch} -->
@@ -99,6 +100,7 @@ Logged in as ${LoggedUser.Name}<br />
       To remove patch, just clear patch text.
       </div>
 </for>
+</test>
 <test if="Editable">
       NDK version:
       <input type="checkbox" id="patch-target-ndk-r5" name="target-ndk-r5" />r5
@@ -119,6 +121,7 @@ Logged in as ${LoggedUser.Name}<br />
   <tr>
     <td>Build Script:</td>
     <td>
+<test if="Project != null && Project.Scripts != null">
 <for each="var script in Project.Scripts">
       <!-- script #${++n_script} -->
       <div>
@@ -143,6 +146,7 @@ Logged in as ${LoggedUser.Name}<br />
       To remove script, just clear script text.
       </div>
 </for>
+</test>
 
 <test if="Editable">
       <div>
