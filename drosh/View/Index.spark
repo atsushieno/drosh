@@ -1,0 +1,33 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="default.css" />
+</head>
+<body>
+<h1>Drosh: Android Shared Library House</h1>
+
+<div id="login" name="login" float="right">
+<form target="/Login">
+Account ID<input type="text" id="login_user" name="login_user" />
+Password<input type="password" id="login_password" name="login_password" />
+<input type="submit" value="Login" />
+<a href="/registration/user/new">New account</a>
+<a href="/registration/user/recovery">forgot password?</a>
+</form>
+</div>
+
+<div id="notification" name="notification">
+<!-- notification area -->
+</div>
+
+<div id="project-search" name="project-search">
+<form target="/projects/search">
+Name <input type="text" />
+<input type="submit" value="Search" />
+</form>
+</div>
+
+<!-- FIXME: add recent/hot projects here? -->
+
+</body>
+</html>
+

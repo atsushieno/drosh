@@ -1,0 +1,42 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="default.css" />
+</head>
+<body>
+
+<div id="logout" name="logout" style="float: right">
+<form target="/Logout">
+Logged in as @(DroshWebContext.LoggedUser.Name)<br />
+<input type="submit" value="Logout" />
+</form>
+</div>
+<div style="clear: left"></div>
+
+<h1>Build status</h1>
+
+<div id="notification" name="notification">
+<!-- notification area -->
+</div>
+
+<table>
+  <tr>
+    <td>Project: </td><td><a href="/project/@(build.Project)">@(build.Project)</a></td>
+  </tr><tr>
+    <td>Revision: </td><td><a href="/project/@(build.Project)/@(build.Revision)">@(build.Revision)</a></td>
+  </tr><tr>
+    <td>Started: </td><td>@(build.StartedTime)</td>
+  </tr><tr>
+    <td>Status: </td><td>@(build.Status)</td>
+  </tr><tr>
+    <td>Target NDK</td><td>@(build.TargetNDK)</td>
+  </tr><tr>
+    <td>Target Arch</td><td>@(build.TargetArch)</td>
+  </tr><tr>
+    <td>Results: </td><td><a href="/download/@(build.ResultsArchiveName)">@(build.ResultsArchiveName)</a></td>
+  </tr><tr>
+    <td>Log: </td><td><a href="/log/@(build.ResultsArchiveName)"><img alt="Log" src="/images/log.png" /></a></td>
+  </tr>
+</table>
+
+</body>
+</html>

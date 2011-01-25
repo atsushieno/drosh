@@ -1,0 +1,92 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="default.css" />
+</head>
+
+<body>
+<if contidion="ManagementMode = UserManagementMode.Confirm">
+  <h1>Confirm user registration</h1>
+</if><else if="ManagementMode = UserManagementMode.New">
+  <h1>New user registration</h1>
+</else><else>
+  <h1>Manage account</h1>
+</else>
+
+<!-- For registration, it is editable. Otherwise not -->
+
+<if contidion="ManagementMode = UserManagementMode.Confirm">
+  <form action="/register/user/register">
+</if><else if="ManagementMode = UserManagementMode.New">
+  <form action="/register/user/confirm">
+</else><else>
+  <form action="/register/user/update">
+</else>
+
+<table>
+  <tr>
+    <td>Account Name</td>
+    <td>
+<if condition="ManagementMode == UserManagementMode.New">
+      <input type="text" id="username" name="username" /><br/>(only alphabet and numbers are accepted)
+</if>
+<else>
+      ${User.Name}
+</else>
+    </td>
+  </tr><tr>
+    <td>OpenID URL</td>
+    <td>
+<if condition="Editable">
+        <input type="text" id="openid" name="openid" size="80" />
+</if>
+<else>${User.OpenID}</else>
+    </td>
+  </tr>
+<if condition="Editable">
+  <tr>
+    <td>Email </td><td><input type="text" id="email" name="email" size="40" value="${User.Email}" /><br/>(used for verification and possible administration contacts)</td>
+  </tr><tr>
+    <td>Confirm email</td><td><input type="text" id="email-verified" name="email-verified" size="40" value="${User.Email}" /></td>
+  </tr><tr>
+    <td>Password</td><td><input type="password" id="password" name="password" /><br />
+<if condition="ManagementMode == UserManagementMode.Update">
+    leave here blank if you don't want to change
+</if>
+    </td>
+  </tr><tr>
+    <td>Confirm password</td><td><input type="password" id="password-verified" name="password-verified" /></td>
+</if><else>
+  <tr>
+    <td>Email </td><td>${User.Email}</td>
+  </tr>
+</else>
+  <tr>
+    <td>Profile (free text)</td><td><textarea id="profile" name="profile" cols="50" rows="3">${User.Profile}</textarea></td>
+  </tr>
+</table>
+
+<p>
+<if contidion="ManagementMode = UserManagementMode.Confirm">
+
+  <p>TODO: insert captcha</p>
+
+  <input type="submit" value="Register" />
+</if><else if="ManagementMode = UserManagementMode.New">
+  <input type="submit" value="Confirm" />
+</else><else>
+  <input type="submit" value="Update" />
+</else>
+</p>
+</form>
+
+<if condition="ManagementMode = UserManagementMode.Update">
+<form target="/delete/user">
+<p>
+  <input type="submit" value="Delete This Account" />
+  Check here if you are really sure: <input type="checkbox" value="delete" />
+</p>
+</form>
+</if>
+
+</body>
+</html>

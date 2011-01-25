@@ -1,0 +1,73 @@
+Models
+	in source file.
+
+Views
+	Index
+	Home
+	UserRegistration
+	PasswordRecovery
+	User
+	ProjectRegistration
+	Projects
+	Project
+	Builds
+	Build
+
+Controllers
+	StartUserRegistration ()
+		- show new user registration form
+	-> ConfirmUserRegistration (user)
+		- show confirmation UI
+	-> ExecuteUserRegistration (user)
+		- register new user to db
+		- send verification email
+
+	ActivateUser (hash)
+		- activate user by verification email
+		- identify user by the URL
+
+	ConfirmPasswordRecoveryRequest (user) [password recovery step 1]
+		- show confirmation
+	-> RequestPasswordRecovery (user) [password recovery step 2]
+		- send email
+		- deactivate user
+		- go to toppage
+
+	StartUserManagement (user)
+		- shows user (self) properties
+		- shows involved projects
+	-> UpdateUser (user)
+		- updates data in db
+		- go back to user management
+	-> ConfirmDeleteAccount (user)
+		- show confirmation UI
+	-> ExecuteDeleteAccount (user)
+		- remove user account in db
+		- logout
+		- go to toppage
+
+	ConfirmResignProjectMaintainer (user, project)
+		- shows confirmation on resigning a project for a user.
+	-> ExecuteResignProjectMaintainer (user, project)
+			- removes user from maintainer db records
+
+	ShowUser (user)
+		- shows user (others) properties
+
+	SearchProjects (name)
+		- search projects from db by name or user
+
+	ShowProject (projectRevision)
+		- show project (actually revision) details
+			Revision properties
+
+	ShowBuilds (project)
+		- show build history for a project
+
+	ShowBuild (build)
+		- show build properties
+
+	ShowLog (logId)
+		- download build log (show as text/plain)
+
+
