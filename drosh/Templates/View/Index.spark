@@ -1,8 +1,7 @@
-<html>
-<head>
-<link rel="stylesheet" type="text/css" href="default.css" />
-</head>
-<body>
+<use master="base.spark" />
+
+<content name="body">
+
 <h1>Drosh: Android Shared Library House</h1>
 
 <div id="login" name="login" float="right">
@@ -27,7 +26,4 @@ Name <input type="text" />
 </div>
 
 <!-- FIXME: add recent/hot projects here? -->
-
-</body>
-</html>
 

@@ -1,9 +1,7 @@
-<html>
-<head>
-<link rel="stylesheet" type="text/css" href="default.css" />
-</head>
+<use master="base.spark" />
 
-<body>
+<content name="body">
+
 <if contidion="ManagementMode = UserManagementMode.Confirm">
   <h1>Confirm user registration</h1>
 </if><else if="ManagementMode = UserManagementMode.New">
@@ -88,5 +86,3 @@
 </form>
 </if>
 
-</body>
-</html>

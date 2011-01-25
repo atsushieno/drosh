@@ -1,7 +1,0 @@
-<html>
-  <title>${#Title}</title>
-  <body>
-    <use content="body" />
-  </body>
-</html>
-
