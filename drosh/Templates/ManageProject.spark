@@ -2,7 +2,9 @@
 <use assembly="drosh" />
 <use namespace="drosh" />
 <use namespace="System.Collections.Generic" />
+<use namespace="System.Linq" />
 <viewdata
+  Contributors="IEnumerable[[ProjectSubscription]]"
   Session="DroshSession"
   LoggedUser="User"
   Project="Project"
@@ -47,7 +49,7 @@ Logged in as ${LoggedUser.Name}<br />
     </td>
   </tr><tr>
     <td>Builder Users:</td>
-    <td><input type="text" id="builders" name="builders" size="80" value="$!{string.Join (" ", Contributors.ToArray ())}" /><br />enter whitespace-separated list of user names</td>
+    <td><input type="text" id="builders" name="builders" size="80" value="${Contributors != null ? string.Join (" ", (from c in Contributors select c.User).ToArray ()) : null})}" /><br />enter whitespace-separated list of user names</td>
   </tr><tr>
     <td>Build Type: </td>
     <td>
@@ -117,7 +119,7 @@ Logged in as ${LoggedUser.Name}<br />
   <tr>
     <td>Build Script:</td>
     <td>
-<for each="var script in Project.BuildScripts">
+<for each="var script in Project.Scripts">
       <!-- script #${++n_script} -->
       <div>
       Phase:
