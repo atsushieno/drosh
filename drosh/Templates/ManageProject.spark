@@ -51,11 +51,11 @@ Logged in as ${LoggedUser.Name}<br />
     <td>Project WebSite</td><td><input type="text" id="website" name="website"size="80" value="$!{Project.PrimaryLink}" readonly="?{!Editable}" /></td>
   </tr><tr>
     <td>Dependencies:</td>
-    <td><input type="text" id="deps" name="deps" size="80" value="$!{string.Join (" ", Project.Dependencies.ToArray ())}" readonly="?{!Editable}" /><br />enter whitespace-separated list of project names</td>
+    <td><input type="text" id="deps" name="deps" size="80" value="$!{string.Join (' ', Project.Dependencies.ToArray ())}" readonly="?{!Editable}" /><br />enter whitespace-separated list of project names</td>
     </td>
   </tr><tr>
     <td>Builder Users:</td>
-    <td><input type="text" id="builders" name="builders" size="80" value="${Project.Builders != null ? string.Join (" ", (from c in Project.Builders select c.User).ToArray ()) : null}" readonly="?{!Editable}" /><br />enter whitespace-separated list of user names</td>
+    <td><input type="text" id="builders" name="builders" size="80" value="${Project.Builders != null ? string.Join (' ', Project.Builders.ToArray ()) : null}" readonly="?{!Editable}" /><br />enter whitespace-separated list of user names</td>
   </tr><tr>
     <td>Build Type: </td>
     <td>

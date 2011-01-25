@@ -244,7 +244,8 @@ Console.Error.WriteLine ("get cookie : " + sessionId);
 		void ConfirmProjectRegistration (IManosContext ctx, DroshSession session)
 		{
 			// FIXME: validate inputs more.
-			this.RenderSparkView (ctx, "ManageProject.spark", new {Session = session, ManagementMode = ProjectManagementMode.Confirm, LoggedUser = session.User, Editable = false});
+			var project = CreateProjectFromForm (session, ctx);
+			this.RenderSparkView (ctx, "ManageProject.spark", new {Session = session, ManagementMode = ProjectManagementMode.Confirm, LoggedUser = session.User, Editable = false, Project = project});
 			ctx.Response.End ();
 		}
 
