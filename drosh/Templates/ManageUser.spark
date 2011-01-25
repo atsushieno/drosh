@@ -31,7 +31,7 @@
       <input type="text" id="username" name="username" /><br/>(only alphabet and numbers are accepted)
 </test>
 <else>
-      ${User.Name}
+      $!{User.Name}
 </else>
     </td>
   </tr><tr>
@@ -40,14 +40,14 @@
 <test if="Editable">
         <input type="text" id="openid" name="openid" size="80" />
 </test>
-<else>${User.OpenID}</else>
+<else>$!{User.OpenID}</else>
     </td>
   </tr>
 <test if="Editable">
   <tr>
-    <td>Email </td><td><input type="text" id="email" name="email" size="40" value="${User.Email}" /><br/>(used for verification and possible administration contacts)</td>
+    <td>Email </td><td><input type="text" id="email" name="email" size="40" value="$!{User.Email}" /><br/>(used for verification and possible administration contacts)</td>
   </tr><tr>
-    <td>Confirm email</td><td><input type="text" id="email-verified" name="email-verified" size="40" value="${User.Email}" /></td>
+    <td>Confirm email</td><td><input type="text" id="email-verified" name="email-verified" size="40" value="$!{User.Email}" /></td>
   </tr><tr>
     <td>Password</td><td><input type="password" id="password" name="password" /><br />
 <test if="ManagementMode == UserManagementMode.Update">
@@ -59,11 +59,11 @@
   </tr>
 </test><else>
   <tr>
-    <td>Email </td><td>${User.Email}</td>
+    <td>Email </td><td>$!{User.Email}</td>
   </tr>
 </else>
   <tr>
-    <td>Profile (free text)</td><td><textarea id="profile" name="profile" cols="50" rows="3">${User.Profile}</textarea></td>
+    <td>Profile (free text)</td><td><textarea id="profile" name="profile" cols="50" rows="3">$!{User.Profile}</textarea></td>
   </tr>
 </table>
 

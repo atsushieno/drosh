@@ -29,7 +29,7 @@ using Spark.FileSystem;
 
 using System;
 using System.Reflection;
-
+using System.Runtime.Serialization;
 
 namespace Manos.Spark {
 
@@ -43,8 +43,8 @@ namespace Manos.Spark {
 				SetupEngine ();
 
 			var descriptor = new SparkViewDescriptor ().AddTemplate (template).AddTemplate ("base.spark");
-Console.Error.WriteLine (engine.CreateEntry (descriptor).SourceCode);
-Console.Error.WriteLine ("---------------------------------------");
+//Console.Error.WriteLine (engine.CreateEntry (descriptor).SourceCode);
+//Console.Error.WriteLine ("---------------------------------------");
 			var view = (ManosSparkTemplate) engine.CreateInstance (descriptor);
 
 			view.Data = data;
