@@ -29,11 +29,6 @@ namespace drosh
 
 	public class drosh : ManosApp
 	{
-		static drosh ()
-		{
-			ManosModuleExtensions.SparkSettings.AddAssembly (typeof (drosh).Assembly);
-		}
-		
 		public drosh ()
 		{
 			Route ("/default.css", new StaticContentModule ());

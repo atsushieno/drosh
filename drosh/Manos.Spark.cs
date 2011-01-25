@@ -35,14 +35,7 @@ namespace Manos.Spark {
 
 	public static class ManosModuleExtensions {
 
-		static ManosModuleExtensions ()
-		{
-			SparkSettings = new SparkSettings ();
-		}
-
 		private static SparkViewEngine engine = null;
-
-		public static SparkSettings SparkSettings { get; private set; }
 
 		public static void RenderSparkView (this ManosModule module, IManosContext ctx, string template, object data)
 		{

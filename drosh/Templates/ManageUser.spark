@@ -1,4 +1,6 @@
 <use master="base.spark" />
+<use assembly="drosh" />
+<use namespace="drosh" />
 <viewdata User="drosh.User" ManagementMode = "drosh.UserManagementMode" />
 
 <content name="body">
