@@ -53,6 +53,7 @@
     </td>
   </tr><tr>
     <td>Confirm password</td><td><input type="password" id="password-verified" name="password-verified" /></td>
+  </tr>
 </if><else>
   <tr>
     <td>Email </td><td>${User.Email}</td>
@@ -86,3 +87,4 @@
 </form>
 </if>
 
+</content>

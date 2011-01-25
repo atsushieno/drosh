@@ -9,8 +9,8 @@
 Account ID<input type="text" id="login_user" name="login_user" />
 Password<input type="password" id="login_password" name="login_password" />
 <input type="submit" value="Login" />
-<a href="/registration/user/new">New account</a>
-<a href="/registration/user/recovery">forgot password?</a>
+<a href="/register/user/new">New account</a>
+<a href="/register/user/recovery">forgot password?</a>
 </form>
 </div>
 
@@ -27,3 +27,4 @@ Name <input type="text" />
 
 <!-- FIXME: add recent/hot projects here? -->
 
+</content>

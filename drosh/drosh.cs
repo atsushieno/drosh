@@ -31,6 +31,7 @@ namespace drosh
 	{
 		public drosh ()
 		{
+			Route ("/default.css", new StaticContentModule ());
 			Route ("/images/", new StaticContentModule ());
 		}
 
@@ -53,7 +54,7 @@ namespace drosh
 		[Route ("/", "/index")]
 		public void Index (IManosContext ctx, string notification)
 		{
-			this.RenderSparkView (ctx, "View/Index.spark", new { Notification = notification});
+			this.RenderSparkView (ctx, "Index.spark", new { Notification = notification});
 			ctx.Response.End ();
 		}
 
@@ -100,14 +101,14 @@ namespace drosh
 		[Route ("/register/user/new")]
 		public void StartUserRegistration (IManosContext ctx)
 		{
-			this.RenderSparkView (ctx, "View/ManageUser.spark", new {ManagementMode = UserManagementMode.New, Editable = true});
+			this.RenderSparkView (ctx, "ManageUser.spark", new {ManagementMode = UserManagementMode.New, Editable = true});
 			ctx.Response.End ();
 		}
 
 		[Route ("/register/user/confirm")]
 		public void ConfirmUserRegistration (IManosContext ctx)
 		{
-			this.RenderSparkView (ctx, "View/ManageUser.spark", new {ManagementMode = UserManagementMode.Confirm, User = CreateUserFromForm (ctx), Editable = false});
+			this.RenderSparkView (ctx, "ManageUser.spark", new {ManagementMode = UserManagementMode.Confirm, User = CreateUserFromForm (ctx), Editable = false});
 			ctx.Response.End ();
 		}
 
@@ -130,7 +131,7 @@ namespace drosh
 		[Route ("/register/user/edit")]
 		public void StartUserUpdate (IManosContext ctx, DroshSession session)
 		{
-			this.RenderSparkView (ctx, "View/ManageUser.spark", new {ManagementMode = UserManagementMode.Update, User = session.User, Editable = true});
+			this.RenderSparkView (ctx, "ManageUser.spark", new {ManagementMode = UserManagementMode.Update, User = session.User, Editable = true});
 			ctx.Response.End ();
 		}
 
@@ -140,11 +141,11 @@ namespace drosh
 			var user = CreateUserFromForm (ctx);
 			// process password change request with care: check existing password
 			if (ctx.Request.Data ["password"] != null && ctx.Request.Data ["password"] != ctx.Request.Data ["password-verified"] || DataStore.HashPassword (ctx.Request.Data ["old-password"]) != user.PasswordHash) {
-				this.RenderSparkView (ctx, "View/ManageUser.spark", new {ManagementMode = UserManagementMode.Update, User = user, Editable = true, Notification = "Password didn't match"});
+				this.RenderSparkView (ctx, "ManageUser.spark", new {ManagementMode = UserManagementMode.Update, User = user, Editable = true, Notification = "Password didn't match"});
 			} else {
 				user.PasswordHash = DataStore.HashPassword (ctx.Request.Data ["password"]) ?? user.PasswordHash;
 				DataStore.Update (user);
-				this.RenderSparkView (ctx, "View/ManageUser.spark", new {ManagementMode = UserManagementMode.Update, User = user, Editable = true, Notification = "updated!"});
+				this.RenderSparkView (ctx, "ManageUser.spark", new {ManagementMode = UserManagementMode.Update, User = user, Editable = true, Notification = "updated!"});
 			}
 			ctx.Response.End ();
 		}
@@ -152,7 +153,7 @@ namespace drosh
 		[Route ("/register/user/recovery")]
 		public void StartPasswordRecovery (IManosContext ctx, string notification)
 		{
-			this.RenderSparkView (ctx, "View/PasswordRecovery.spark", new {Notification = notification});
+			this.RenderSparkView (ctx, "PasswordRecovery.spark", new {Notification = notification});
 			ctx.Response.End ();
 		}
 
@@ -194,7 +195,7 @@ namespace drosh
 
 		void LoggedHome (IManosContext ctx, DroshSession session, string notification)
 		{
-			this.RenderSparkView (ctx, "View/Home.spark", new { LoggedUser = session.User, Notification = notification});
+			this.RenderSparkView (ctx, "Home.spark", new { LoggedUser = session.User, Notification = notification});
 		}
 	}
 
