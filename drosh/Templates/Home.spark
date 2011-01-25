@@ -4,6 +4,7 @@
 <use namespace="System.Collections.Generic" />
 
 <viewdata
+  Session="DroshSession"
   Notification="string"
   LoggedUser="drosh.User"
   Projects="IEnumerable[[Project]]"
@@ -15,6 +16,7 @@
 
 <div id="logout" name="logout" style="float: right">
 <form action="/logout">
+<input type="hidden" name="session" id="session" value="${Session.Id}">
 Logged in as ${LoggedUser.Name}<br />
 <input type="submit" value="Logout" />
 </form>
@@ -26,7 +28,7 @@ Logged in as ${LoggedUser.Name}<br />
 <div id="accessible-projects" name="accessible-projects">
 <h2>Your Projects</h2>
 
-<p><a href="/register/project/new">
+<p><a href="/register/project/new">Create new Project</a></p>
 
 <table>
 
