@@ -1,13 +1,13 @@
 <use master="base.spark" />
 <use assembly="drosh" />
 <use namespace="drosh" />
-<viewdata User="drosh.User" ManagementMode = "drosh.UserManagementMode" />
+<viewdata User="drosh.User" ManagementMode = "drosh.UserManagementMode" Editable="bool" />
 
 <content name="body">
 
-<test if="ManagementMode = UserManagementMode.Confirm">
+<test if="ManagementMode == UserManagementMode.Confirm">
   <h1>Confirm user registration</h1>
-</test><else if="ManagementMode = UserManagementMode.New">
+</test><else if="ManagementMode == UserManagementMode.New">
   <h1>New user registration</h1>
 </else><else>
   <h1>Manage account</h1>
@@ -15,9 +15,9 @@
 
 <!-- For registration, it is editable. Otherwise not -->
 
-<test if="ManagementMode = UserManagementMode.Confirm">
+<test if="ManagementMode == UserManagementMode.Confirm">
   <form action="/register/user/register">
-</test><else if="ManagementMode = UserManagementMode.New">
+</test><else if="ManagementMode == UserManagementMode.New">
   <form action="/register/user/confirm">
 </else><else>
   <form action="/register/user/update">
@@ -68,12 +68,12 @@
 </table>
 
 <p>
-<test if="ManagementMode = UserManagementMode.Confirm">
+<test if="ManagementMode == UserManagementMode.Confirm">
 
   <p>TODO: insert captcha</p>
 
   <input type="submit" value="Register" />
-</test><else if="ManagementMode = UserManagementMode.New">
+</test><else if="ManagementMode == UserManagementMode.New">
   <input type="submit" value="Confirm" />
 </else><else>
   <input type="submit" value="Update" />
@@ -81,7 +81,7 @@
 </p>
 </form>
 
-<test if="ManagementMode = UserManagementMode.Update">
+<test if="ManagementMode == UserManagementMode.Update">
 <form target="/delete/user">
 <p>
   <input type="submit" value="Delete This Account" />

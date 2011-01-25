@@ -89,6 +89,7 @@ namespace drosh
 	{
 		public string Name { get; set; }
 		public string OpenID { get; set; }
+		public string Email { get; set; }
 		public string PasswordHash { get; set; }
 		public UserStatus Status { get; set; }
 		public DateTime RegisteredTimestamp { get; set; }
