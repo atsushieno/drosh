@@ -53,15 +53,30 @@ namespace drosh
 
 		void AssertLoggedIn (IManosContext ctx, Action<IManosContext,DroshSession> action)
 		{
-			var session = GetSessionCache (ctx.Request.Cookies.Get ("session"));
+			var sessionId = ctx.Request.Cookies.Get ("session");
+Console.Error.WriteLine ("get cookie : " + sessionId);
+			var session = GetSessionCache (sessionId);
 			if (session == null || session.User == null)
 				Index (ctx, "Login status expired or not logged in");
-			else
+			else {
+				ctx.Response.SetCookie ("session", sessionId, DateTime.Now.AddMinutes (60));
 				action (ctx, session);
+			}
 		}
 		
-		[Route ("/", "/index")]
+		[Route ("/", "/index", "/home")]
 		public void Index (IManosContext ctx, string notification)
+		{
+			var sessionId = ctx.Request.Cookies.Get ("session");
+Console.Error.WriteLine ("get cookie : " + sessionId);
+			var session = GetSessionCache (sessionId);
+			if (session == null || session.User == null)
+				NotLogged (ctx, notification);
+			else
+				LoggedHome (ctx, session, notification);
+		}
+
+		void NotLogged (IManosContext ctx, string notification)
 		{
 			this.RenderSparkView (ctx, "Index.spark", new { Notification = notification});
 			ctx.Response.End ();
@@ -133,6 +148,7 @@ namespace drosh
 			var session = new DroshSession (sessionId, user);
 			Cache.Set (sessionId, session, TimeSpan.FromMinutes (60));
 			ctx.Response.SetCookie ("session", sessionId, DateTime.Now.AddMinutes (60));
+Console.Error.WriteLine ("set cookie");
 
 			LoggedHome (ctx, session, "You are now registered");
 #endif
@@ -197,12 +213,6 @@ namespace drosh
 		}
 
 		// Logged
-
-		[Route ("/home")]
-		public void Home (IManosContext ctx, string notification)
-		{
-			AssertLoggedIn (ctx, (c, session) => LoggedHome (c, session, notification));
-		}
 
 		void LoggedHome (IManosContext ctx, DroshSession session, string notification)
 		{
