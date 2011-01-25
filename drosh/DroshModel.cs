@@ -37,6 +37,14 @@ namespace drosh
 		CMake // future
 	}
 	
+	public enum ScriptStep
+	{
+		Build,
+		PreInstall,
+		Install,
+		PostInstall
+	}
+	
 	public enum SubscriptionKind
 	{
 		BuilderPending,
@@ -45,13 +53,21 @@ namespace drosh
 		Suspended
 	}
 	
-	public class PerTargetResource
+	public class Patch
 	{
 		public NDKType TargetNDKs { get; set; }
 		public ArchType TargetArchs { get; set; }
 		public string Text { get; set; }
 	}
 	
+	public class Script
+	{
+		public ScriptStep Step { get; set; }
+		public NDKType TargetNDKs { get; set; }
+		public ArchType TargetArchs { get; set; }
+		public string Text { get; set; }
+	}
+
 	public class Project
 	{
 		public string Id { get; set; } // FIXME: it should replace usage of Name as identity (Name is not unique without Owner).
@@ -60,10 +76,11 @@ namespace drosh
 		public string PrimaryLink { get; set; }
 		public UserReference Owner { get; set; }
 		public IList<ProjectReference> Dependencies { get; set; }
+		public IList<UserReference> Builders { get; set; }
 		public BuildType BuildType { get; set; }
 		public string SourceArchiveName { get; set; }
-		public IList<PerTargetResource> Patches { get; set; }
-		public IList<PerTargetResource> Scripts { get; set; }
+		public IList<Patch> Patches { get; set; }
+		public IList<Script> Scripts { get; set; }
 		public NDKType TargetNDKs { get; set; }
 		public ArchType TargetArchs { get; set; }
 		public IList<string> FilesByPackage { get; set; }

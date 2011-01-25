@@ -283,7 +283,7 @@ Console.Error.WriteLine ("get cookie : " + sessionId);
 		Project CreateProjectFromForm (DroshSession session, IManosContext ctx)
 		{
 			var user = session.User.Name;
-			var name = ctx.Request.Data ["project"];
+			var name = ctx.Request.Data ["projectname"];
 			var p = new Project ();
 			var existing = name != null ? DataStore.GetProject (user, name) : null;
 			if (existing != null) {
@@ -291,13 +291,92 @@ Console.Error.WriteLine ("get cookie : " + sessionId);
 				// FIXME: fill everything else appropriated
 			}
 			p.Name = name;
+			p.Owner = user;
 			p.Description = ctx.Request.Data ["description"];
 			p.PrimaryLink = ctx.Request.Data ["website"];
-			p.Owner = user;
+			p.Dependencies = (ctx.Request.Data ["deps"] ?? String.Empty).Split (new char [] {' '}, StringSplitOptions.RemoveEmptyEntries);
+			p.Builders = (ctx.Request.Data ["builders"] ?? String.Empty).Split (new char [] {' '}, StringSplitOptions.RemoveEmptyEntries);
+
+			switch (ctx.Request.Data ["build-type"]) {
+			case "prebuilt": p.BuildType = BuildType.Prebuilt; break;
+			case "custom": p.BuildType = BuildType.Custom; break;
+			case "ndk-build": p.BuildType = BuildType.NdkBuild; break;
+			case "autotools": p.BuildType = BuildType.Autotools; break;
+			case "cmake": p.BuildType = BuildType.CMake; break;
+			}
+
+			p.TargetNDKs = GetNDKTarget (ctx, null, 0);
+			/*
+			if (ctx.Request.Data ["target-ndk-r5"] != null)
+				p.TargetNDKs |= NDKType.R5;
+			if (ctx.Request.Data ["target-ndk-crystaxR4b"] != null)
+				p.TargetNDKs |= NDKType.CrystaxR4b;
+			if (ctx.Request.Data ["target-ndk-r4b"] != null)
+				p.TargetNDKs |= NDKType.R4b;
+			*/
+			p.TargetArchs = GetArchTarget (ctx, null, 0);
+			/*
+			if (ctx.Request.Data ["target-arch-arm"] != null)
+				p.TargetArchs |= ArchType.Arm;
+			if (ctx.Request.Data ["target-arch-armv7a"] != null)
+				p.TargetArchs |= ArchType.ArmV7a;
+			if (ctx.Request.Data ["target-arch-x86"] != null)
+				p.TargetArchs |= ArchType.X86;
+			*/
+
+			// FIXME: handle source-archive
+
+			int n_patch = 0;
+			p.Patches = new List<Patch> ();
+			while (ctx.Request.Data ["patch-target-" + ++n_patch + "-text"] != null) {
+				var patch = new Patch ();
+				patch.TargetNDKs = GetNDKTarget (ctx, "patch-", n_patch);
+				patch.TargetArchs = GetArchTarget (ctx, "patch-", n_patch);
+				p.Patches.Add (patch);
+			}
+
+			int n_script = 0;
+			p.Scripts = new List<Script> ();
+			while (ctx.Request.Data ["script-target-" + ++n_script + "-text"] != null) {
+				var script = new Script ();
+				switch (ctx.Request.Data ["script-step-" + n_script]) {
+				case "build": script.Step = ScriptStep.Build; break;
+				case "preinstall": script.Step = ScriptStep.PreInstall; break;
+				case "install": script.Step = ScriptStep.Install; break;
+				case "postinstall": script.Step = ScriptStep.PostInstall; break;
+				}
+				script.TargetNDKs = GetNDKTarget (ctx, "script-", n_patch);
+				script.TargetArchs = GetArchTarget (ctx, "script-", n_patch);
+				p.Scripts.Add (script);
+			}
 
 			// FIXME: fill everything else appropriated
 
 			return p;
+		}
+
+		NDKType GetNDKTarget (IManosContext ctx, string prefix, int count)
+		{
+			NDKType ret = NDKType.None;
+			if (ctx.Request.Data [prefix + "target-ndk-" + (count > 0 ? count + "-" : String.Empty) + "r5"] != null)
+				ret |= NDKType.R5;
+			if (ctx.Request.Data [prefix + "target-ndk-" + (count > 0 ? count + "-" : String.Empty) + "crystaxR4b"] != null)
+				ret |= NDKType.CrystaxR4b;
+			if (ctx.Request.Data [prefix + "target-ndk-" + (count > 0 ? count + "-" : String.Empty) + "r4b"] != null)
+				ret |= NDKType.R4b;
+			return ret;
+		}
+
+		ArchType GetArchTarget (IManosContext ctx, string prefix, int count)
+		{
+			ArchType ret = ArchType.None;
+			if (ctx.Request.Data [prefix + "target-arch-" + (count > 0 ? count + "-" : String.Empty) + "arm"] != null)
+				ret |= ArchType.Arm;
+			if (ctx.Request.Data [prefix + "target-arch-" + (count > 0 ? count + "-" : String.Empty) + "armV7a"] != null)
+				ret |= ArchType.ArmV7a;
+			if (ctx.Request.Data [prefix + "target-arch-" + (count > 0 ? count + "-" : String.Empty) + "x86"] != null)
+				ret |= ArchType.X86;
+			return ret;
 		}
 	}
 
