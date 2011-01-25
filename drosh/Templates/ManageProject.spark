@@ -4,7 +4,7 @@
 <use namespace="System.Collections.Generic" />
 <viewdata
   Session="DroshSession"
-  User="User"
+  LoggedUser="User"
   Project="Project"
   ManagementMode="ProjectManagementMode"
   Editable="bool"
@@ -40,14 +40,14 @@ Logged in as ${LoggedUser.Name}<br />
   </tr><tr>
     <td>Brief Description: </td><td><textarea id="desc" name="desc" rows="2" cols="80">$!{Project.Description}</textarea></td>
   </tr><tr>
-    <td>Project WebSite</td><td><input type="text" id="website" name="website" /size="80" value="$!{Project.WebSite}"></td>
+    <td>Project WebSite</td><td><input type="text" id="website" name="website" /size="80" value="$!{Project.PrimaryLink}"></td>
   </tr><tr>
     <td>Dependencies:</td>
-    <td><input type="text" id="deps" name="deps" size="80" value="$!{String.Join (" ", Project.Dependencies.ToArray ())}" /><br />enter whitespace-separated list of project names</td>
+    <td><input type="text" id="deps" name="deps" size="80" value="$!{string.Join (" ", Project.Dependencies.ToArray ())}" /><br />enter whitespace-separated list of project names</td>
     </td>
   </tr><tr>
     <td>Builder Users:</td>
-    <td><input type="text" id="builders" name="builders" size="80" value="$!{String.Join (" ", Contributors.ToArray ())}" /><br />enter whitespace-separated list of user names</td>
+    <td><input type="text" id="builders" name="builders" size="80" value="$!{string.Join (" ", Contributors.ToArray ())}" /><br />enter whitespace-separated list of user names</td>
   </tr><tr>
     <td>Build Type: </td>
     <td>
@@ -62,9 +62,9 @@ Logged in as ${LoggedUser.Name}<br />
   </tr><tr>
     <td>Target NDK: </td>
     <td>
-      <input type="checkbox" id="target-ndk-r5" name="target-ndk-r5" checked="?{Project != null && (Project.TargetNDKs & NdkType.R5) != 0}" />r5
-      <input type="checkbox" id="target-ndk-crystaxR4b" name="target-ndk-crystaxR4b"  checked="?{Project != null && (Project.TargetNDKs & NdkType.CrystaxR4b) != 0}" />crystax r4b
-      <input type="checkbox" id="target-ndk-r4b" name="target-ndk-r4b"  checked="?{Project != null && (Project.TargetNDKs & NdkType.R4b) != 0}" />r4b
+      <input type="checkbox" id="target-ndk-r5" name="target-ndk-r5" checked="?{Project != null && (Project.TargetNDKs & NDKType.R5) != 0}" />r5
+      <input type="checkbox" id="target-ndk-crystaxR4b" name="target-ndk-crystaxR4b"  checked="?{Project != null && (Project.TargetNDKs & NDKType.CrystaxR4b) != 0}" />crystax r4b
+      <input type="checkbox" id="target-ndk-r4b" name="target-ndk-r4b"  checked="?{Project != null && (Project.TargetNDKs & NDKType.R4b) != 0}" />r4b
     </td>
   </tr><tr>
     <td>Target Arch: </td>
@@ -84,9 +84,9 @@ Logged in as ${LoggedUser.Name}<br />
       <div>
       <!-- patch #${++n_patch} -->
       NDK version:
-      <input type="checkbox" id="patch-target-${n_patch}-ndk-r5" name="target-ndk-r5" checked="?{(patch.TargetNDKs & NdkType.R5) != 0}" />r5
-      <input type="checkbox" id="patch-target-${n_patch}-ndk-crystaxR4b" name="target-ndk-crystaxR4b"  checked="?{(patch.TargetNDKs & NdkType.CrystaxR4b) != 0}" />crystax r4b
-      <input type="checkbox" id="patch-target-${n_patch}-ndk-r4b" name="target-ndk-r4b"  checked="?{(patch.TargetNDKs & NdkType.R4b) != 0}" />r4b
+      <input type="checkbox" id="patch-target-${n_patch}-ndk-r5" name="target-ndk-r5" checked="?{(patch.TargetNDKs & NDKType.R5) != 0}" />r5
+      <input type="checkbox" id="patch-target-${n_patch}-ndk-crystaxR4b" name="target-ndk-crystaxR4b"  checked="?{(patch.TargetNDKs & NDKType.CrystaxR4b) != 0}" />crystax r4b
+      <input type="checkbox" id="patch-target-${n_patch}-ndk-r4b" name="target-ndk-r4b"  checked="?{(patch.TargetNDKs & NDKType.R4b) != 0}" />r4b
       <br />
       Arch:
       <input type="checkbox" id="patch-target-${n_patch}-arch-arm" name="target-arch-arm" checked="?{(patch.TargetArchs & ArchType.Arm) != 0}" />armeabi
@@ -99,17 +99,18 @@ Logged in as ${LoggedUser.Name}<br />
 </for>
 <test if="Editable">
       NDK version:
-      <input type="checkbox" id="patch-target-ndk-r5" name="target-ndk-r5" checked="?{(patch.TargetNDKs & NdkType.R5) != 0}" />r5
-      <input type="checkbox" id="patch-target-ndk-crystaxR4b" name="target-ndk-crystaxR4b"  checked="?{(patch.TargetNDKs & NdkType.CrystaxR4b) != 0}" />crystax r4b
-      <input type="checkbox" id="patch-target-ndk-r4b" name="target-ndk-r4b"  checked="?{(patch.TargetNDKs & NdkType.R4b) != 0}" />r4b
+      <input type="checkbox" id="patch-target-ndk-r5" name="target-ndk-r5" />r5
+      <input type="checkbox" id="patch-target-ndk-crystaxR4b" name="target-ndk-crystaxR4b" />crystax r4b
+      <input type="checkbox" id="patch-target-ndk-r4b" name="target-ndk-r4b" />r4b
       <br />
       Arch:
-      <input type="checkbox" id="patch-target-arch-arm" name="target-arch-arm" checked="?{(patch.TargetArchs & ArchType.Arm) != 0}" />armeabi
-      <input type="checkbox" id="patch-target-arch-armV7a" name="target-arch-armV7a"  checked="?{(patch.TargetArchs & ArchType.ArmV7a) != 0}" />armeabi-v7a
-      <input type="checkbox" id="patch-target-arch-x86" name="target-arch-x86" checked="?{(patch.TargetArchs & ArchType.X86) != 0}" />x86
+      <input type="checkbox" id="patch-target-arch-arm" name="target-arch-arm" />armeabi
+      <input type="checkbox" id="patch-target-arch-armV7a" name="target-arch-armV7a" />armeabi-v7a
+      <input type="checkbox" id="patch-target-arch-x86" name="target-arch-x86" />x86
       <br />
       <textarea cols="80" rows="5" id="patch-text" name="patch-text"></textarea><br />
       <input type="button" value="TODO: Add more..." />
+</test>
     </td>
   </tr>
 
@@ -127,9 +128,9 @@ Logged in as ${LoggedUser.Name}<br />
         <option value="postinstall">postinstall</option>
       </select><br />
       NDK version:
-      <input type="checkbox" id="script-target-${n_script}-ndk-r5" name="target-ndk-r5" checked="?{(script.TargetNDKs & NdkType.R5) != 0}" />r5
-      <input type="checkbox" id="script-target-${n_script}-ndk-crystaxR4b" name="target-ndk-crystaxR4b"  checked="?{(script.TargetNDKs & NdkType.CrystaxR4b) != 0}" />crystax r4b
-      <input type="checkbox" id="script-target-${n_script}-ndk-r4b" name="target-ndk-r4b"  checked="?{(script.TargetNDKs & NdkType.R4b) != 0}" />r4b
+      <input type="checkbox" id="script-target-${n_script}-ndk-r5" name="target-ndk-r5" checked="?{(script.TargetNDKs & NDKType.R5) != 0}" />r5
+      <input type="checkbox" id="script-target-${n_script}-ndk-crystaxR4b" name="target-ndk-crystaxR4b"  checked="?{(script.TargetNDKs & NDKType.CrystaxR4b) != 0}" />crystax r4b
+      <input type="checkbox" id="script-target-${n_script}-ndk-r4b" name="target-ndk-r4b"  checked="?{(script.TargetNDKs & NDKType.R4b) != 0}" />r4b
       <br />
       Arch:
       <input type="checkbox" id="script-target-${n_script}-arch-arm" name="target-arch-arm" checked="?{(script.TargetArchs & ArchType.Arm) != 0}" />armeabi
@@ -151,14 +152,14 @@ Logged in as ${LoggedUser.Name}<br />
         <option value="postinstall">postinstall</option>
       </select><br />
       NDK version:
-      <input type="checkbox" id="script-target-ndk-r5" name="target-ndk-r5" checked="?{(script.TargetNDKs & NdkType.R5) != 0}" />r5
-      <input type="checkbox" id="script-target-ndk-crystaxR4b" name="target-ndk-crystaxR4b"  checked="?{(script.TargetNDKs & NdkType.CrystaxR4b) != 0}" />crystax r4b
-      <input type="checkbox" id="script-target-ndk-r4b" name="target-ndk-r4b"  checked="?{(script.TargetNDKs & NdkType.R4b) != 0}" />r4b
+      <input type="checkbox" id="script-target-ndk-r5" name="target-ndk-r5" />r5
+      <input type="checkbox" id="script-target-ndk-crystaxR4b" name="target-ndk-crystaxR4b" />crystax r4b
+      <input type="checkbox" id="script-target-ndk-r4b" name="target-ndk-r4b" />r4b
       <br />
       Arch:
-      <input type="checkbox" id="script-target-arch-arm" name="target-arch-arm" checked="?{(script.TargetArchs & ArchType.Arm) != 0}" />armeabi
-      <input type="checkbox" id="script-target-arch-armV7a" name="target-arch-armV7a"  checked="?{(script.TargetArchs & ArchType.ArmV7a) != 0}" />armeabi-v7a
-      <input type="checkbox" id="script-target-arch-x86" name="target-arch-x86" checked="?{(script.TargetArchs & ArchType.X86) != 0}" />x86
+      <input type="checkbox" id="script-target-arch-arm" name="target-arch-arm" />armeabi
+      <input type="checkbox" id="script-target-arch-armV7a" name="target-arch-armV7a" />armeabi-v7a
+      <input type="checkbox" id="script-target-arch-x86" name="target-arch-x86" />x86
       <br />
       <textarea cols="80" rows="5" id="script-text" name="script-text"></textarea><br />
       </div>
