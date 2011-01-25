@@ -140,7 +140,8 @@ namespace drosh
 		{
 			var user = CreateUserFromForm (ctx);
 			// process password change request with care: check existing password
-			if (ctx.Request.Data ["password"] != null && ctx.Request.Data ["password"] != ctx.Request.Data ["password-verified"] || DataStore.HashPassword (ctx.Request.Data ["old-password"]) != user.PasswordHash) {
+			var rawpwd = ctx.Request.Data ["old-password"];
+			if (ctx.Request.Data ["password"] != null && ctx.Request.Data ["password"] != ctx.Request.Data ["password-verified"] || rawpwd != null && DataStore.HashPassword (rawpwd) != user.PasswordHash) {
 				this.RenderSparkView (ctx, "ManageUser.spark", new {ManagementMode = UserManagementMode.Update, User = user, Editable = true, Notification = "Password didn't match"});
 			} else {
 				user.PasswordHash = DataStore.HashPassword (ctx.Request.Data ["password"]) ?? user.PasswordHash;
