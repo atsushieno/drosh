@@ -118,7 +118,7 @@ namespace drosh
 		}
 
 		[Route ("/register/user/register")]
-		void ExecuteUserRegistration (IManosContext ctx)
+		public void ExecuteUserRegistration (IManosContext ctx)
 		{
 			// FIXME: validate inputs.
 

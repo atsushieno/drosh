@@ -1,0 +1,67 @@
+<use master="base.spark" />
+<use assembly="drosh" />
+<use namespace="drosh" />
+<viewdata
+  User="drosh.User"
+  Projects="IEnumerable{{Project}}"
+  Builds="IEnumerable{{Build}}" />
+
+<content name="body">
+
+<h1>Drosh: Android Shared Library House</h1>
+
+<div id="logout" name="logout" style="float: right">
+<form target="/logout">
+Logged in as ${User.Name}<br />
+<input type="submit" value="Logout" />
+</form>
+</div>
+<div style="clear: left"></div>
+
+<div id="notification" name="notification">
+<!-- notification area -->
+</div>
+
+<div id="accessible-projects" name="accessible-projects">
+<h2>Your Projects</h2>
+
+<table>
+
+<for each="var project in Projects">
+  <tr id="project-${project.Name}" name="project-${project.Name}">
+    <td><a href="/project/${project.Name}/Head">${project.Name}</td>
+  </tr>
+</for>
+
+</table>
+
+
+<!-- FIXME: do we need this? -->
+<div id="recent-builds" name="recent-builds">
+<form>
+
+<!-- list of builds -->
+
+<h2>recent builds</h2>
+
+<table>
+<for each="var build in Builds">
+<tr id="build-${build.Id}" name="build-${build.Id}">
+  <td style="color: ${build.Status == BuildStatus.Failure ? "red" : build.Status == BuildStatus.OK ? "green" : build.Status == BuildStatus.Ongoing ? "yellow" : null}">${build.Status}</td>
+  <td>${build.StartedTime}</td>
+  <td><a href="/project/${build.Project.Id}/${build.Revision}">${build.Project.Name}</td>
+  <td>${build.Revision}</td>
+  <td>${build.TargetNDK}</td>
+  <td>${build.TargetArch}</td>
+</tr>
+}
+</table>
+
+<!-- TODO: page controller links -->
+
+</form>
+</div>
+
+
+</body>
+</html>
