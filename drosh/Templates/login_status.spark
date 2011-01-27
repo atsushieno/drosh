@@ -1,0 +1,23 @@
+<use master="base.spark" />
+<viewdata
+  Notification="string" />
+
+<test if="LoggedUser != null">
+  <div id="logout" name="logout" style="float: right">
+    <form action="/logout">
+      Logged in as ${LoggedUser.Name}<br />
+      <input type="submit" value="Logout" />
+    </form>
+  </div>
+</test><else>
+  <div id="login" name="login" float="right">
+    <form action="/login" method="POST">
+      Account ID <input type="text" name="login_user" />
+      Password <input type="password" name="login_password" />
+      <input type="submit" value="Login" />
+      <a href="/register/user/new">new account</a> / <a href="/register/user/recovery">forgot password?</a>
+    </form>
+  </div>
+</else>
+
+<div style="clear: left"></div>

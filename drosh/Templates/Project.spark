@@ -1,0 +1,100 @@
+<use master="base.spark" />
+<use assembly="drosh" />
+<use namespace="drosh" />
+<use namespace="System.Collections.Generic" />
+<use namespace="System.Linq" />
+<viewdata
+  Notification="string"
+  Project="Project" />
+
+<content name="body">
+
+<use file="login_status.spark" />
+
+<h1><a href="/user/${Project.Owner}">${Project.Owner}</a>/${Project.Name}</h1>
+
+<div id="notification" name="notification"><p>$!{Notification}</p></div>
+
+<!-- Project abstract -->
+<div id="project-abstract" name="project-abstract">
+<h2>${Project.Name}</h2>
+
+<div id="revision-selector" name="revision-selector">
+<p>${Project.Description}</p>
+
+<p>revisions: <select><option value="HEAD">HEAD</option>
+<for each="var revision in Project.Revisions">
+  <option value="${revision.Id}">${revision.Id}</option>
+</for>
+</select></p>
+</div>
+
+<h2>Details</h2>
+
+<table>
+  <tr>
+    <td>Dependencies: </td><td>${string.Join (', ', (from dep in Project.Dependencies select dep.Name).ToArray ())}</td>
+  </tr><tr>
+    <td>Owner: </td><td>${project.Owner}</td>
+  </tr><tr>
+    <td>Builder Users: </td><td>${string.Join (', ', (from c in project.Builders select c.Name).ToArray ())}</td>
+  </tr><tr>
+    <td>Target NDK: </td><td>${Project.TargetNDKs}</td>
+  </tr><tr>
+    <td>Target Arch: </td><td>${Project.TargetArchs}</td>
+  </tr><tr>
+    <td>Download</td><td><a href="/download/${Project.ResultArchiveName}">${project.ResultArchiveName}</a></td>
+  </tr><tr>
+    <td>Project WebSite</td><td><a href="${Project.PrimaryLink}">${Project.PrimaryLink}</a></td>
+  </tr><tr>
+    <td>Build Type: </td><td>${Project.BuildType}</td>
+  </tr><tr>
+    <td>Source: </td><td><a href="/download/${project.SourceArchiveName}">${project.SourceArchiveName}</td>
+  </tr><tr>
+    <td>Patches: </td><td>
+<for each="var patch in Project.Patches">
+  <var ident="${patch.TargetNDKs}-${patch.TargetArchs}-${patch.Step}" />
+  <div id="patch-${ident}" name="patch-${ident}">
+    <p>${ident}<br/><textarea id="patch-text-${ident}" name="patch-text-${ident}" rows="4" cols="80">${patch.Text}</textarea></p>
+    </td>
+  </tr><tr>
+    <td>Build Scripts: </td><td>
+<for each="var script in project.BuildScripts">
+  <var ident="${script.TargetNDKs}-${script.TargetArchs}-${script.Step}" />
+  <div id="script-${ident}" name="script-${ident}">
+    <p>${ident}<br/><textarea id="script-text-${ident}" name="script-text-${ident}" rows="4" cols="80">${script.Text}</textarea></p>
+  </div>
+}
+    </td>
+  </tr>
+</table>
+
+</div>
+
+
+<!-- list of builds -->
+<div id="recent-builds" name="recent-builds">
+
+<h2>recent builds</h2>
+
+<!-- almost identical to Index.cshtml (contents differ; it is by user list) -->
+<table>
+<for each="var build in Builds">
+<tr id="build-${build.Id}" name="build-${build.Id}">
+  <td style="color: ${build.Status == BuildStatus.Failure ? 'red' : build.Status == BuildStatus.OK ? 'green' : build.Status == BuildStatus.Ongoing ? 'yellow' : null}">${build.Status}</td>
+  <td>${build.StartedTime}</td>
+  <td>${build.Revision}</td>
+  <td>${build.TargetNDK}</td>
+  <td>${build.TargetArch}</td>
+  <td>${build.User}</td><!-- TODO: show link? -->
+  <td><a href="/log/${build.Id}"><img alt="Log" src="/images/log.png" /></a></td>
+</tr>
+</for>
+</table>
+
+<!-- TODO: page controller links -->
+
+</div>
+
+</body>
+</html>
