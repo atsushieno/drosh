@@ -55,24 +55,24 @@ Logged in as ${LoggedUser.Name}<br />
     </td>
   </tr><tr>
     <td>Builder Users:</td>
-    <td><input type="text" id="builders" name="builders" size="80" value="${Project.Builders != null ? string.Join (' ', Project.Builders.ToArray ()) : null}" readonly="?{!Editable}" /><br />enter whitespace-separated list of user names</td>
+    <td><input type="text" id="builders" name="builders" size="80" value="$!{Project.Builders != null ? string.Join (' ', Project.Builders.ToArray ()) : null}" readonly="?{!Editable}" /><br />enter whitespace-separated list of user names</td>
   </tr><tr>
     <td>Build Type: </td>
     <td>
-      <select id="build-type" name="build-type" disabled="?{!Editable}">
-        <option value="prebuilt" checked="?{Project != null && Project.BuildType == BuildType.Prebuilt}">prebuilt</option>
-        <option value="custom" checked="?{Project != null && Project.BuildType == BuildType.Custom}">custom</option>
-        <option value="ndk-build" checked="?{Project != null && Project.BuildType == BuildType.NdkBuild}">ndk-build</option>
-        <option value="autotools" checked="?{Project != null && Project.BuildType == BuildType.Autotools}">autotools</option>
-        <option value="cmake" checked="?{Project != null && Project.BuildType == BuildType.CMake}">cmake</option>
+      <select id="build-type" name="build-type" readonly="?{!Editable}">
+        <option value="prebuilt" selected="?{Project != null && Project.BuildType == BuildType.Prebuilt}">prebuilt</option>
+        <option value="custom" selected="?{Project != null && Project.BuildType == BuildType.Custom}">custom</option>
+        <option value="ndk-build" selected="?{Project != null && Project.BuildType == BuildType.NdkBuild}">ndk-build</option>
+        <option value="autotools" selected="?{Project != null && Project.BuildType == BuildType.Autotools}">autotools</option>
+        <option value="cmake" selected="?{Project != null && Project.BuildType == BuildType.CMake}">cmake</option>
       </select>
     </td>
   </tr><tr>
     <td>Target NDK: </td>
     <td>
-      <input type="checkbox" id="target-ndk-r5" name="target-ndk-r5" checked="?{Project == null || (Project.TargetNDKs & NDKType.R5) != 0}" disabled="?{!Editable}" />r5
-      <input type="checkbox" id="target-ndk-crystaxR4b" name="target-ndk-crystaxR4b"  checked="?{Project == null || (Project.TargetNDKs & NDKType.CrystaxR4b) != 0}" disabled="?{!Editable}" />crystax r4b
-      <input type="checkbox" id="target-ndk-r4b" name="target-ndk-r4b"  checked="?{Project == null || (Project.TargetNDKs & NDKType.R4b) != 0}" disabled="?{!Editable}" />r4b
+      <input type="checkbox" name="target-ndk-r5" checked="?{Project == null || (Project.TargetNDKs & NDKType.R5) != 0}" disabled="?{!Editable}" />r5
+      <input type="checkbox" name="target-ndk-crystaxR4b"  checked="?{Project == null || (Project.TargetNDKs & NDKType.CrystaxR4b) != 0}" disabled="?{!Editable}" />crystax r4b
+      <input type="checkbox" name="target-ndk-r4b"  checked="?{Project == null || (Project.TargetNDKs & NDKType.R4b) != 0}" disabled="?{!Editable}" />r4b
     </td>
   </tr><tr>
     <td>Target Arch: </td>
@@ -115,14 +115,14 @@ Logged in as ${LoggedUser.Name}<br />
 </test>
 <test if="Editable">
       NDK version:
-      <input type="checkbox" id="patch-target-ndk-r5" name="target-ndk-r5" checked="" />r5
-      <input type="checkbox" id="patch-target-ndk-crystaxR4b" name="target-ndk-crystaxR4b" checked="" />crystax r4b
-      <input type="checkbox" id="patch-target-ndk-r4b" name="target-ndk-r4b" checked="" />r4b
+      <input type="checkbox" name="patch-target-ndk-r5" checked="" />r5
+      <input type="checkbox" name="patch-target-ndk-crystaxR4b" checked="" />crystax r4b
+      <input type="checkbox" name="patch-target-ndk-r4b" checked="" />r4b
       <br />
       Arch:
-      <input type="checkbox" id="patch-target-arch-arm" name="target-arch-arm" checked="" />armeabi
-      <input type="checkbox" id="patch-target-arch-armV7a" name="target-arch-armV7a" checked="" />armeabi-v7a
-      <input type="checkbox" id="patch-target-arch-x86" name="target-arch-x86" checked="" />x86
+      <input type="checkbox" name="patch-target-arch-arm" checked="" />armeabi
+      <input type="checkbox" name="patch-target-arch-armV7a" checked="" />armeabi-v7a
+      <input type="checkbox" name="patch-target-arch-x86" checked="" />x86
       <br />
       <textarea cols="80" rows="5" id="patch-text" name="patch-text"></textarea><br />
       <input type="button" value="TODO: Add more..." />
@@ -170,14 +170,14 @@ Logged in as ${LoggedUser.Name}<br />
         <option value="postinstall">postinstall</option>
       </select><br />
       NDK version:
-      <input type="checkbox" id="script-target-ndk-r5" name="target-ndk-r5" checked="" />r5
-      <input type="checkbox" id="script-target-ndk-crystaxR4b" name="target-ndk-crystaxR4b" checked="" />crystax r4b
-      <input type="checkbox" id="script-target-ndk-r4b" name="target-ndk-r4b" checked="" />r4b
+      <input type="checkbox" name="script-target-ndk-r5" checked="" />r5
+      <input type="checkbox" name="script-target-ndk-crystaxR4b" checked="" />crystax r4b
+      <input type="checkbox" name="script-target-ndk-r4b" checked="" />r4b
       <br />
       Arch:
-      <input type="checkbox" id="script-target-arch-arm" name="target-arch-arm" checked="" />armeabi
-      <input type="checkbox" id="script-target-arch-armV7a" name="target-arch-armV7a" checked="" />armeabi-v7a
-      <input type="checkbox" id="script-target-arch-x86" name="target-arch-x86" checked="" />x86
+      <input type="checkbox" name="script-target-arch-arm" checked="" />armeabi
+      <input type="checkbox" name="script-target-arch-armV7a" checked="" />armeabi-v7a
+      <input type="checkbox" name="script-target-arch-x86" checked="" />x86
       <br />
       <textarea cols="80" rows="5" id="script-text" name="script-text"></textarea><br />
       </div>

@@ -59,7 +59,8 @@ namespace drosh
 			if (session == null || session.User == null)
 				Index (ctx, "Login status expired or not logged in");
 			else {
-				ctx.Response.SetCookie ("drosh-session", new HttpCookie ("drosh-session", sessionId) {Path = "/", Expires = DateTime.Now.AddMinutes (60)});
+				ctx.Response.SetCookie ("drosh-session", new HttpCookie ("drosh-session", sessionId) {Path = "/"/*, Expires = DateTime.Now.AddMinutes (60)*/});
+Console.Error.WriteLine ("set-cookie: " + sessionId);
 				action (ctx, session);
 			}
 		}
@@ -67,7 +68,7 @@ namespace drosh
 		[Route ("/", "/index", "/home")]
 		public void Index (IManosContext ctx, string notification)
 		{
-			var sessionId = ctx.Request.Cookies.Get ("session");
+			var sessionId = ctx.Request.Cookies.Get ("drosh-session");
 Console.Error.WriteLine ("get cookie : " + sessionId);
 			var session = GetSessionCache (sessionId);
 			if (session == null || session.User == null)
@@ -95,7 +96,9 @@ Console.Error.WriteLine ("get cookie : " + sessionId);
 			string sessionId = Guid.NewGuid ().ToString ();
 			var session = new DroshSession (sessionId, user);
 			Cache.Set (sessionId, session, TimeSpan.FromMinutes (60));
-			ctx.Response.SetCookie ("drosh-session", new HttpCookie ("drosh-session", sessionId) {Path = "/", Expires = DateTime.Now.AddMinutes (60)});
+			ctx.Response.SetCookie ("drosh-session", new HttpCookie ("drosh-session", sessionId) {Path = "/"/*, Expires = DateTime.Now.AddMinutes (60)*/});
+Console.Error.WriteLine ("set-cookie: " + sessionId);
+
 			if (link != null)
 				ctx.Response.Redirect (link);
 			else
@@ -119,7 +122,7 @@ Console.Error.WriteLine ("get cookie : " + sessionId);
 		[Route ("/register/user/new")]
 		public void StartUserRegistration (IManosContext ctx, string notification)
 		{
-			this.RenderSparkView (ctx, "ManageUser.spark", new {ManagementMode = UserManagementMode.New, Editable = true, Notification = notification});
+			this.RenderSparkView (ctx, "ManageUser.spark", new {ManagementMode = UserManagementMode.New, Editable = true, Notification = notification, User = CreateUserFromForm (ctx)});
 			ctx.Response.End ();
 		}
 
@@ -129,6 +132,8 @@ Console.Error.WriteLine ("get cookie : " + sessionId);
 			// FIXME: validate inputs more.
 			if (ctx.Request.Data ["password"] != ctx.Request.Data ["password-verified"])
 				StartUserRegistration (ctx, "Password inputs don't match.");
+			else if (DataStore.GetUser (ctx.Request.Data ["username"]) != null)
+				StartUserRegistration (ctx, "The same user name is already registered. Please pick another name.");
 			else {
 				this.RenderSparkView (ctx, "ManageUser.spark", new {ManagementMode = UserManagementMode.Confirm, User = CreateUserFromForm (ctx), Editable = false});
 				ctx.Response.End ();
@@ -149,7 +154,8 @@ Console.Error.WriteLine ("get cookie : " + sessionId);
 			string sessionId = Guid.NewGuid ().ToString ();
 			var session = new DroshSession (sessionId, user);
 			Cache.Set (sessionId, session, TimeSpan.FromMinutes (60));
-			ctx.Response.SetCookie ("drosh-session", new HttpCookie ("drosh-session", sessionId) {Path = "/", Expires = DateTime.Now.AddMinutes (60)});
+			ctx.Response.SetCookie ("drosh-session", new HttpCookie ("drosh-session", sessionId) {Path = "/"/*, Expires = DateTime.Now.AddMinutes (60)*/});
+Console.Error.WriteLine ("set-cookie: " + sessionId);
 
 			LoggedHome (ctx, session, "You are now registered");
 #endif
@@ -289,7 +295,7 @@ Console.Error.WriteLine ("get cookie : " + sessionId);
 			var existing = name != null ? DataStore.GetProject (user, name) : null;
 			if (existing != null) {
 				p.RegisteredTimestamp = existing.RegisteredTimestamp;
-				// FIXME: fill everything else appropriated
+				// FIXME: fill everything else appropriate
 			}
 			p.Name = name;
 			p.Owner = user;
@@ -304,26 +310,11 @@ Console.Error.WriteLine ("get cookie : " + sessionId);
 			case "ndk-build": p.BuildType = BuildType.NdkBuild; break;
 			case "autotools": p.BuildType = BuildType.Autotools; break;
 			case "cmake": p.BuildType = BuildType.CMake; break;
+			default: throw new Exception (ctx.Request.Data ["build-type"]);
 			}
 
 			p.TargetNDKs = GetNDKTarget (ctx, null, 0);
-			/*
-			if (ctx.Request.Data ["target-ndk-r5"] != null)
-				p.TargetNDKs |= NDKType.R5;
-			if (ctx.Request.Data ["target-ndk-crystaxR4b"] != null)
-				p.TargetNDKs |= NDKType.CrystaxR4b;
-			if (ctx.Request.Data ["target-ndk-r4b"] != null)
-				p.TargetNDKs |= NDKType.R4b;
-			*/
 			p.TargetArchs = GetArchTarget (ctx, null, 0);
-			/*
-			if (ctx.Request.Data ["target-arch-arm"] != null)
-				p.TargetArchs |= ArchType.Arm;
-			if (ctx.Request.Data ["target-arch-armv7a"] != null)
-				p.TargetArchs |= ArchType.ArmV7a;
-			if (ctx.Request.Data ["target-arch-x86"] != null)
-				p.TargetArchs |= ArchType.X86;
-			*/
 
 			// FIXME: handle source-archive
 
@@ -351,7 +342,7 @@ Console.Error.WriteLine ("get cookie : " + sessionId);
 				p.Scripts.Add (script);
 			}
 
-			// FIXME: fill everything else appropriated
+			// FIXME: fill everything else appropriate
 
 			return p;
 		}
@@ -472,3 +463,4 @@ Console.Error.WriteLine ("get cookie : " + sessionId);
 		}
 	}
 }
+
