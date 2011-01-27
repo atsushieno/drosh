@@ -43,6 +43,13 @@ namespace drosh
 			Route ("/images/", new StaticContentModule ());
 		}
 
+		DroshSession GetSession (IManosContext ctx)
+		{
+			var sessionId = ctx.Request.Cookies.Get ("drosh-session");
+Console.Error.WriteLine ("get cookie : " + sessionId);
+			return sessionId != null ? GetSessionCache (sessionId) : null;
+		}
+
 		DroshSession GetSessionCache (string key)
 		{
 			if (key == null)
@@ -54,13 +61,12 @@ namespace drosh
 
 		void AssertLoggedIn (IManosContext ctx, Action<IManosContext,DroshSession> action)
 		{
-			var sessionId = ctx.Request.Cookies.Get ("drosh-session");
-			var session = GetSessionCache (sessionId);
+			var session = GetSession (ctx);
 			if (session == null || session.User == null)
 				Index (ctx, "Login status expired or not logged in");
 			else {
-				ctx.Response.SetCookie ("drosh-session", new HttpCookie ("drosh-session", sessionId) {Path = "/"/*, Expires = DateTime.Now.AddMinutes (60)*/});
-Console.Error.WriteLine ("set-cookie: " + sessionId);
+				ctx.Response.SetCookie ("drosh-session", new HttpCookie ("drosh-session", session.Id) {Path = "/"/*, Expires = DateTime.Now.AddMinutes (60)*/});
+Console.Error.WriteLine ("set-cookie: " + session.Id);
 				action (ctx, session);
 			}
 		}
@@ -68,9 +74,7 @@ Console.Error.WriteLine ("set-cookie: " + sessionId);
 		[Route ("/", "/index", "/home")]
 		public void Index (IManosContext ctx, string notification)
 		{
-			var sessionId = ctx.Request.Cookies.Get ("drosh-session");
-Console.Error.WriteLine ("get cookie : " + sessionId);
-			var session = GetSessionCache (sessionId);
+			var session = GetSession (ctx);
 			if (session == null || session.User == null)
 				NotLogged (ctx, notification);
 			else
@@ -227,7 +231,17 @@ Console.Error.WriteLine ("set-cookie: " + sessionId);
 			ctx.Response.End ();
 		}
 		
-		// Projects
+		// Project Browse
+
+		[Route ("/project/{user}/{projectname}", "/project/{user}/{projectname}/{revision}", "/project/{projectId}")]
+		public void ProjectDetails (IManosContext ctx, string userid, string projectname, string projectId, string revision, string notification)
+		{
+			var session = GetSession (ctx);
+			var project = projectname != null ? DataStore.GetProject (userid, projectname) : DataStore.GetProject (projectId);
+			this.RenderSparkView (ctx, "Project.spark", new { Session = session, LoggedUser = session.User, Notification = notification, Project = project, Builds = DataStore.GetLatestBuildsByProject (project.Id, 0)});
+		}
+		
+		// Project Management
 		
 		[Route ("/register/project/new")]
 		public void StartProjectRegistration (IManosContext ctx, string notification)
@@ -272,14 +286,24 @@ Console.Error.WriteLine ("set-cookie: " + sessionId);
 		}
 
 		[Route ("/register/project/edit")]
-		public void StartProjectUpdate (IManosContext ctx, DroshSession session)
+		public void StartProjectUpdate (IManosContext ctx)
+		{
+			AssertLoggedIn (ctx, (c, session) => StartProjectUpdate (c, session));
+		}
+		
+		void StartProjectUpdate (IManosContext ctx, DroshSession session)
 		{
 			this.RenderSparkView (ctx, "ManageProject.spark", new {Session = session, ManagementMode = ProjectManagementMode.Update, LoggedUser = session.User, Editable = true, Project = CreateProjectFromForm (session, ctx)});
 			ctx.Response.End ();
 		}
 
 		[Route ("/register/project/update")]
-		public void ExecuteProjectUpdate (IManosContext ctx, DroshSession session)
+		public void ExecuteProjectUpdate (IManosContext ctx)
+		{
+			AssertLoggedIn (ctx, (c, session) => ExecuteProjectUpdate (c, session));
+		}
+
+		void ExecuteProjectUpdate (IManosContext ctx, DroshSession session)
 		{
 			var project = CreateProjectFromForm (session, ctx);
 			DataStore.UpdateProject (session.User.Name, project);
@@ -436,6 +460,11 @@ Console.Error.WriteLine ("set-cookie: " + sessionId);
 			return projects.FirstOrDefault (p => p.Owner == user && p.Name == name);
 		}
 
+		public static Project GetProject (string id)
+		{
+			return projects.FirstOrDefault (p => p.Id == id);
+		}
+
 		public static void UpdateProject (string user, Project project)
 		{
 			if (!projects.Any (p => p.Owner == user && p.Name == project.Name))
@@ -451,7 +480,12 @@ Console.Error.WriteLine ("set-cookie: " + sessionId);
 
 		public static IEnumerable<BuildRecord> GetLatestBuildsByUser (string user, int skip)
 		{
-			return builds.OrderBy (b => b.BuildStartedTimestamp).Skip (skip).Take (10);
+			return builds.Where (b => b.Builder == user).OrderBy (b => b.BuildStartedTimestamp).Skip (skip).Take (10);
+		}
+
+		public static IEnumerable<BuildRecord> GetLatestBuildsByProject (string projectId, int skip)
+		{
+			return builds.Where (b => b.Project == projectId).OrderBy (b => b.BuildStartedTimestamp).Skip (skip).Take (10);
 		}
 	}
 
