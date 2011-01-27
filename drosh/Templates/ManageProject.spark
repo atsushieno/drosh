@@ -48,7 +48,7 @@ Logged in as ${LoggedUser.Name}<br />
   </tr><tr>
     <td>Brief Description: </td><td><textarea id="description" name="description" rows="2" cols="80" readonly="?{!Editable}">$!{Project.Description}</textarea></td>
   </tr><tr>
-    <td>Project WebSite</td><td><input type="text" id="website" name="website"size="80" value="$!{Project.PrimaryLink}" readonly="?{!Editable}" /></td>
+    <td>Project WebSite</td><td><input type="text" id="website" name="website" size="80" value="$!{Project.PrimaryLink}" readonly="?{!Editable}" /></td>
   </tr><tr>
     <td>Dependencies:</td>
     <td><input type="text" id="deps" name="deps" size="80" value="$!{string.Join (' ', Project.Dependencies.ToArray ())}" readonly="?{!Editable}" /><br />enter whitespace-separated list of project names</td>
