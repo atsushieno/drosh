@@ -93,7 +93,7 @@ Console.Error.WriteLine ("set-cookie: " + session.Id);
 			var userid = ctx.Request.Data ["login_user"];
 			var passraw = ctx.Request.Data ["login_password"];
 			var user = DataStore.GetUser (userid);
-			if (user == null || user.PasswordHash != DataStore.HashPassword (passraw)) {
+			if (user == null || passraw == null || user.PasswordHash != DataStore.HashPassword (passraw)) {
 				Index (ctx, String.Format ("User name '{0}' does not exist or password is wrong", userid));
 				return;
 			}
@@ -227,18 +227,26 @@ Console.Error.WriteLine ("set-cookie: " + sessionId);
 
 		void LoggedHome (IManosContext ctx, DroshSession session, string notification)
 		{
-			this.RenderSparkView (ctx, "Home.spark", new { Session = session, LoggedUser = session.User, Notification = notification, Builds = DataStore.GetLatestBuildsByUser (session.User.Name, 0), Projects = DataStore.GetProjectsByUser (session.User.Name) });
+			this.RenderSparkView (ctx, "Home.spark", new { Session = session, LoggedUser = session.User, Notification = notification, Builds = DataStore.GetLatestBuildsByUser (session.User.Name, 0, 10), Projects = DataStore.GetProjectsByUser (session.User.Name) });
 			ctx.Response.End ();
 		}
 		
 		// Project Browse
 
-		[Route ("/project/{user}/{projectname}", "/project/{user}/{projectname}/{revision}", "/project/{projectId}")]
+		[Route ("/project/{userid}/{projectname}/{revision}", "/project/{userid}/{projectname}")]
 		public void ProjectDetails (IManosContext ctx, string userid, string projectname, string projectId, string revision, string notification)
 		{
 			var session = GetSession (ctx);
 			var project = projectname != null ? DataStore.GetProject (userid, projectname) : DataStore.GetProject (projectId);
-			this.RenderSparkView (ctx, "Project.spark", new { Session = session, LoggedUser = session.User, Notification = notification, Project = project, Builds = DataStore.GetLatestBuildsByProject (project.Id, 0)});
+			if (project == null)
+				Index (ctx, String.Format ("Project '{0}' was not found. Make sure that the link is correct.", projectId ?? userid + "/" + projectname));
+			else {
+				var builds = DataStore.GetLatestBuildsByProject (project.Id, 0, 10);
+				var revs = DataStore.GetRevisions (userid, projectname, 0, 10);
+				this.RenderSparkView (ctx, "Project.spark", new { Session = session, LoggedUser = session == null ? null : session.User, Notification = notification, Project = project, Builds = builds, Revisions = revs});
+
+				ctx.Response.End ();
+			}
 		}
 		
 		// Project Management
@@ -315,8 +323,8 @@ Console.Error.WriteLine ("set-cookie: " + sessionId);
 		{
 			var user = session.User.Name;
 			var name = ctx.Request.Data ["projectname"];
-			var p = new Project ();
 			var existing = name != null ? DataStore.GetProject (user, name) : null;
+			var p = existing != null ? existing.Clone () : new Project () { Id = Guid.NewGuid ().ToString () };
 			if (existing != null) {
 				p.RegisteredTimestamp = existing.RegisteredTimestamp;
 				// FIXME: fill everything else appropriate
@@ -419,6 +427,7 @@ Console.Error.WriteLine ("set-cookie: " + sessionId);
 		static List<Project> projects = new List<Project> ();
 		static List<ProjectSubscription> subscriptions = new List<ProjectSubscription> ();
 		static List<BuildRecord> builds = new List<BuildRecord> ();
+		static List<ProjectRevision> revisions = new List<ProjectRevision> ();
 
 		public static void RegisterUser (User user)
 		{
@@ -478,14 +487,19 @@ Console.Error.WriteLine ("set-cookie: " + sessionId);
 			return projects.Where (p => p.Owner == user || subscriptions.Any (s => s.Project == p.Id && s.User == user));
 		}
 
-		public static IEnumerable<BuildRecord> GetLatestBuildsByUser (string user, int skip)
+		public static IEnumerable<BuildRecord> GetLatestBuildsByUser (string user, int skip, int take)
 		{
-			return builds.Where (b => b.Builder == user).OrderBy (b => b.BuildStartedTimestamp).Skip (skip).Take (10);
+			return builds.Where (b => b.Builder == user).OrderBy (b => b.BuildStartedTimestamp).Skip (skip).Take (take);
 		}
 
-		public static IEnumerable<BuildRecord> GetLatestBuildsByProject (string projectId, int skip)
+		public static IEnumerable<BuildRecord> GetLatestBuildsByProject (string projectId, int skip, int take)
 		{
-			return builds.Where (b => b.Project == projectId).OrderBy (b => b.BuildStartedTimestamp).Skip (skip).Take (10);
+			return builds.Where (b => b.Project == projectId).OrderBy (b => b.BuildStartedTimestamp).Skip (skip).Take (take);
+		}
+
+		public static IEnumerable<ProjectRevision> GetRevisions (string userid, string projectname, int skip, int take)
+		{
+			return revisions.Where (r => r.Owner == userid && r.Project == projectname).OrderBy (r => r.CreatedTimestamp).Skip (skip).Take (take);
 		}
 	}
 

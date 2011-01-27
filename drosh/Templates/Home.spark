@@ -33,7 +33,7 @@ Logged in as ${LoggedUser.Name}<br />
 
 <for each="var project in Projects">
   <tr id="project-${project.Name}" name="project-${project.Name}">
-    <td><a href="/project/${project.Name}/Head">${project.Name}</td>
+    <td><a href="/project/${project.Owner}/${project.Name}/Head">${project.Name}</td>
   </tr>
 </for>
 

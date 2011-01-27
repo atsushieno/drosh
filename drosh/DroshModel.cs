@@ -58,6 +58,11 @@ namespace drosh
 		public NDKType TargetNDKs { get; set; }
 		public ArchType TargetArchs { get; set; }
 		public string Text { get; set; }
+
+		public Patch Clone ()
+		{
+			return (Patch) MemberwiseClone ();
+		}
 	}
 	
 	public class Script
@@ -66,6 +71,11 @@ namespace drosh
 		public NDKType TargetNDKs { get; set; }
 		public ArchType TargetArchs { get; set; }
 		public string Text { get; set; }
+
+		public Script Clone ()
+		{
+			return (Script) MemberwiseClone ();
+		}
 	}
 
 	public class Project
@@ -86,10 +96,31 @@ namespace drosh
 		public IList<string> FilesByPackage { get; set; }
 		public DateTime RegisteredTimestamp { get; set; }
 		public DateTime LastUpdatedTimestamp { get; set; }
+
+		public string ResultArchiveName {
+			get { return Name + "-bin.tar.bz2"; }
+		}
+
+		public Project Clone ()
+		{
+			var ret = (Project) MemberwiseClone ();
+			if (Dependencies != null)
+				ret.Dependencies = new List<ProjectReference> (Dependencies);
+			if (Builders != null)
+				ret.Builders = new List<UserReference> (Builders);
+			if (Patches != null)
+				ret.Patches = new List<Patch> ((from p in Patches select p.Clone ()));
+			if (Scripts != null)
+				ret.Scripts = new List<Script> ((from s in Scripts select s.Clone ()));
+			if (FilesByPackage != null)
+				ret.FilesByPackage = new List<string> (FilesByPackage);
+			return ret;
+		}
 	}
 
 	public class ProjectRevision
 	{
+		public UserReference Owner { get; set; }
 		public ProjectReference Project { get; set; }
 		public string RevisionId { get; set; }
 		public DateTime CreatedTimestamp { get; set; }

@@ -1,5 +1,10 @@
 <use master="base.spark" />
+<use assembly="drosh" />
+<use namespace="drosh" />
+<use namespace="System.Collections.Generic" />
+<use namespace="System.Linq" />
 <viewdata
+  LoggedUser="User"
   Notification="string" />
 
 <test if="LoggedUser != null">
