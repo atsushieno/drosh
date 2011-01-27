@@ -134,8 +134,10 @@ Console.Error.WriteLine ("set-cookie: " + sessionId);
 		public void ConfirmUserRegistration (IManosContext ctx)
 		{
 			// FIXME: validate inputs more.
-			if (ctx.Request.Data ["password"] != ctx.Request.Data ["password-verified"])
-				StartUserRegistration (ctx, "Password inputs don't match.");
+			var pwd = ctx.Request.Data ["password"];
+			var pwdv = ctx.Request.Data ["password-verified"];
+			if (pwd != pwdv)
+				StartUserRegistration (ctx, "Password inputs don't match. [" + pwd + "][" + pwdv + "]");
 			else if (DataStore.GetUser (ctx.Request.Data ["username"]) != null)
 				StartUserRegistration (ctx, "The same user name is already registered. Please pick another name.");
 			else {

@@ -16,7 +16,7 @@
 <content name="body">
 
 <div id="logout" name="logout" style="float: right">
-<form action="/logout">
+<form action="/logout" method="POST">
 Logged in as ${LoggedUser.Name}<br />
 <input type="submit" value="Logout" />
 </form>
@@ -35,11 +35,11 @@ Logged in as ${LoggedUser.Name}<br />
 <div id="notification" name="notification"><p>$!{Notification}</p></div>
 
 <test if="ManagementMode == ProjectManagementMode.Confirm">
-  <form action="/register/project/register">
+  <form action="/register/project/register" method="POST">
 </test><else if="ManagementMode == ProjectManagementMode.New">
-  <form action="/register/project/confirm">
+  <form action="/register/project/confirm" method="POST">
 </else><else>
-  <form action="/register/project/update">
+  <form action="/register/project/update" method="POST">
 </else>
 
 <table>

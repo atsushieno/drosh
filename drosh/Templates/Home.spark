@@ -15,7 +15,7 @@
 <h1>Drosh: Android Shared Library House</h1>
 
 <div id="logout" name="logout" style="float: right">
-<form action="/logout">
+<form action="/logout" method="POST">
 Logged in as ${LoggedUser.Name}<br />
 <input type="submit" value="Logout" />
 </form>

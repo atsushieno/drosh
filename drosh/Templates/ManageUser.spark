@@ -22,11 +22,11 @@
 <!-- For registration, it is editable. Otherwise not -->
 
 <test if="ManagementMode == UserManagementMode.Confirm">
-  <form action="/register/user/register">
+  <form action="/register/user/register" method="POST">
 </test><else if="ManagementMode == UserManagementMode.New">
-  <form action="/register/user/confirm">
+  <form action="/register/user/confirm" method="POST">
 </else><else>
-  <form action="/register/user/update">
+  <form action="/register/user/update" method="POST">
 </else>
 
 <div id="notification" name="notification"><p>$!{Notification}</p></div>
@@ -58,13 +58,13 @@
   </tr><tr>
     <td>Confirm email</td><td><input type="text" id="email-verified" name="email-verified" size="40" value="$!{User.Email}" /></td>
   </tr><tr>
-    <td>Password</td><td><input type="password" id="password" name="password" /><br />
+    <td>Password</td><td><input type="password" name="password" /><br />
 <test if="ManagementMode == UserManagementMode.Update">
     leave here blank if you don't want to change
 </test>
     </td>
   </tr><tr>
-    <td>Confirm password</td><td><input type="password" id="password-verified" name="password-verified" /></td>
+    <td>Confirm password</td><td><input type="password" name="password-verified" /></td>
   </tr>
 </test><else>
   <tr>
@@ -91,7 +91,7 @@
 </form>
 
 <test if="ManagementMode == UserManagementMode.Update">
-<form target="/delete/user">
+<form target="/delete/user" method="POST">
 <p>
   <input type="submit" value="Delete This Account" />
   Check here if you are really sure: <input type="checkbox" value="delete" />
