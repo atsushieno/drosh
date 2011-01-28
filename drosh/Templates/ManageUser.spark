@@ -39,8 +39,9 @@
       <input type="text" id="username" name="username" /><br/>(only alphabet and numbers are accepted)
 </test>
 <else>
-      <input type="hidden" id="username" name="username" value="$!{User.Name}" />
+      <input type="hidden" name="username" value="$!{User.Name}" />
       $!{User.Name}
+      <input type="hidden" name="password-hash" value="$!{User.PasswordHash}" />
 </else>
     </td>
   </tr><tr>

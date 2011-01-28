@@ -33,6 +33,7 @@ namespace drosh
 		
 		public string Id { get; set; }
 		public User User { get; set; }
+		public string Notification { get; set; }
 	}
 
 	public class drosh : ManosApp
@@ -46,8 +47,8 @@ namespace drosh
 		DroshSession GetSession (IManosContext ctx)
 		{
 			var sessionId = ctx.Request.Cookies.Get ("drosh-session");
-Console.Error.WriteLine ("get cookie : " + sessionId);
-			return sessionId != null ? GetSessionCache (sessionId) : null;
+			var ret = sessionId != null ? GetSessionCache (sessionId) : null;
+			return ret;
 		}
 
 		DroshSession GetSessionCache (string key)
@@ -65,10 +66,14 @@ Console.Error.WriteLine ("get cookie : " + sessionId);
 			if (session == null || session.User == null)
 				Index (ctx, "Login status expired or not logged in");
 			else {
-				ctx.Response.SetCookie ("drosh-session", new HttpCookie ("drosh-session", session.Id) {Path = "/"/*, Expires = DateTime.Now.AddMinutes (60)*/});
-Console.Error.WriteLine ("set-cookie: " + session.Id);
 				action (ctx, session);
 			}
+		}
+		
+		void SetSession (IManosContext ctx, DroshSession session)
+		{
+			ctx.Response.SetCookie ("drosh-session", new HttpCookie ("drosh-session", session.Id) {Path = "/"});
+			Cache.Set (session.Id, session, TimeSpan.FromMinutes (60));
 		}
 		
 		[Route ("/", "/index", "/home")]
@@ -90,32 +95,38 @@ Console.Error.WriteLine ("set-cookie: " + session.Id);
 		[Route ("/login")]
 		public void Login (IManosContext ctx, string link)
 		{
-			var userid = ctx.Request.Data ["login_user"];
-			var passraw = ctx.Request.Data ["login_password"];
-			var user = DataStore.GetUser (userid);
-			if (user == null || passraw == null || user.PasswordHash != DataStore.HashPassword (passraw)) {
-				Index (ctx, String.Format ("User name '{0}' does not exist or password is wrong", userid));
-				return;
+			var session = GetSession (ctx);
+			string notification = null;
+			if (session == null) {
+				var userid = ctx.Request.Data ["login_user"];
+				var passraw = ctx.Request.Data ["login_password"];
+				var user = DataStore.GetUser (userid);
+				if (user == null || passraw == null || user.PasswordHash != DataStore.HashPassword (passraw)) {
+					Index (ctx, String.Format ("User name '{0}' does not exist or password is wrong", userid));
+					return;
+				}
+				string sessionId = Guid.NewGuid ().ToString ();
+				session = new DroshSession (sessionId, user);
+				SetSession (ctx, session);
+				notification = String.Format ("Welcome, {0}!", user.Name);
 			}
-			string sessionId = Guid.NewGuid ().ToString ();
-			var session = new DroshSession (sessionId, user);
-			Cache.Set (sessionId, session, TimeSpan.FromMinutes (60));
-			ctx.Response.SetCookie ("drosh-session", new HttpCookie ("drosh-session", sessionId) {Path = "/"/*, Expires = DateTime.Now.AddMinutes (60)*/});
-Console.Error.WriteLine ("set-cookie: " + sessionId);
 
 			if (link != null)
 				ctx.Response.Redirect (link);
 			else
-				LoggedHome (ctx, session, String.Format ("Welcome, {0}!", user.Name));
+				LoggedHome (ctx, session, notification);
 		}
 
 		[Route ("/logout")]
 		public void Logout (IManosContext ctx)
 		{
-			var session = ctx.Request.Data ["session"];
+			var session = GetSession (ctx);
 			if (session != null) {
-				Cache.Remove (session);
+				ctx.Response.SetCookie ("drosh-session", "deleted", DateTime.Now);
+				Cache.Remove (session.Id);
+				// FIXME: use Response.Redirect()
 				Index (ctx, "logged out");
+				//ctx.Response.Redirect ("/");
 			}
 			else
 				Index (ctx, "not logged in");
@@ -134,21 +145,28 @@ Console.Error.WriteLine ("set-cookie: " + sessionId);
 		public void ConfirmUserRegistration (IManosContext ctx)
 		{
 			// FIXME: validate inputs more.
-			var pwd = ctx.Request.Data ["password"];
-			var pwdv = ctx.Request.Data ["password-verified"];
-			if (pwd != pwdv)
-				StartUserRegistration (ctx, "Password inputs don't match. [" + pwd + "][" + pwdv + "]");
+			string error = null;
+			if (ctx.Request.Data ["password"] != ctx.Request.Data ["password-verified"])
+				error = "Password inputs don't match.";
 			else if (DataStore.GetUser (ctx.Request.Data ["username"]) != null)
-				StartUserRegistration (ctx, "The same user name is already registered. Please pick another name.");
-			else {
-				this.RenderSparkView (ctx, "ManageUser.spark", new {ManagementMode = UserManagementMode.Confirm, User = CreateUserFromForm (ctx), Editable = false});
-				ctx.Response.End ();
-			}
+				error = "The same user name is already registered. Please pick another name.";
+			var user = CreateUserFromForm (ctx);
+			var mode = error == null ? UserManagementMode.Confirm : UserManagementMode.New;
+			user.PasswordHash = DataStore.HashPassword (ctx.Request.Data ["password"]);
+			this.RenderSparkView (ctx, "ManageUser.spark", new {ManagementMode = mode, User = user, Editable = false, Notification = error});
+			ctx.Response.End ();
 		}
 
 		[Route ("/register/user/register")]
 		public void ExecuteUserRegistration (IManosContext ctx)
 		{
+			var existingSession = GetSession (ctx);
+			if (existingSession != null) {
+				// FIXME: use Response.Redirect()
+				LoggedHome (ctx, existingSession, "already logged in");
+				return;
+			}
+
 			// FIXME: validate inputs.
 
 			var user = CreateUserFromForm (ctx);
@@ -159,11 +177,11 @@ Console.Error.WriteLine ("set-cookie: " + sessionId);
 #else
 			string sessionId = Guid.NewGuid ().ToString ();
 			var session = new DroshSession (sessionId, user);
-			Cache.Set (sessionId, session, TimeSpan.FromMinutes (60));
-			ctx.Response.SetCookie ("drosh-session", new HttpCookie ("drosh-session", sessionId) {Path = "/"/*, Expires = DateTime.Now.AddMinutes (60)*/});
-Console.Error.WriteLine ("set-cookie: " + sessionId);
+			SetSession (ctx, session);
 
-			LoggedHome (ctx, session, "You are now registered");
+			//LoggedHome (ctx, session, "You are now registered");
+			// FIXME: Use notification message
+			ctx.Response.Redirect ("/");
 #endif
 		}
 
@@ -218,6 +236,8 @@ Console.Error.WriteLine ("set-cookie: " + sessionId);
 				u.RegisteredTimestamp = existing.RegisteredTimestamp;
 				u.Status = existing.Status;
 			}
+			else 
+				u.PasswordHash = ctx.Request.Data ["password-hash"];
 			u.Name = name;
 			u.OpenID = ctx.Request.Data ["openid"];
 			u.Profile = ctx.Request.Data ["profile"];
@@ -513,4 +533,5 @@ Console.Error.WriteLine ("set-cookie: " + sessionId);
 		}
 	}
 }
+
 
