@@ -17,7 +17,8 @@
 <div id="logout" name="logout" style="float: right">
 <form action="/logout" method="POST">
 Logged in as ${LoggedUser.Name}<br />
-<input type="submit" value="Logout" />
+<input type="submit" value="Logout" /><br />
+<a href="/register/user/edit">manage account</a>
 </form>
 </div>
 <div style="clear: left"></div>

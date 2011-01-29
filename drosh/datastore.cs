@@ -112,6 +112,13 @@ namespace drosh
 			Users.Add (user);
 		}
 
+		public static void DeleteUser (string name)
+		{
+			var user = GetUser (name);
+			if (user != null)
+				Users.Remove (user);
+		}
+
 		public static void RegisterProject (string user, Project project)
 		{
 			if (Projects.Any (p => p.Owner == user && p.Name == project.Name))

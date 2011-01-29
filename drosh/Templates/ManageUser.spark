@@ -92,10 +92,10 @@
 </form>
 
 <test if="ManagementMode == UserManagementMode.Update">
-<form target="/delete/user" method="POST">
+<form action="/register/user/delete" method="POST">
 <p>
   <input type="submit" value="Delete This Account" />
-  Check here if you are really sure: <input type="checkbox" value="delete" />
+  Check here if you are really sure: <input type="checkbox" name="delete" />
 </p>
 </form>
 </test>

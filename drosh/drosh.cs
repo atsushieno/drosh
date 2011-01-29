@@ -186,9 +186,14 @@ namespace drosh
 		}
 
 		[Route ("/register/user/edit")]
-		public void StartUserUpdate (IManosContext ctx, DroshSession session)
+		public void StartUserUpdate (IManosContext ctx, string notification)
 		{
-			this.RenderSparkView (ctx, "ManageUser.spark", new {Session = session, ManagementMode = UserManagementMode.Update, User = session.User, Editable = true});
+			AssertLoggedIn (ctx, (c, session) => StartUserUpdate (c, session, notification));
+		}
+
+		void StartUserUpdate (IManosContext ctx, DroshSession session, string notification)
+		{
+			this.RenderSparkView (ctx, "ManageUser.spark", new {Session = session, ManagementMode = UserManagementMode.Update, User = session.User, Editable = true, Notification = notification});
 			ctx.Response.End ();
 		}
 
@@ -213,6 +218,22 @@ namespace drosh
 		{
 			this.RenderSparkView (ctx, "PasswordRecovery.spark", new {Notification = notification});
 			ctx.Response.End ();
+		}
+
+		[Route ("/register/user/delete")]
+		public void DeleteUser (IManosContext ctx)
+		{
+			AssertLoggedIn (ctx, (c, session) => DeleteUser (c, session));
+		}
+
+		void DeleteUser (IManosContext ctx, DroshSession session)
+		{ 
+			if (ctx.Request.Data ["delete"] == null)
+				StartUserUpdate (ctx, session, "Make sure to check required item.");
+			else {
+				DataStore.DeleteUser (session.User.Name);
+				NotLogged (ctx, "Your account is now removed");
+			}
 		}
 
 		[Route ("/register/user/recovery/execute")]
