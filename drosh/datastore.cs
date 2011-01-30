@@ -93,7 +93,7 @@ namespace drosh
 
 		public static User GetUser (string name)
 		{
-			return Users.FirstOrDefault (u => u.Name == name);
+			return Users.FirstOrDefault (u => u.Name == name && u.Status != UserStatus.Removed);
 		}
 
 		public static void Update (User user)
