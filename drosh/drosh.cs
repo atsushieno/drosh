@@ -403,6 +403,14 @@ Console.WriteLine ("notification: " + notification);
 			AssertLoggedIn (ctx, (c, session) => ExecuteProjectUpdate (c, session));
 		}
 
+		[Route ("/projects/{keyword}")]
+		public void SearchProjects (IManosContext ctx, string keyword)
+		{
+			var session = GetSession ();
+			var projects = DataStore.GetProjectsByKeyword (keyword, 0, 10);
+			this.RenderSparkView (ctx, "Projects.spark", new { LoggedUser = session != null ? session.User : null, Notification = session != null ? session.Notification : null, SearchKeyword = keyword, Projects = projects });
+		}
+
 		void ExecuteProjectUpdate (IManosContext ctx, DroshSession session)
 		{
 			var project = CreateProjectFromForm (session, ctx);

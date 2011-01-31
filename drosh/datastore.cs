@@ -165,5 +165,10 @@ namespace drosh
 		{
 			return Revisions.Where (r => r.Owner == userid && r.Project == projectname).OrderBy (r => r.CreatedTimestamp).Skip (skip).Take (take);
 		}
+
+		public static IEnumerable<Project> GetProjectsByKeyword (string keyword, int skip, int take)
+		{
+			return Projects.Where (p => p.Name.Contains (keyword) || p.Owner.Contains (keyword)).Skip (skip).Take (take);
+		}
 	}
 }
