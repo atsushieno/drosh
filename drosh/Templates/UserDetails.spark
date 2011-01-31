@@ -28,7 +28,7 @@
   </tr>
 </table>
 
-<test if="LoggedUser.Name == User.Name">
+<test if="LoggedUser != null && LoggedUser.Name == User.Name">
 <p>
   <a href="/register/user/edit">manage account</a>
 </p>

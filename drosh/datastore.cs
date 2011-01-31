@@ -168,6 +168,7 @@ namespace drosh
 
 		public static IEnumerable<Project> GetProjectsByKeyword (string keyword, int skip, int take)
 		{
+foreach (var p in Projects) Console.Error.WriteLine ("{0}/{1}:{4}:{2} {3}", p.Owner, p.Name, p.Owner.Contains (keyword), p.Name.Contains (keyword), keyword);
 			return Projects.Where (p => p.Name.Contains (keyword) || p.Owner.Contains (keyword)).Skip (skip).Take (take);
 		}
 	}

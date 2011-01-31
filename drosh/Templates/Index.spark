@@ -12,8 +12,8 @@
 <div id="notification" name="notification"><p>$!{Notification}</p></div>
 
 <div id="project-search" name="project-search">
-<form action="/projects/search" method="POST">
-Name <input type="text" />
+<form action="/projects" method="POST">
+Name <input type="text" name="keyword" />
 <input type="submit" value="Search" />
 </form>
 </div>
