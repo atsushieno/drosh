@@ -5,3 +5,4 @@ td { border-top: 1px solid #CCCCCC; border-left: 1px solid #CCCCCC }
 td,th { vertical-align: top }
 textarea, input { background-color: #E0E0E0 }
 #login, #logout { background-color: #FFFFF0; font-size: 0.8em; text-align: right; padding: 0.5em; }
+.project-list { list-style-type: none }

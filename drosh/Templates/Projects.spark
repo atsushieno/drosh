@@ -1,0 +1,39 @@
+<use master="base.spark" />
+<use assembly="drosh" />
+<use namespace="drosh" />
+<use namespace="System.Collections.Generic" />
+<use namespace="System.Linq" />
+<viewdata
+  SearchKeyword="string"
+  Notification="string"
+  LoggedUser="User"
+  Projects="IEnumerable[[Project]]" />
+
+<content name="body">
+
+<use file="login_status.spark" />
+
+<h1>Projects</h1>
+
+<div id="notification" name="notification">${Notification}</div>
+
+<div id="projects" name="projects">
+
+<h2>Projects - ${SearchKeyword}</h2>
+
+<ul class="project-list">
+<for each="var project in Projects">
+  <li>
+    <test if="LoggedUser != null && project.Owner == LoggedUser.Name">
+      <img alt="Owner" src="/images/owner.png"/>
+    </test>
+    <a href="/user/${project.Owner}">${project.Owner}</a>/<a href="/project/${project.Owner}/${project.Name}">${project.Name}</a>
+  </li>
+</for>
+</ul>
+
+<!-- TODO: page controller links -->
+
+</div>
+
+</content>

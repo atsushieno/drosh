@@ -17,9 +17,7 @@
 
 <h1>User: ${User.Name}</h1>
 
-<div id="notification" name="notification">
-<!-- notification area -->
-</div>
+<div id="notification" name="notification">${Notification}</div>
 
 <!-- import non-editable user details here -->
 <table>
