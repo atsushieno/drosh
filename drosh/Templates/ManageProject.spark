@@ -70,16 +70,24 @@ Logged in as ${LoggedUser.Name}<br />
   </tr><tr>
     <td>Target NDK: </td>
     <td>
-      <input type="checkbox" name="target-ndk-r5" checked="?{Project == null || (Project.TargetNDKs & NDKType.R5) != 0}" disabled="?{!Editable}" />r5
-      <input type="checkbox" name="target-ndk-crystaxR4b"  checked="?{Project == null || (Project.TargetNDKs & NDKType.CrystaxR4b) != 0}" disabled="?{!Editable}" />crystax r4b
-      <input type="checkbox" name="target-ndk-r4b"  checked="?{Project == null || (Project.TargetNDKs & NDKType.R4b) != 0}" disabled="?{!Editable}" />r4b
+<test if="Editable">
+      <input type="checkbox" name="target-ndk-r5" checked="?{Project == null || (Project.TargetNDKs & NDKType.R5) != 0}" />r5
+      <input type="checkbox" name="target-ndk-crystaxR4b"  checked="?{Project == null || (Project.TargetNDKs & NDKType.CrystaxR4b) != 0}" />crystax r4b
+      <input type="checkbox" name="target-ndk-r4b"  checked="?{Project == null || (Project.TargetNDKs & NDKType.R4b) != 0}" />r4b
+</test><else>
+  <input type="hidden" name="target-ndk" value="${Project.TargetNDKs}" />${Project.TargetNDKs}
+</else>
     </td>
   </tr><tr>
     <td>Target Arch: </td>
     <td>
-      <input type="checkbox" id="target-arch-arm" name="target-arch-arm" checked="?{Project == null || (Project.TargetArchs & ArchType.Arm) != 0}" disabled="?{!Editable}" />armeabi
-      <input type="checkbox" id="target-arch-armV7a" name="target-arch-armV7a"  checked="?{Project == null || (Project.TargetArchs & ArchType.ArmV7a) != 0}" disabled="?{!Editable}" />armeabi-v7a
-      <input type="checkbox" id="target-arch-x86" name="target-arch-x86" checked="?{Project == null || (Project.TargetArchs & ArchType.X86) != 0}" disabled="?{!Editable}" />x86
+<test if="Editable">
+      <input type="checkbox" id="target-arch-arm" name="target-arch-arm" checked="?{Project == null || (Project.TargetArchs & ArchType.Arm) != 0}" />armeabi
+      <input type="checkbox" id="target-arch-armV7a" name="target-arch-armV7a"  checked="?{Project == null || (Project.TargetArchs & ArchType.ArmV7a) != 0}" />armeabi-v7a
+      <input type="checkbox" id="target-arch-x86" name="target-arch-x86" checked="?{Project == null || (Project.TargetArchs & ArchType.X86) != 0}" />x86
+</test><else>
+  <input type="hidden" name="target-arch" value="${Project.TargetArchs}" />${Project.TargetArchs}
+</else>
     </td>
   </tr><tr>
     <td>Source: </td>
@@ -100,9 +108,9 @@ Logged in as ${LoggedUser.Name}<br />
       <div>
       <!-- patch #${++n_patch} -->
       NDK version:
-      <input type="checkbox" name="patch-target-ndk-${n_patch}-r5" checked="?{(patch.TargetNDKs & NDKType.R5) != 0}" readonly="?{!Editable}" />r5
-      <input type="checkbox" name="patch-target-ndk-${n_patch}-crystaxR4b" checked="?{(patch.TargetNDKs & NDKType.CrystaxR4b) != 0}" readonly="?{!Editable}" />crystax r4b
-      <input type="checkbox" name="patch-target-ndk-${n_patch}-r4b" checked="?{(patch.TargetNDKs & NDKType.R4b) != 0}" readonly="?{!Editable}" />r4b
+      <input type="checkbox" name="patch-target-ndk-${n_patch}-r5" checked="?{(patch.TargetNDKs & NDKType.R5) != 0}" />r5
+      <input type="checkbox" name="patch-target-ndk-${n_patch}-crystaxR4b" checked="?{(patch.TargetNDKs & NDKType.CrystaxR4b) != 0}" />crystax r4b
+      <input type="checkbox" name="patch-target-ndk-${n_patch}-r4b" checked="?{(patch.TargetNDKs & NDKType.R4b) != 0}" />r4b
       <br />
       Arch:
       <input type="checkbox" name="patch-target-arch-${n_patch}-arm" checked="?{(patch.TargetArchs & ArchType.Arm) != 0}" />armeabi
@@ -110,7 +118,7 @@ Logged in as ${LoggedUser.Name}<br />
       <input type="checkbox" name="patch-target-arch-${n_patch}-x86" checked="?{(patch.TargetArchs & ArchType.X86) != 0}" />x86
       <br />
       <textarea cols="80" rows="5" id="patch-text" name="patch-${n_patch}-text" readonly="?{!Editable}">${patch.Text}</textarea><br />
-      To remove patch, just clear patch text.
+      <test if="Editable">To remove patch, just clear patch text.</test>
       </div>
 </for>
 </div>

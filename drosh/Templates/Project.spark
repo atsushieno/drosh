@@ -34,6 +34,10 @@
 
 <h2>Details</h2>
 
+<test if="LoggedUser != null && Project.Owner == LoggedUser.Name">
+<p><a href="/register/project/edit/${Project.Owner}/${Project.Name}">Manage Project</a></p>
+</test>
+
 <table>
   <tr>
     <td>Dependencies: </td><td>${string.Join (', ', (from dep in Project.Dependencies select dep).ToArray ())}</td>

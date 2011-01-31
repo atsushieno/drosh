@@ -339,6 +339,15 @@ Console.WriteLine ("notification: " + notification);
 			}
 		}
 		
+		[Route ("/projects")]
+		public void SearchProjects (IManosContext ctx, string keyword)
+		{
+			var session = GetSession (ctx);
+			var projects = DataStore.GetProjectsByKeyword (keyword, 0, 10);
+			this.RenderSparkView (ctx, "Projects.spark", new { LoggedUser = session != null ? session.User : null, Notification = session != null ? session.Notification : null, SearchKeyword = keyword, Projects = projects });
+			ctx.Response.End ();
+		}
+
 		// Project Management
 		
 		[Route ("/register/project/new")]
@@ -385,15 +394,15 @@ Console.WriteLine ("notification: " + notification);
 			LoggedHome (ctx, session);
 		}
 
-		[Route ("/register/project/edit")]
-		public void StartProjectUpdate (IManosContext ctx)
+		[Route ("/register/project/edit/{userid}/{project}")]
+		public void StartProjectUpdate (IManosContext ctx, string userid, string project)
 		{
-			AssertLoggedIn (ctx, (c, session) => StartProjectUpdate (c, session));
+			AssertLoggedIn (ctx, (c, session) => StartProjectUpdate (c, session, userid, project));
 		}
 		
-		void StartProjectUpdate (IManosContext ctx, DroshSession session)
+		void StartProjectUpdate (IManosContext ctx, DroshSession session, string userid, string project)
 		{
-			this.RenderSparkView (ctx, "ManageProject.spark", new {Session = session, ManagementMode = ProjectManagementMode.Update, LoggedUser = session.User, Editable = true, Project = CreateProjectFromForm (session, ctx)});
+			this.RenderSparkView (ctx, "ManageProject.spark", new {Session = session, ManagementMode = ProjectManagementMode.Update, LoggedUser = session.User, Editable = true, Project = DataStore.GetProject (userid, project)});
 			ctx.Response.End ();
 		}
 
@@ -401,15 +410,6 @@ Console.WriteLine ("notification: " + notification);
 		public void ExecuteProjectUpdate (IManosContext ctx)
 		{
 			AssertLoggedIn (ctx, (c, session) => ExecuteProjectUpdate (c, session));
-		}
-
-		[Route ("/projects")]
-		public void SearchProjects (IManosContext ctx, string keyword)
-		{
-			var session = GetSession (ctx);
-			var projects = DataStore.GetProjectsByKeyword (keyword, 0, 10);
-			this.RenderSparkView (ctx, "Projects.spark", new { LoggedUser = session != null ? session.User : null, Notification = session != null ? session.Notification : null, SearchKeyword = keyword, Projects = projects });
-			ctx.Response.End ();
 		}
 
 		void ExecuteProjectUpdate (IManosContext ctx, DroshSession session)
@@ -482,6 +482,9 @@ Console.WriteLine ("notification: " + notification);
 
 		NDKType GetNDKTarget (IManosContext ctx, string prefix, int count)
 		{
+			var s = ctx.Request.Data [prefix + "target-ndk" + (count > 0 ? "-" + count : String.Empty)];
+			if (s != null)
+				return (NDKType) Enum.Parse (typeof (NDKType), s);
 			NDKType ret = NDKType.None;
 			if (ctx.Request.Data [prefix + "target-ndk-" + (count > 0 ? count + "-" : String.Empty) + "r5"] != null)
 				ret |= NDKType.R5;
@@ -494,6 +497,9 @@ Console.WriteLine ("notification: " + notification);
 
 		ArchType GetArchTarget (IManosContext ctx, string prefix, int count)
 		{
+			var s = ctx.Request.Data [prefix + "target-arch" + (count > 0 ? "-" + count : String.Empty)];
+			if (s != null)
+				return (ArchType) Enum.Parse (typeof (ArchType), s);
 			ArchType ret = ArchType.None;
 			if (ctx.Request.Data [prefix + "target-arch-" + (count > 0 ? count + "-" : String.Empty) + "arm"] != null)
 				ret |= ArchType.Arm;
