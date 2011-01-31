@@ -22,10 +22,17 @@
 </div>
 
 <!-- import non-editable user details here -->
+<table>
+  <tr>
+    <td>OpenID</td><td>${User.OpenID}</td>
+  </tr><tr>
+    <td>Profile</td><td><textarea readonly="yes" cols="50" rows="5">${User.Profile}</textarea></td>
+  </tr>
+</table>
 
 <test if="LoggedUser.Name == User.Name">
 <p>
-  <a href="/registration/user/edit">manage account</a>
+  <a href="/register/user/edit">manage account</a>
 </p>
 </test>
 
@@ -42,7 +49,7 @@
       </test><else>
         <img alt="Builder" src="/images/non-owner.png"/>
       </else>
-      <a href="/project/${project.Name}">${project.Name}</a>
+      <a href="/project/${project.Owner}/${project.Name}">${project.Owner}/${project.Name}</a>
     </td>
   </tr>
 </for>

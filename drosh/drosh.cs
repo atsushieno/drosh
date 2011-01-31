@@ -284,7 +284,7 @@ namespace drosh
 				return;
 			}
 
-			this.RenderSparkView ("UserDetails.spark", new { User = targetUser, LoggedUser = session.User, Notification = notification, InvolvedProjects = DataStore.GetProjectsByUser (userid) };
+			this.RenderSparkView (ctx, "UserDetails.spark", new { User = targetUser, LoggedUser = session.User, Notification = notification, InvolvedProjects = DataStore.GetProjectsByUser (userid) });
 			ctx.Response.End ();
 		}
 
