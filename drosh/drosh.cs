@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -170,11 +171,37 @@ namespace drosh
 			// FIXME: validate inputs.
 
 			var user = CreateUserFromForm (ctx);
+			user.Status = UserStatus.Pending;
+			user.Verification = Guid.NewGuid ().ToString ();
 			DataStore.RegisterUser (user);
 #if MAIL
 			MailClient.SendRegistration (user);
 			Index (ctx, "Confirmation email will be sent to your inbox");
 #else
+			VerifyUserRegistration (ctx, user);
+#endif
+		}
+
+		[Route ("/register/user/verify/{userid}/{verification}")]
+		public void VerifyUserRegistration (IManosContext ctx, string userid, string verification)
+		{
+			var user = DataStore.GetUserByVerificationCode (userid, verification);
+			if (user == null)
+				Index (ctx, "Invalid verification code.");
+			else if (user.Status != UserStatus.Pending)
+				Index (ctx, "The user is not either registered or in pending state.");
+			else
+				VerifyUserRegistration (ctx, user);
+		}
+
+		void VerifyUserRegistration (IManosContext ctx, User user)
+		{
+			user.Status = UserStatus.Active;
+			DataStore.UpdateUser (user);
+			string path = "../house/var/drosh/pub/user/" + user.Verification;
+			if (!Directory.Exists (path))
+				Directory.CreateDirectory (path);
+
 			string sessionId = Guid.NewGuid ().ToString ();
 			var session = new DroshSession (sessionId, user);
 			SetSession (ctx, session);
@@ -182,7 +209,6 @@ namespace drosh
 			//LoggedHome (ctx, session, "You are now registered");
 			// FIXME: Use notification message
 			ctx.Response.Redirect ("/");
-#endif
 		}
 
 		[Route ("/register/user/edit")]
@@ -207,7 +233,7 @@ namespace drosh
 				this.RenderSparkView (ctx, "ManageUser.spark", new {Session = session, ManagementMode = UserManagementMode.Update, User = user, Editable = true, Notification = "Password didn't match"});
 			} else {
 				user.PasswordHash = DataStore.HashPassword (ctx.Request.Data ["password"]) ?? user.PasswordHash;
-				DataStore.Update (user);
+				DataStore.UpdateUser (user);
 				this.RenderSparkView (ctx, "ManageUser.spark", new {ManagementMode = UserManagementMode.Update, User = user, Editable = true, Notification = "updated!"});
 			}
 			ctx.Response.End ();

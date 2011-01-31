@@ -10,6 +10,11 @@ namespace drosh
 {
 	public class DataStore
 	{
+		static DataStore ()
+		{
+			// hack any maintenance code here.
+		}
+
 		static SHA256 sha256 = SHA256.Create ();
 
 		public static string HashPassword (string rawPassword)
@@ -93,22 +98,19 @@ namespace drosh
 
 		public static User GetUser (string name)
 		{
-			return Users.FirstOrDefault (u => u.Name == name && u.Status != UserStatus.Removed);
+			return Users.FirstOrDefault (u => u.Name == name && u.Status == UserStatus.Active);
 		}
 
-		public static void Update (User user)
+		public static User GetUserByVerificationCode (string name, string verification)
 		{
-			if (!Users.Any (u => u.Name == user.Name))
-				throw new Exception ("The user does not exist");
-			Users.Remove (GetUser (user.Name));
-			Users.Add (user);
+			return Users.FirstOrDefault (u => u.Name == name && u.Verification == verification && u.Status != UserStatus.Removed);
 		}
 
 		public static void UpdateUser (User user)
 		{
 			if (!Users.Any (u => u.Name == user.Name))
 				throw new Exception ("The user does not exist");
-			Users.Remove (GetUser (user.Name));
+			Users.Remove (Users.First (u => u.Name == user.Name));
 			Users.Add (user);
 		}
 

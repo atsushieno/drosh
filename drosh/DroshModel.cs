@@ -140,6 +140,7 @@ namespace drosh
 		public string OpenID { get; set; }
 		public string Email { get; set; }
 		public string PasswordHash { get; set; }
+		public string Verification { get; set; }
 		public UserStatus Status { get; set; }
 		public DateTime RegisteredTimestamp { get; set; }
 		public string Profile { get; set; }

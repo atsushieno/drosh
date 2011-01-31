@@ -1,0 +1,10 @@
+Setup howto:
+
+	ln -s ../house/var/drosh/pub pub
+
+Run howto:
+	cd ..
+	./start-redis &
+	cd drosh
+	manos -server &
+
