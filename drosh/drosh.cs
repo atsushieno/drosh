@@ -97,6 +97,7 @@ namespace drosh
 				notification = session.Notification;
 				session.Notification = null;
 			}
+Console.WriteLine ("notification: " + notification);
 			this.RenderSparkView (ctx, "Index.spark", new { Notification = notification});
 			ctx.Response.End ();
 		}
@@ -105,14 +106,13 @@ namespace drosh
 		public void Login (IManosContext ctx, string link)
 		{
 			var session = GetSession (ctx) ?? new DroshSession (Guid.NewGuid ().ToString (), null);
-			string notification = null;
-			if (session == null) {
+			if (session.User == null) {
 				var userid = ctx.Request.Data ["login_user"];
 				var passraw = ctx.Request.Data ["login_password"];
 				var user = DataStore.GetUser (userid);
-				session.User = user;
 				bool error = user == null || passraw == null || user.PasswordHash != DataStore.HashPassword (passraw);
 				session.Notification = error ? String.Format ("User name '{0}' does not exist or password is wrong", userid) : String.Format ("Welcome, {0}!", user.Name);
+				session.User = error ? null : user;
 				SetSession (ctx, session);
 				if (error) {
 					ctx.Response.Redirect ("/");
@@ -120,10 +120,7 @@ namespace drosh
 				}
 			}
 
-			if (link != null)
-				ctx.Response.Redirect (link);
-			else
-				LoggedHome (ctx, session);
+			ctx.Response.Redirect (link ?? "/");
 		}
 
 		[Route ("/logout")]
@@ -222,7 +219,7 @@ namespace drosh
 
 		void StartUserUpdate (IManosContext ctx, DroshSession session, string notification)
 		{
-			this.RenderSparkView (ctx, "ManageUser.spark", new {Session = session, ManagementMode = UserManagementMode.Update, User = session.User, Editable = true, Notification = notification});
+			this.RenderSparkView (ctx, "ManageUser.spark", new {Session = session, ManagementMode = UserManagementMode.Update, User = session.User, LoggedUser = session.User, Editable = true, Notification = notification});
 			ctx.Response.End ();
 		}
 
@@ -233,11 +230,11 @@ namespace drosh
 			// process password change request with care: check existing password
 			var rawpwd = ctx.Request.Data ["old-password"];
 			if (ctx.Request.Data ["password"] != null && ctx.Request.Data ["password"] != ctx.Request.Data ["password-verified"] || rawpwd != null && DataStore.HashPassword (rawpwd) != user.PasswordHash) {
-				this.RenderSparkView (ctx, "ManageUser.spark", new {Session = session, ManagementMode = UserManagementMode.Update, User = user, Editable = true, Notification = "Password didn't match"});
+				this.RenderSparkView (ctx, "ManageUser.spark", new {Session = session, ManagementMode = UserManagementMode.Update, User = user, LoggedUser = user, Editable = true, Notification = "Password didn't match"});
 			} else {
 				user.PasswordHash = DataStore.HashPassword (ctx.Request.Data ["password"]) ?? user.PasswordHash;
 				DataStore.UpdateUser (user);
-				this.RenderSparkView (ctx, "ManageUser.spark", new {ManagementMode = UserManagementMode.Update, User = user, Editable = true, Notification = "updated!"});
+				this.RenderSparkView (ctx, "ManageUser.spark", new {ManagementMode = UserManagementMode.Update, User = user, LoggedUser = user, Editable = true, Notification = "updated!"});
 			}
 			ctx.Response.End ();
 		}
@@ -261,6 +258,7 @@ namespace drosh
 				StartUserUpdate (ctx, session, "Make sure to check required item.");
 			else {
 				DataStore.DeleteUser (session.User.Name);
+				session.User = null;
 				session.Notification = "Your account is now removed";
 				ctx.Response.Redirect ("/");
 			}

@@ -11,6 +11,8 @@
 
 <content name="body">
 
+<use file="login_status.spark" /><!-- to enable logout -->
+
 <test if="ManagementMode == UserManagementMode.Confirm">
   <h1>Confirm user registration</h1>
 </test><else if="ManagementMode == UserManagementMode.New">
