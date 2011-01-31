@@ -63,12 +63,14 @@ namespace drosh
 
 		void AssertLoggedIn (IManosContext ctx, Action<IManosContext,DroshSession> action)
 		{
-			var session = GetSession (ctx);
-			if (session == null || session.User == null)
-				Index (ctx, "Login status expired or not logged in");
-			else {
-				action (ctx, session);
+			var session = GetSession (ctx) ?? new DroshSession (Guid.NewGuid ().ToString (), null);
+			if (session.User == null) {
+				session.Notification = "Login status expired or not logged in";
+				SetSession (ctx, session);
+				ctx.Response.Redirect ("/");
 			}
+			else
+				action (ctx, session);
 		}
 		
 		void SetSession (IManosContext ctx, DroshSession session)
@@ -78,17 +80,23 @@ namespace drosh
 		}
 		
 		[Route ("/", "/index", "/home")]
-		public void Index (IManosContext ctx, string notification)
+		public void Index (IManosContext ctx)
 		{
 			var session = GetSession (ctx);
 			if (session == null || session.User == null)
-				NotLogged (ctx, notification);
+				NotLogged (ctx);
 			else
-				LoggedHome (ctx, session, notification);
+				LoggedHome (ctx, session);
 		}
 
-		void NotLogged (IManosContext ctx, string notification)
+		void NotLogged (IManosContext ctx)
 		{
+			var session = GetSession (ctx);
+			string notification = null;
+			if (session != null) {
+				notification = session.Notification;
+				session.Notification = null;
+			}
 			this.RenderSparkView (ctx, "Index.spark", new { Notification = notification});
 			ctx.Response.End ();
 		}
@@ -96,41 +104,36 @@ namespace drosh
 		[Route ("/login")]
 		public void Login (IManosContext ctx, string link)
 		{
-			var session = GetSession (ctx);
+			var session = GetSession (ctx) ?? new DroshSession (Guid.NewGuid ().ToString (), null);
 			string notification = null;
 			if (session == null) {
 				var userid = ctx.Request.Data ["login_user"];
 				var passraw = ctx.Request.Data ["login_password"];
 				var user = DataStore.GetUser (userid);
-				if (user == null || passraw == null || user.PasswordHash != DataStore.HashPassword (passraw)) {
-					Index (ctx, String.Format ("User name '{0}' does not exist or password is wrong", userid));
+				session.User = user;
+				bool error = user == null || passraw == null || user.PasswordHash != DataStore.HashPassword (passraw);
+				session.Notification = error ? String.Format ("User name '{0}' does not exist or password is wrong", userid) : String.Format ("Welcome, {0}!", user.Name);
+				SetSession (ctx, session);
+				if (error) {
+					ctx.Response.Redirect ("/");
 					return;
 				}
-				string sessionId = Guid.NewGuid ().ToString ();
-				session = new DroshSession (sessionId, user);
-				SetSession (ctx, session);
-				notification = String.Format ("Welcome, {0}!", user.Name);
 			}
 
 			if (link != null)
 				ctx.Response.Redirect (link);
 			else
-				LoggedHome (ctx, session, notification);
+				LoggedHome (ctx, session);
 		}
 
 		[Route ("/logout")]
 		public void Logout (IManosContext ctx)
 		{
-			var session = GetSession (ctx);
-			if (session != null) {
-				ctx.Response.SetCookie ("drosh-session", "deleted", DateTime.Now);
-				Cache.Remove (session.Id);
-				// FIXME: use Response.Redirect()
-				Index (ctx, "logged out");
-				//ctx.Response.Redirect ("/");
-			}
-			else
-				Index (ctx, "not logged in");
+			var session = GetSession (ctx) ?? new DroshSession (Guid.NewGuid ().ToString (), null);
+			session.Notification = (session.User != null) ? "loggeed out" : "not logged in";
+			session.User = null;
+			SetSession (ctx, session);
+			ctx.Response.Redirect ("/");
 		}
 
 		// User registration
@@ -154,17 +157,17 @@ namespace drosh
 			var user = CreateUserFromForm (ctx);
 			var mode = error == null ? UserManagementMode.Confirm : UserManagementMode.New;
 			user.PasswordHash = DataStore.HashPassword (ctx.Request.Data ["password"]);
-			this.RenderSparkView (ctx, "ManageUser.spark", new {ManagementMode = mode, User = user, Editable = false, Notification = error});
+			this.RenderSparkView (ctx, "ManageUser.spark", new {ManagementMode = mode, User = user, Editable = (error != null), Notification = error});
 			ctx.Response.End ();
 		}
 
 		[Route ("/register/user/register")]
 		public void ExecuteUserRegistration (IManosContext ctx)
 		{
-			var existingSession = GetSession (ctx);
-			if (existingSession != null) {
-				// FIXME: use Response.Redirect()
-				LoggedHome (ctx, existingSession, "already logged in");
+			var existingSession = GetSession (ctx) ?? new DroshSession (Guid.NewGuid ().ToString (), null);
+			if (existingSession.User != null) {
+				existingSession.Notification = "already logged in";
+				ctx.Response.Redirect ("/");
 				return;
 			}
 
@@ -176,7 +179,8 @@ namespace drosh
 			DataStore.RegisterUser (user);
 #if MAIL
 			MailClient.SendRegistration (user);
-			Index (ctx, "Confirmation email will be sent to your inbox");
+			session.Notification = "Confirmation email will be sent to your inbox";
+			ctx.Response.Redirect ("/");
 #else
 			VerifyUserRegistration (ctx, user);
 #endif
@@ -185,11 +189,12 @@ namespace drosh
 		[Route ("/register/user/verify/{userid}/{verification}")]
 		public void VerifyUserRegistration (IManosContext ctx, string userid, string verification)
 		{
+			var session = GetSession (ctx) ?? new DroshSession (Guid.NewGuid ().ToString (), null);
 			var user = DataStore.GetUserByVerificationCode (userid, verification);
-			if (user == null)
-				Index (ctx, "Invalid verification code.");
-			else if (user.Status != UserStatus.Pending)
-				Index (ctx, "The user is not either registered or in pending state.");
+			session.User = user;
+			session.Notification = (user == null) ? "Invalid verification code." : (user.Status != UserStatus.Pending) ? "The user is not either registered or in pending state." : null;
+			if (session.Notification != null)
+				ctx.Response.Redirect ("/");
 			else
 				VerifyUserRegistration (ctx, user);
 		}
@@ -204,10 +209,8 @@ namespace drosh
 
 			string sessionId = Guid.NewGuid ().ToString ();
 			var session = new DroshSession (sessionId, user);
+			session.Notification = "You are now registered";
 			SetSession (ctx, session);
-
-			//LoggedHome (ctx, session, "You are now registered");
-			// FIXME: Use notification message
 			ctx.Response.Redirect ("/");
 		}
 
@@ -258,7 +261,8 @@ namespace drosh
 				StartUserUpdate (ctx, session, "Make sure to check required item.");
 			else {
 				DataStore.DeleteUser (session.User.Name);
-				NotLogged (ctx, "Your account is now removed");
+				session.Notification = "Your account is now removed";
+				ctx.Response.Redirect ("/");
 			}
 		}
 
@@ -269,8 +273,11 @@ namespace drosh
 			var user = DataStore.GetUser (name);
 			if (user == null)
 				StartPasswordRecovery (ctx, String.Format ("User '{0}' was not found", name));
-			else
-				Index (ctx, "Your account is temporarily suspended and verification email is sent to you");
+			else {
+				var session = new DroshSession (Guid.NewGuid ().ToString (), null);
+				session.Notification = "Your account is temporarily suspended and verification email is sent to you";
+				ctx.Response.Redirect ("/");
+			}
 		}
 
 		User CreateUserFromForm (IManosContext ctx)
@@ -292,8 +299,10 @@ namespace drosh
 			return u;
 		}
 
-		void LoggedHome (IManosContext ctx, DroshSession session, string notification)
+		void LoggedHome (IManosContext ctx, DroshSession session)
 		{
+			string notification = session.Notification;
+			session.Notification = null;
 			this.RenderSparkView (ctx, "Home.spark", new { Session = session, LoggedUser = session.User, Notification = notification, Builds = DataStore.GetLatestBuildsByUser (session.User.Name, 0, 10), Projects = DataStore.GetProjectsByUser (session.User.Name) });
 			ctx.Response.End ();
 		}
@@ -303,10 +312,11 @@ namespace drosh
 		[Route ("/user/{userid}")]
 		public void StartUserUpdate (IManosContext ctx, string userid, string notification)
 		{
-			var session = GetSession (ctx);
+			var session = GetSession (ctx) ?? new DroshSession (Guid.NewGuid ().ToString (), null);
 			var targetUser = DataStore.GetUser (userid);
 			if (targetUser == null) {
-				Index (ctx, String.Format ("User {0} does not exist", userid));
+				session.Notification = String.Format ("User {0} does not exist", userid);
+				ctx.Response.Redirect ("/");
 				return;
 			}
 
@@ -317,11 +327,12 @@ namespace drosh
 		[Route ("/project/{userid}/{projectname}/{revision}", "/project/{userid}/{projectname}")]
 		public void ProjectDetails (IManosContext ctx, string userid, string projectname, string projectId, string revision, string notification)
 		{
-			var session = GetSession (ctx);
+			var session = GetSession (ctx) ?? new DroshSession (Guid.NewGuid ().ToString (), null);
 			var project = projectname != null ? DataStore.GetProject (userid, projectname) : DataStore.GetProject (projectId);
-			if (project == null)
-				Index (ctx, String.Format ("Project '{0}' was not found. Make sure that the link is correct.", projectId ?? userid + "/" + projectname));
-			else {
+			if (project == null) {
+				session.Notification = String.Format ("Project '{0}' was not found. Make sure that the link is correct.", projectId ?? userid + "/" + projectname);
+				ctx.Response.Redirect ("/");
+			} else {
 				var builds = DataStore.GetLatestBuildsByProject (project.Id, 0, 10);
 				var revs = DataStore.GetRevisions (userid, projectname, 0, 10);
 				this.RenderSparkView (ctx, "Project.spark", new { Session = session, LoggedUser = session == null ? null : session.User, Notification = notification, Project = project, Builds = builds, Revisions = revs});
@@ -371,7 +382,9 @@ namespace drosh
 			var user = session.User;
 			var project = CreateProjectFromForm (session, ctx);
 			DataStore.RegisterProject (user.Name, project);
-			LoggedHome (ctx, session, String.Format ("Registered project '{0}'", project.Name));
+			session.Notification = String.Format ("Registered project '{0}'", project.Name);
+			SetSession (ctx, session);
+			LoggedHome (ctx, session);
 		}
 
 		[Route ("/register/project/edit")]
