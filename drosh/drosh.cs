@@ -266,15 +266,27 @@ namespace drosh
 			return u;
 		}
 
-		// Logged
-
 		void LoggedHome (IManosContext ctx, DroshSession session, string notification)
 		{
 			this.RenderSparkView (ctx, "Home.spark", new { Session = session, LoggedUser = session.User, Notification = notification, Builds = DataStore.GetLatestBuildsByUser (session.User.Name, 0, 10), Projects = DataStore.GetProjectsByUser (session.User.Name) });
 			ctx.Response.End ();
 		}
 		
-		// Project Browse
+		// anonymous accesses
+		
+		[Route ("/user/{userid}")]
+		public void StartUserUpdate (IManosContext ctx, string userid, string notification)
+		{
+			var session = GetSession (ctx);
+			var targetUser = DataStore.GetUser (userid);
+			if (targetUser == null) {
+				Index (ctx, String.Format ("User {0} does not exist", userid));
+				return;
+			}
+
+			this.RenderSparkView ("UserDetails.spark", new { User = targetUser, LoggedUser = session.User, Notification = notification, InvolvedProjects = DataStore.GetProjectsByUser (userid) };
+			ctx.Response.End ();
+		}
 
 		[Route ("/project/{userid}/{projectname}/{revision}", "/project/{userid}/{projectname}")]
 		public void ProjectDetails (IManosContext ctx, string userid, string projectname, string projectId, string revision, string notification)

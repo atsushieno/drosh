@@ -1,0 +1,53 @@
+<use master="base.spark" />
+<use assembly="drosh" />
+<use namespace="drosh" />
+<use namespace="System.Collections.Generic" />
+<use namespace="System.Linq" />
+<viewdata
+  Notification="string"
+  User="User"
+  LoggedUser="User"
+  InvolvedProjects="IEnumerable[[Project]]" />
+<global type="string" ident="string.Empty" />
+
+<content name="body">
+
+<use file="login_status.spark" />
+
+
+<h1>User: ${User.Name}</h1>
+
+<div id="notification" name="notification">
+<!-- notification area -->
+</div>
+
+<!-- import non-editable user details here -->
+
+<test if="LoggedUser.Name == User.Name">
+<p>
+  <a href="/registration/user/edit">manage account</a>
+</p>
+</test>
+
+<div id="projects" name="projects">
+
+<h2>Involved projects</h2>
+
+<table>
+<for each="var project in InvolvedProjects">
+  <tr>
+    <td>
+      <test if="LoggedUser != null && project.Owner == LoggedUser.Name">
+        <img alt="Owner" src="/images/owner.png"/>
+      </test><else>
+        <img alt="Builder" src="/images/non-owner.png"/>
+      </else>
+      <a href="/project/${project.Name}">${project.Name}</a>
+    </td>
+  </tr>
+</for>
+</table>
+
+</div>
+
+</content>
