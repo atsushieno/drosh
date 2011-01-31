@@ -87,7 +87,7 @@ Logged in as ${LoggedUser.Name}<br />
 <test if="Editable">
       <input type="file" id="source-archive" name="source-archive" />
 </test>
-<else>$!{Project.SourceArchiveName}</else>
+<else><input type="hidden" name="source-archive" value="$!{Project.SourceArchiveName}" />$!{Project.SourceArchiveName}</else>
     </td>
   </tr>
 
@@ -95,6 +95,7 @@ Logged in as ${LoggedUser.Name}<br />
     <td>Patches: </td>
     <td>
 <test if="Project != null && Project.Patches != null">
+<div style="${Editable ? 'display: none' : ''}">
 <for each="var patch in Project.Patches">
       <div>
       <!-- patch #${++n_patch} -->
@@ -112,8 +113,10 @@ Logged in as ${LoggedUser.Name}<br />
       To remove patch, just clear patch text.
       </div>
 </for>
+</div>
 </test>
-<test if="Editable">
+
+<div style="${Editable ? 'display: none' : ''}">
       NDK version:
       <input type="checkbox" name="patch-target-ndk-r5" checked="" />r5
       <input type="checkbox" name="patch-target-ndk-crystaxR4b" checked="" />crystax r4b
@@ -126,7 +129,7 @@ Logged in as ${LoggedUser.Name}<br />
       <br />
       <textarea cols="80" rows="5" id="patch-text" name="patch-text"></textarea><br />
       <input type="button" value="TODO: Add more..." />
-</test>
+</div>
     </td>
   </tr>
 
