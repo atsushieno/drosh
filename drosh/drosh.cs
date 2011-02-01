@@ -35,6 +35,13 @@ namespace drosh
 		public string Id { get; set; }
 		public User User { get; set; }
 		public string Notification { get; set; }
+
+		public string PullNotification ()
+		{
+			var ret = Notification;
+			Notification = null;
+			return ret;
+		}
 	}
 
 	public class drosh : ManosApp
@@ -92,12 +99,7 @@ namespace drosh
 		void NotLogged (IManosContext ctx)
 		{
 			var session = GetSession (ctx);
-			string notification = null;
-			if (session != null) {
-				notification = session.Notification;
-				session.Notification = null;
-			}
-Console.WriteLine ("notification: " + notification);
+			string notification = session != null ? session.PullNotification () : null;
 			this.RenderSparkView (ctx, "Index.spark", new { Notification = notification});
 			ctx.Response.End ();
 		}
@@ -136,8 +138,10 @@ Console.WriteLine ("notification: " + notification);
 		// User registration
 
 		[Route ("/register/user/new")]
-		public void StartUserRegistration (IManosContext ctx, string notification)
+		public void StartUserRegistration (IManosContext ctx)
 		{
+			var session = GetSession (ctx);
+			string notification = session != null ? session.PullNotification () : null;
 			this.RenderSparkView (ctx, "ManageUser.spark", new {ManagementMode = UserManagementMode.New, Editable = true, Notification = notification, User = CreateUserFromForm (ctx)});
 			ctx.Response.End ();
 		}
@@ -212,14 +216,14 @@ Console.WriteLine ("notification: " + notification);
 		}
 
 		[Route ("/register/user/edit")]
-		public void StartUserUpdate (IManosContext ctx, string notification)
+		public void StartUserUpdate (IManosContext ctx)
 		{
-			AssertLoggedIn (ctx, (c, session) => StartUserUpdate (c, session, notification));
+			AssertLoggedIn (ctx, (c, session) => StartUserUpdate (c, session));
 		}
 
-		void StartUserUpdate (IManosContext ctx, DroshSession session, string notification)
+		void StartUserUpdate (IManosContext ctx, DroshSession session)
 		{
-			this.RenderSparkView (ctx, "ManageUser.spark", new {Session = session, ManagementMode = UserManagementMode.Update, User = session.User, LoggedUser = session.User, Editable = true, Notification = notification});
+			this.RenderSparkView (ctx, "ManageUser.spark", new {Session = session, ManagementMode = UserManagementMode.Update, User = session.User, LoggedUser = session.User, Editable = true, Notification = session.PullNotification ()});
 			ctx.Response.End ();
 		}
 
@@ -240,7 +244,7 @@ Console.WriteLine ("notification: " + notification);
 		}
 
 		[Route ("/register/user/recovery")]
-		public void StartPasswordRecovery (IManosContext ctx, string notification)
+		public void StartPasswordRecovery (IManosContext ctx)
 		{
 			this.RenderSparkView (ctx, "PasswordRecovery.spark", new {Notification = notification});
 			ctx.Response.End ();
@@ -254,9 +258,10 @@ Console.WriteLine ("notification: " + notification);
 
 		void DeleteUser (IManosContext ctx, DroshSession session)
 		{ 
-			if (ctx.Request.Data ["delete"] == null)
-				StartUserUpdate (ctx, session, "Make sure to check required item.");
-			else {
+			if (ctx.Request.Data ["delete"] == null) {
+				session.Notification = "Make sure to check required item.";
+				StartUserUpdate (ctx, session);
+			} else {
 				DataStore.DeleteUser (session.User.Name);
 				session.User = null;
 				session.Notification = "Your account is now removed";
@@ -269,10 +274,11 @@ Console.WriteLine ("notification: " + notification);
 		{
 			var name = ctx.Request.Data ["userid"];
 			var user = DataStore.GetUser (name);
-			if (user == null)
-				StartPasswordRecovery (ctx, String.Format ("User '{0}' was not found", name));
+			var session = new DroshSession (Guid.NewGuid ().ToString (), null);
+			if (user == null) {
+				session.Notification = String.Format ("User '{0}' was not found", name);
+				Response.Redirect ("/register/user/recovery");
 			else {
-				var session = new DroshSession (Guid.NewGuid ().ToString (), null);
 				session.Notification = "Your account is temporarily suspended and verification email is sent to you";
 				ctx.Response.Redirect ("/");
 			}
@@ -299,16 +305,14 @@ Console.WriteLine ("notification: " + notification);
 
 		void LoggedHome (IManosContext ctx, DroshSession session)
 		{
-			string notification = session.Notification;
-			session.Notification = null;
-			this.RenderSparkView (ctx, "Home.spark", new { Session = session, LoggedUser = session.User, Notification = notification, Builds = DataStore.GetLatestBuildsByUser (session.User.Name, 0, 10), Projects = DataStore.GetProjectsByUser (session.User.Name) });
+			this.RenderSparkView (ctx, "Home.spark", new { Session = session, LoggedUser = session.User, Notification = session.PullNotification (), Builds = DataStore.GetLatestBuildsByUser (session.User.Name, 0, 10), Projects = DataStore.GetProjectsByUser (session.User.Name) });
 			ctx.Response.End ();
 		}
 		
 		// anonymous accesses
 		
 		[Route ("/user/{userid}")]
-		public void StartUserUpdate (IManosContext ctx, string userid, string notification)
+		public void ShowUserDetails (IManosContext ctx, string userid)
 		{
 			var session = GetSession (ctx) ?? new DroshSession (Guid.NewGuid ().ToString (), null);
 			var targetUser = DataStore.GetUser (userid);
@@ -318,7 +322,7 @@ Console.WriteLine ("notification: " + notification);
 				return;
 			}
 
-			this.RenderSparkView (ctx, "UserDetails.spark", new { User = targetUser, LoggedUser = session.User, Notification = notification, InvolvedProjects = DataStore.GetProjectsByUser (userid) });
+			this.RenderSparkView (ctx, "UserDetails.spark", new { User = targetUser, LoggedUser = session.User, Notification = session.PullNotification (), InvolvedProjects = DataStore.GetProjectsByUser (userid) });
 			ctx.Response.End ();
 		}
 
