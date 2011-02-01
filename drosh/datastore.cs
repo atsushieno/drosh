@@ -166,6 +166,12 @@ namespace drosh
 			return Revisions.Where (r => r.Owner == userid && r.Project == projectname).OrderBy (r => r.CreatedTimestamp).Skip (skip).Take (take);
 		}
 
+		public static ProjectRevision GetRevision (string userid, string projectname, string revision)
+		{
+			revision = revision == "Head" ? null : revision;
+			return Revisions.OrderByDescendant (r => r.CreatedTimestamp).FirstOrDefault (r => r.Owner == userid && r.Project == projectname && (revision == null || r.RevisionId == revision));
+		}
+
 		public static IEnumerable<Project> GetProjectsByKeyword (string keyword, int skip, int take)
 		{
 foreach (var p in Projects) Console.Error.WriteLine ("{0}/{1}:{4}:{2} {3}", p.Owner, p.Name, p.Owner.Contains (keyword), p.Name.Contains (keyword), keyword);

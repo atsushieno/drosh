@@ -6,6 +6,7 @@
 <viewdata
   Notification="string"
   Project="Project"
+  ForkOrigin="Project"
   Revisions="IEnumerable[[ProjectRevision]]"
   Builds="IEnumerable[[BuildRecord]]" />
 <global type="string" ident="string.Empty" />
@@ -40,6 +41,9 @@
 
 <table>
   <tr>
+<test if="ForkOrigin != null">
+    <td>Fork Origin: </td><td><a href="/user/${ForkOrigin.Owner}">${ForkOrigin.Owner}/<a href="/project/${ForkOrigin.Owner}/${ForkOrigin.Name}">${ForkOrigin.Name}</a></td>
+</test>
     <td>Dependencies: </td><td>${string.Join (', ', (from dep in Project.Dependencies select dep).ToArray ())}</td>
   </tr><tr>
     <td>Owner: </td><td>${Project.Owner}</td>

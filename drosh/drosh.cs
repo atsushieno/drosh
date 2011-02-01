@@ -330,10 +330,14 @@ namespace drosh
 			ctx.Response.End ();
 		}
 
-		[Route ("/project/{userid}/{projectname}/{revision}", "/project/{userid}/{projectname}")]
-		public void ProjectDetails (IManosContext ctx, string userid, string projectname, string projectId, string revision, string notification)
+		[Route ("/project/{userid}/{projectname}",
+			"/project/{userid}/{projectname}/{revision}",
+			"/project-by-id/{projectId}",
+			"/project-by-id/{projectId}/{revision}")]
+		public void ShowProjectDetails (IManosContext ctx, string userid, string projectname, string projectId, string revision, string notification)
 		{
 			var session = GetSession (ctx) ?? new DroshSession (Guid.NewGuid ().ToString (), null);
+			// FIXME: pull specific revision
 			var project = projectname != null ? DataStore.GetProject (userid, projectname) : DataStore.GetProject (projectId);
 			if (project == null) {
 				session.Notification = String.Format ("Project '{0}' was not found. Make sure that the link is correct.", projectId ?? userid + "/" + projectname);
@@ -341,7 +345,10 @@ namespace drosh
 			} else {
 				var builds = DataStore.GetLatestBuildsByProject (project.Id, 0, 10);
 				var revs = DataStore.GetRevisions (userid, projectname, 0, 10);
-				this.RenderSparkView (ctx, "Project.spark", new { Session = session, LoggedUser = session == null ? null : session.User, Notification = notification, Project = project, Builds = builds, Revisions = revs});
+				// FIXME: better represented as ProjectRevision
+				var forkOrigin = project.ForkOrigin != null ? DataStore.GetProject (project.ForkOrigin) : null;
+
+				this.RenderSparkView (ctx, "Project.spark", new { Session = session, LoggedUser = session == null ? null : session.User, Notification = notification, Project = project, ForkOrigin = forkOrigin, Builds = builds, Revisions = revs});
 
 				ctx.Response.End ();
 			}
@@ -396,6 +403,7 @@ namespace drosh
 
 			var user = session.User;
 			var project = CreateProjectFromForm (session, ctx);
+			project.Id = Guid.NewGuid ().ToString ();
 			DataStore.RegisterProject (user.Name, project);
 			session.Notification = String.Format ("Registered project '{0}'", project.Name);
 			SetSession (ctx, session);
@@ -486,6 +494,43 @@ namespace drosh
 			// FIXME: fill everything else appropriate
 
 			return p;
+		}
+
+		[Route ("/register/project/fork/{srcuser}/{srcproj}/{srcrev}")]
+		public void ForkProject (IManosContext ctx, string srcuser, string srcproj, string srcrev)
+		{
+			AssertLoggedIn (ctx, (c, session) => ForkProject (c, session, srcuser, srcproj, srcrev));
+		}
+
+		void ForkProject (IManosContext ctx, DroshSession session, string srcuser, string srcproj, string srcrev)
+		{
+			var src = DataStore.GetProject (srcuser, srcproj);
+			if (src == null) {
+				session.Notification = String.Format ("Project {0}/{1} could not be retrieved.", srcuser, srcproj);
+				ShowProjectDetails (ctx, srcuser, srcproj, null, srcrev, session.Notification); // FIXME: use Response.Redirect()
+			} else if (src.Owner == session.User.Name) {
+				session.Notification = String.Format ("You cannot fork your own project.", srcuser, srcproj);
+				ShowProjectDetails (ctx, srcuser, srcproj, null, srcrev, session.Notification); // FIXME: use Response.Redirect()
+			} else {
+				var user = session.User;
+				var fork = src.Clone ();
+				fork.Owner = user.Name;
+				// make name unique
+				if (DataStore.GetProject (fork.Owner, fork.Name) != null) {
+					int count = 2;
+					while (DataStore.GetProject (fork.Owner, fork.Name + count) != null)
+						count++;
+					fork.Name += count;
+				}
+				fork.Id = Guid.NewGuid ().ToString ();
+				fork.ForkOrigin = src.Id;
+				// FIXME: reject null srcrev to avoid complication.
+				fork.ForkOriginRevision = srcrev;
+				fork.CreatedTimestamp = DateTime.Now;
+				DataStore.RegisterProject (fork);
+				session.Notification = "Successfully forked";
+				ctx.Response.Redirect ("/register/project/edit/" + fork.Owner "/" + fork.Name);
+			}
 		}
 
 		NDKType GetNDKTarget (IManosContext ctx, string prefix, int count)

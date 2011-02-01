@@ -84,6 +84,8 @@ namespace drosh
 		public string Name { get; set; }
 		public string Description { get; set; }
 		public string PrimaryLink { get; set; }
+		public ProjectReference ForkOrigin { get; set; }
+		public ProjectRevisionReference ForkOriginRevision { get; set; }
 		public UserReference Owner { get; set; }
 		public IList<ProjectReference> Dependencies { get; set; }
 		public IList<UserReference> Builders { get; set; }
