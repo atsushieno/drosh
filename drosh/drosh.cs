@@ -243,13 +243,6 @@ namespace drosh
 			ctx.Response.End ();
 		}
 
-		[Route ("/register/user/recovery")]
-		public void StartPasswordRecovery (IManosContext ctx)
-		{
-			this.RenderSparkView (ctx, "PasswordRecovery.spark", new {Notification = notification});
-			ctx.Response.End ();
-		}
-
 		[Route ("/register/user/delete")]
 		public void DeleteUser (IManosContext ctx)
 		{
@@ -269,6 +262,15 @@ namespace drosh
 			}
 		}
 
+		[Route ("/register/user/recovery")]
+		public void StartPasswordRecovery (IManosContext ctx)
+		{
+			var session = GetSession (ctx);
+			var notification = session != null ? session.PullNotification () : null;
+			this.RenderSparkView (ctx, "PasswordRecovery.spark", new {Notification = notification});
+			ctx.Response.End ();
+		}
+
 		[Route ("/register/user/recovery/execute")]
 		public void ExecutePasswordRecovery (IManosContext ctx)
 		{
@@ -277,9 +279,11 @@ namespace drosh
 			var session = new DroshSession (Guid.NewGuid ().ToString (), null);
 			if (user == null) {
 				session.Notification = String.Format ("User '{0}' was not found", name);
-				Response.Redirect ("/register/user/recovery");
-			else {
+				SetSession (ctx, session);
+				ctx.Response.Redirect ("/register/user/recovery");
+			} else {
 				session.Notification = "Your account is temporarily suspended and verification email is sent to you";
+				SetSession (ctx, session);
 				ctx.Response.Redirect ("/");
 			}
 		}
