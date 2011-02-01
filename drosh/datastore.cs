@@ -121,9 +121,9 @@ namespace drosh
 				Users.Remove (user);
 		}
 
-		public static void RegisterProject (string user, Project project)
+		public static void RegisterProject (Project project)
 		{
-			if (Projects.Any (p => p.Owner == user && p.Name == project.Name))
+			if (Projects.Any (p => p.Owner == project.Owner && p.Name == project.Name))
 				throw new Exception ("duplicate project name");
 			Projects.Add (project);
 		}
@@ -169,7 +169,7 @@ namespace drosh
 		public static ProjectRevision GetRevision (string userid, string projectname, string revision)
 		{
 			revision = revision == "Head" ? null : revision;
-			return Revisions.OrderByDescendant (r => r.CreatedTimestamp).FirstOrDefault (r => r.Owner == userid && r.Project == projectname && (revision == null || r.RevisionId == revision));
+			return Revisions.OrderByDescending (r => r.CreatedTimestamp).FirstOrDefault (r => r.Owner == userid && r.Project == projectname && (revision == null || r.RevisionId == revision));
 		}
 
 		public static IEnumerable<Project> GetProjectsByKeyword (string keyword, int skip, int take)

@@ -37,12 +37,15 @@
 
 <test if="LoggedUser != null && Project.Owner == LoggedUser.Name">
 <p><a href="/register/project/edit/${Project.Owner}/${Project.Name}">Manage Project</a></p>
-</test>
+</test><else if="LoggedUser != null">
+<p><a href="/register/project/fork/${Project.Owner}/${Project.Name}">Fork</a></p>
+</else>
 
 <table>
   <tr>
 <test if="ForkOrigin != null">
     <td>Fork Origin: </td><td><a href="/user/${ForkOrigin.Owner}">${ForkOrigin.Owner}/<a href="/project/${ForkOrigin.Owner}/${ForkOrigin.Name}">${ForkOrigin.Name}</a></td>
+  </tr><tr>
 </test>
     <td>Dependencies: </td><td>${string.Join (', ', (from dep in Project.Dependencies select dep).ToArray ())}</td>
   </tr><tr>

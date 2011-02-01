@@ -330,10 +330,10 @@ namespace drosh
 			ctx.Response.End ();
 		}
 
-		[Route ("/project/{userid}/{projectname}",
-			"/project/{userid}/{projectname}/{revision}",
-			"/project-by-id/{projectId}",
-			"/project-by-id/{projectId}/{revision}")]
+		[Route ("/project/{userid}/{projectname}/{revision}",
+			"/project/{userid}/{projectname}",
+			"/project-by-id/{projectId}/{revision}",
+			"/project-by-id/{projectId}")]
 		public void ShowProjectDetails (IManosContext ctx, string userid, string projectname, string projectId, string revision, string notification)
 		{
 			var session = GetSession (ctx) ?? new DroshSession (Guid.NewGuid ().ToString (), null);
@@ -403,8 +403,9 @@ namespace drosh
 
 			var user = session.User;
 			var project = CreateProjectFromForm (session, ctx);
+			project.Owner = user.Name;
 			project.Id = Guid.NewGuid ().ToString ();
-			DataStore.RegisterProject (user.Name, project);
+			DataStore.RegisterProject (project);
 			session.Notification = String.Format ("Registered project '{0}'", project.Name);
 			SetSession (ctx, session);
 			LoggedHome (ctx, session);
@@ -496,7 +497,8 @@ namespace drosh
 			return p;
 		}
 
-		[Route ("/register/project/fork/{srcuser}/{srcproj}/{srcrev}")]
+		[Route ("/register/project/fork/{srcuser}/{srcproj}/{srcrev}",
+			"/register/project/fork/{srcuser}/{srcproj}")]
 		public void ForkProject (IManosContext ctx, string srcuser, string srcproj, string srcrev)
 		{
 			AssertLoggedIn (ctx, (c, session) => ForkProject (c, session, srcuser, srcproj, srcrev));
@@ -526,10 +528,10 @@ namespace drosh
 				fork.ForkOrigin = src.Id;
 				// FIXME: reject null srcrev to avoid complication.
 				fork.ForkOriginRevision = srcrev;
-				fork.CreatedTimestamp = DateTime.Now;
+				fork.RegisteredTimestamp = DateTime.Now;
 				DataStore.RegisterProject (fork);
 				session.Notification = "Successfully forked";
-				ctx.Response.Redirect ("/register/project/edit/" + fork.Owner "/" + fork.Name);
+				ctx.Response.Redirect ("/register/project/edit/" + fork.Owner + "/" + fork.Name);
 			}
 		}
 

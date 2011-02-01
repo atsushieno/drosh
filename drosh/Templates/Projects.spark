@@ -25,7 +25,7 @@
 <for each="var project in Projects">
   <li>
     <test if="LoggedUser != null && project.Owner == LoggedUser.Name">
-      <img alt="Owner" src="/images/owner.png"/>
+      <img alt="owner" src="/images/owner.png" />
     </test>
     <a href="/user/${project.Owner}">${project.Owner}</a>/<a href="/project/${project.Owner}/${project.Name}">${project.Name}</a>
   </li>
