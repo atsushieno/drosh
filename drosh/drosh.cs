@@ -46,7 +46,8 @@ namespace drosh
 
 	public class drosh : ManosApp
 	{
-		public static readonly DownloadTopdir = Path.Cobmbine (Path.Combine (Path.GetFullPath ("."), ".."), "download");
+		static readonly int id_prefix_length = Guid.NewGuid ().ToString ().Length;
+		public static readonly string DownloadTopdir = Path.GetFullPath ("pub");
 
 		public drosh ()
 		{
@@ -206,7 +207,7 @@ namespace drosh
 		{
 			user.Status = UserStatus.Active;
 			DataStore.UpdateUser (user);
-			string path = "../house/var/drosh/pub/user/" + user.Verification;
+			string path = Path.Combine (DownloadTopdir, user.Name);
 			if (!Directory.Exists (path))
 				Directory.CreateDirectory (path);
 
@@ -317,12 +318,13 @@ namespace drosh
 		
 		// anonymous accesses
 		
-		[Route ("/download/{filename}"]
+		[Route ("/download/{filename}")]
 		public void DownloadFile (IManosContext ctx, string filename)
 		{
 			var path = Path.Combine (DownloadTopdir, filename);
 			if (File.Exists (path)) {
 				ctx.Response.Headers.SetNormalizedHeader ("Content-Type", ManosMimeTypes.GetMimeType (path));
+				ctx.Response.Headers.SetNormalizedHeader ("Content-Disposition", "attachment;filename=" + filename.Substring (filename.LastIndexOf ('/') + 1).Substring (id_prefix_length + 1));
 				ctx.Response.SendFile (path);
 			} else
 				ctx.Response.StatusCode = 404;
@@ -419,7 +421,7 @@ namespace drosh
 			var project = CreateProjectFromForm (session, ctx);
 			project.Owner = user.Name;
 			project.Id = Guid.NewGuid ().ToString ();
-			string newname = Guid.NewGuid () + "_" project.LocalArchiveName.Substring (id_prefix_length);
+			string newname = Path.Combine (user.Name, Guid.NewGuid () + "_" + project.LocalArchiveName.Substring (id_prefix_length));
 			File.Move (Path.Combine (DownloadTopdir, project.LocalArchiveName), Path.Combine (DownloadTopdir, newname));
 			project.LocalArchiveName = newname;
 			DataStore.RegisterProject (project);
@@ -511,10 +513,10 @@ namespace drosh
 
 			// FIXME: fill everything else appropriate
 
-			var filename = ctx.Request.Data ["source-archive"]
-			if (filename != null) {
-				p.PublicArchiveName = filename;
-				p.LocalArchiveName = SaveFileOnServer (p.Id, ctx.Request.Files [filename]);
+			var file = ctx.Request.Files ["source-archive"];
+			if (file != null) {
+				p.PublicArchiveName = file.Name;
+				p.LocalArchiveName = SaveFileOnServer (p.Owner, p.Id, file);
 			}
 
 			return p;
@@ -558,11 +560,12 @@ namespace drosh
 			}
 		}
 
-		void SaveFileOnServer (string id, UploadedFile file)
+		string SaveFileOnServer (string user, string id, UploadedFile file)
 		{
 			string uniqueName = id + "_" + file.Name;
-			using (var fs = File.Create (Path.Combine (DownloadTopdir, uniqueName))
+			using (var fs = File.Create (Path.Combine (DownloadTopdir, "user", user, uniqueName)))
 				file.Contents.CopyTo (fs);
+			return uniqueName;
 		}
 
 		NDKType GetNDKTarget (IManosContext ctx, string prefix, int count)

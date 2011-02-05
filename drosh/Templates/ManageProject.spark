@@ -37,9 +37,9 @@ Logged in as ${LoggedUser.Name}<br />
 <test if="ManagementMode == ProjectManagementMode.Confirm">
   <form action="/register/project/register" method="POST">
 </test><else if="ManagementMode == ProjectManagementMode.New">
-  <form action="/register/project/confirm" method="POST">
+  <form action="/register/project/confirm" method="POST" enctype="multipart/form-data">
 </else><else>
-  <form action="/register/project/update" method="POST">
+  <form action="/register/project/update" method="POST"  enctype="multipart/form-data">
 </else>
 
 <table>
