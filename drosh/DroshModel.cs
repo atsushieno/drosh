@@ -90,7 +90,8 @@ namespace drosh
 		public IList<ProjectReference> Dependencies { get; set; }
 		public IList<UserReference> Builders { get; set; }
 		public BuildType BuildType { get; set; }
-		public string SourceArchiveName { get; set; }
+		public string PublicArchiveName { get; set; }
+		public string LocalArchiveName { get; set; }
 		public IList<Patch> Patches { get; set; }
 		public IList<Script> Scripts { get; set; }
 		public NDKType TargetNDKs { get; set; }

@@ -95,7 +95,7 @@ Logged in as ${LoggedUser.Name}<br />
 <test if="Editable">
       <input type="file" id="source-archive" name="source-archive" />
 </test>
-<else><input type="hidden" name="source-archive" value="$!{Project.SourceArchiveName}" />$!{Project.SourceArchiveName}</else>
+<else><input type="hidden" name="source-archive" value="$!{Project.PublicArchiveName}" />$!{Project.PublicArchiveName}</else>
     </td>
   </tr>
 

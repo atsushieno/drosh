@@ -63,7 +63,7 @@
   </tr><tr>
     <td>Build Type: </td><td>${Project.BuildType}</td>
   </tr><tr>
-    <td>Source: </td><td><a href="/download/${Project.SourceArchiveName}">${Project.SourceArchiveName}</td>
+    <td>Source: </td><td><a href="/download/${Project.PublicArchiveName}">${Project.PublicArchiveName}</td>
   </tr><tr>
     <td>Patches: </td><td>
 <for each="var patch in Project.Patches">

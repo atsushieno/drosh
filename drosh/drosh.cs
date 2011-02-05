@@ -46,6 +46,8 @@ namespace drosh
 
 	public class drosh : ManosApp
 	{
+		public static readonly DownloadTopdir = Path.Cobmbine (Path.Combine (Path.GetFullPath ("."), ".."), "download");
+
 		public drosh ()
 		{
 			Route ("/default.css", new StaticContentModule ());
@@ -315,6 +317,18 @@ namespace drosh
 		
 		// anonymous accesses
 		
+		[Route ("/download/{filename}"]
+		public void DownloadFile (IManosContext ctx, string filename)
+		{
+			var path = Path.Combine (DownloadTopdir, filename);
+			if (File.Exists (path)) {
+				ctx.Response.Headers.SetNormalizedHeader ("Content-Type", ManosMimeTypes.GetMimeType (path));
+				ctx.Response.SendFile (path);
+			} else
+				ctx.Response.StatusCode = 404;
+			ctx.Response.End ();
+		}
+		
 		[Route ("/user/{userid}")]
 		public void ShowUserDetails (IManosContext ctx, string userid)
 		{
@@ -405,6 +419,9 @@ namespace drosh
 			var project = CreateProjectFromForm (session, ctx);
 			project.Owner = user.Name;
 			project.Id = Guid.NewGuid ().ToString ();
+			string newname = Guid.NewGuid () + "_" project.LocalArchiveName.Substring (id_prefix_length);
+			File.Move (Path.Combine (DownloadTopdir, project.LocalArchiveName), Path.Combine (DownloadTopdir, newname));
+			project.LocalArchiveName = newname;
 			DataStore.RegisterProject (project);
 			session.Notification = String.Format ("Registered project '{0}'", project.Name);
 			SetSession (ctx, session);
@@ -494,6 +511,12 @@ namespace drosh
 
 			// FIXME: fill everything else appropriate
 
+			var filename = ctx.Request.Data ["source-archive"]
+			if (filename != null) {
+				p.PublicArchiveName = filename;
+				p.LocalArchiveName = SaveFileOnServer (p.Id, ctx.Request.Files [filename]);
+			}
+
 			return p;
 		}
 
@@ -533,6 +556,13 @@ namespace drosh
 				session.Notification = "Successfully forked";
 				ctx.Response.Redirect ("/register/project/edit/" + fork.Owner + "/" + fork.Name);
 			}
+		}
+
+		void SaveFileOnServer (string id, UploadedFile file)
+		{
+			string uniqueName = id + "_" + file.Name;
+			using (var fs = File.Create (Path.Combine (DownloadTopdir, uniqueName))
+				file.Contents.CopyTo (fs);
 		}
 
 		NDKType GetNDKTarget (IManosContext ctx, string prefix, int count)
