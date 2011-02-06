@@ -159,6 +159,8 @@ namespace drosh
 
 			// Now that build and install is done successfully, pack the results into an archive.
 
+			// FIXME: handle filesbypkg
+
 			string destArc = Path.Combine (buildDir, build.ProjectName + "-bin.tar.bz2");
 			var pkpsi = new ProcessStartInfo () { FileName = "tar", Arguments = String.Format ("jcf {0} {1}/*", destArc, resultDir) };
 			var pkproc = Process.Start (pkpsi);

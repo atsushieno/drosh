@@ -114,7 +114,7 @@
 <for each="var build in Builds">
 <tr id="build-${build.BuildId}" name="build-${build.BuildId}">
   <td style="color: ${build.Status == BuildStatus.Failure ? 'red' : build.Status == BuildStatus.Success ? 'green' : build.Status == BuildStatus.Ongoing ? 'yellow' : null}">${build.Status}</td>
-  <td>${build.BuildRegisteredTimestamp.ToString ("s")}</td>
+  <td>${build.BuildRecordedTimestamp.ToString ("s")}</td>
   <td>${build.ProjectRevision.Substring (0, 8)}...</td>
   <td>${build.TargetNDK}</td>
   <td>${build.TargetArch}</td>
