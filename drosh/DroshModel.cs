@@ -124,7 +124,7 @@ namespace drosh
 	// FIXME: now I doubt if we want this record.
 	public class ProjectRevision
 	{
-		public UserReference Owner { get; set; }
+		//public UserReference Owner { get; set; }
 		public ProjectReference Project { get; set; }
 		public string RevisionId { get; set; }
 		public DateTime CreatedTimestamp { get; set; }

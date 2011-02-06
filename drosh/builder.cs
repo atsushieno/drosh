@@ -13,10 +13,10 @@ namespace drosh
 {
 	public class Builder
 	{
-		NDKType [] target_ndks = new NDKType [] { NDKType.R5, NDKType.CrystaxR4b, NDKType.R4b };
-		ArchType [] target_archs = new ArchType [] { ArchType.Arm, ArchType.ArmV7a, ArchType.X86 };
+		static NDKType [] target_ndks = new NDKType [] { NDKType.R5, NDKType.CrystaxR4b, NDKType.R4b };
+		static ArchType [] target_archs = new ArchType [] { ArchType.Arm, ArchType.ArmV7a, ArchType.X86 };
 
-		public void QueueBuild (ProjectRevision rev, UserReference user)
+		public static void QueueBuild (ProjectRevision rev, UserReference user)
 		{
 			if (rev == null)
 				throw new ArgumentNullException ("rev");
@@ -24,7 +24,9 @@ namespace drosh
 			var project = DataStore.GetProjectWithRevision (rev.Project, rev.RevisionId);
 			if (project == null)
 				throw new Exception (String.Format ("Project {0} for ProjectRevision {1} was not found", rev.Project, rev.RevisionId));
-			
+			if (!project.Builders.Contains (user))
+				throw new Exception (String.Format ("User {0} is not granted to build this project", user));
+
 			foreach (var ndkType in target_ndks) {
 				if ((project.TargetNDKs & ndkType) == 0)
 					continue;
@@ -48,7 +50,7 @@ namespace drosh
 			}
 		}
 
-		public void ProcessBuilds ()
+		public static void ProcessBuilds ()
 		{
 			BuildRecord build;
 			DateTime lastBuild = DateTime.MinValue;
@@ -65,7 +67,7 @@ namespace drosh
 			}
 		}
 
-		public void ProcessBuild (BuildRecord build)
+		public static void ProcessBuild (BuildRecord build)
 		{
 /*
     * It creates a dist directory for each build(-id). Name it as [topdir]. The directory layout looks like:
@@ -174,12 +176,12 @@ namespace drosh
 
 		static readonly ScriptStep [] build_steps = new ScriptStep [] { ScriptStep.Build, ScriptStep.PreInstall, ScriptStep.Install, ScriptStep.PostInstall };
 
-		string GetDefaultScript (ScriptStep step, NDKType ndk)
+		static string GetDefaultScript (ScriptStep step, NDKType ndk)
 		{
 			return File.ReadAllText (Path.Combine (Drosh.BuildTopdir, String.Format ("__default_script_{0}_{1}.txt", step, ndk)));
 		}
 
-		void Unpack (string archive, string destDir)
+		static void Unpack (string archive, string destDir)
 		{
 			Process proc;
 			var psi = new ProcessStartInfo () { UseShellExecute = true, RedirectStandardOutput = true, RedirectStandardError = true };

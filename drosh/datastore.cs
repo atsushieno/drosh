@@ -159,6 +159,7 @@ namespace drosh
 			if (Projects.Any (p => p.Owner == project.Owner && p.Name == project.Name))
 				throw new Exception ("duplicate project name");
 			Projects.Add (project);
+			AddRevisionForProject (project);
 		}
 
 		public static Project GetProject (string user, string name)
@@ -177,6 +178,13 @@ namespace drosh
 				throw new Exception ("The project does not exist");
 			Projects.Remove (GetProject (user, project.Name));
 			Projects.Add (project);
+			AddRevisionForProject (project);
+		}
+
+		static void AddRevisionForProject (Project project)
+		{
+			var rev= new ProjectRevision () { Project = project.Id, RevisionId = Guid.NewGuid ().ToString (), CreatedTimestamp = project.LastUpdatedTimestamp };
+			Revisions.Add (rev);
 		}
 
 		public static IEnumerable<Project> GetProjectsByUser (string user)
@@ -194,10 +202,10 @@ namespace drosh
 			return Builds.Where (b => b.Project == projectId).OrderBy (b => b.BuildStartedTimestamp).Skip (skip).Take (take);
 		}
 
-		public static ProjectRevision GetRevision (string userid, string projectname, string revision)
+		public static ProjectRevision GetRevision (ProjectReference projectId, string revision)
 		{
 			revision = revision == "Head" ? null : revision;
-			return Revisions.OrderByDescending (r => r.CreatedTimestamp).FirstOrDefault (r => r.Owner == userid && r.Project == projectname && (revision == null || r.RevisionId == revision));
+			return Revisions.OrderByDescending (r => r.CreatedTimestamp).FirstOrDefault (r => r.Project == projectId && (revision == null || r.RevisionId == revision));
 		}
 
 		public static IEnumerable<Project> GetProjectsByKeyword (string keyword, int skip, int take)
@@ -207,9 +215,9 @@ namespace drosh
 
 		// Revisions related
 
-		public static IEnumerable<ProjectRevision> GetRevisions (string userid, string projectname, int skip, int take)
+		public static IEnumerable<ProjectRevision> GetRevisions (ProjectReference projectId, int skip, int take)
 		{
-			return Revisions.Where (r => r.Owner == userid && r.Project == projectname).OrderBy (r => r.CreatedTimestamp).Skip (skip).Take (take);
+			return Revisions.Where (r => r.Project == projectId).OrderBy (r => r.CreatedTimestamp).Skip (skip).Take (take);
 		}
 
 		public static void RegisterRevision (ProjectRevision revision)

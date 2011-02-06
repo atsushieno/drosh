@@ -362,7 +362,7 @@ namespace drosh
 				ctx.Response.Redirect ("/");
 			} else {
 				var builds = DataStore.GetLatestBuildsByProject (project.Id, 0, 10);
-				var revs = DataStore.GetRevisions (userid, projectname, 0, 10);
+				var revs = DataStore.GetRevisions (project.Id, 0, 10);
 				// FIXME: better represented as ProjectRevision
 				var forkOrigin = project.ForkOrigin != null ? DataStore.GetProject (project.ForkOrigin) : null;
 
@@ -559,6 +559,35 @@ namespace drosh
 				DataStore.RegisterProject (fork);
 				session.Notification = "Successfully forked";
 				ctx.Response.Redirect ("/register/project/edit/" + fork.Owner + "/" + fork.Name);
+			}
+		}
+
+		[Route ("/build/kick/{user}/{project}/{revision}",
+			"/build/kick/{user}/{project}")]
+		public void KickBuild (IManosContext ctx, string user, string project, string revision)
+		{
+			AssertLoggedIn (ctx, (c, session) => KickBuild (c, session, user, project, revision));
+		}
+
+		void KickBuild (IManosContext ctx, DroshSession session, string user, string project, string revision)
+		{
+			var proj = DataStore.GetProject (user, project);
+			var rev = DataStore.GetRevision (proj.Id, revision);
+			if (proj == null || rev == null) {
+				session.Notification = String.Format ("Project {0}/{1}/{2} could not be retrieved.", user, project, revision);
+				ShowProjectDetails (ctx, user, project, null, revision, session.Notification); // FIXME: use Response.Redirect()
+			} else if (!proj.Builders.Contains (session.User.Name)) {
+				session.Notification = String.Format ("You cannot build this project.", user, project);
+				ShowProjectDetails (ctx, user, project, null, revision, session.Notification); // FIXME: use Response.Redirect()
+			} else {
+				Builder.QueueBuild (rev, session.User.Name);
+				if (proj.Owner == session.User.Name) {
+					session.Notification = "A new build has started.";
+					ctx.Response.Redirect (String.Format ("/register/project/edit/{0}/{1}", proj.Owner, proj.Name));
+				} else {
+					session.Notification = "A new build has started.";
+					ShowProjectDetails (ctx, user, project, null, revision, session.Notification); // FIXME: use Response.Redirect()
+				}
 			}
 		}
 

@@ -36,11 +36,16 @@
 
 <h2>Details</h2>
 
+<p>
 <test if="LoggedUser != null && Project.Owner == LoggedUser.Name">
-<p><a href="/register/project/edit/${Project.Owner}/${Project.Name}">Manage Project</a></p>
+<a href="/register/project/edit/${Project.Owner}/${Project.Name}">Manage Project</a>
 </test><else if="LoggedUser != null">
-<p><a href="/register/project/fork/${Project.Owner}/${Project.Name}">Fork</a></p>
+<a href="/register/project/fork/${Project.Owner}/${Project.Name}">Fork</a>
 </else>
+<test if="LoggedUser != null && Project.Builder.Contains (LoggedUser.Name)">
+<a href="/build/kick/${Project.Owner}/${Project.User}">Start Build</a>
+</test>
+</p>
 
 <table>
   <tr>
