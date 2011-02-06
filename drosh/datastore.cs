@@ -1,13 +1,46 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using ServiceStack.Redis;
 
+using ProjectReference = System.String; // Project.Id
+using RevisionReference = System.String; // Revision.RevisionId
+
 namespace drosh
 {
+	public class Drosh
+	{
+		static readonly string appbase = typeof (Drosh).Assembly.Location;
+		public static readonly string DownloadTopdir, BuildTopdir, AndroidNdkR5, AndroidNdkR4, AndroidNdkCrystaxR4;
+
+		static Drosh ()
+		{
+			DownloadTopdir = Path.Combine (appbase, "pub");
+			BuildTopdir = Path.Combine (appbase, "builds");
+			AndroidNdkR5 = Path.Combine (appbase, "ndk-r5");
+			AndroidNdkCrystaxR4 = Path.Combine (appbase, "ndk-crystax-r4");
+			AndroidNdkR4 = Path.Combine (appbase, "ndk-r4");
+		}
+
+		public static string GetAndroidRoot (NDKType type)
+		{
+			switch (type) {
+			case NDKType.R5:
+				return AndroidNdkR5;
+			case NDKType.CrystaxR4b:
+				return AndroidNdkCrystaxR4;
+			case NDKType.R4b:
+				return AndroidNdkR4;
+			default:
+				throw new ArgumentOutOfRangeException ("type");
+			}
+		}
+	}
+
 	public class DataStore
 	{
 		static DataStore ()
@@ -161,11 +194,6 @@ namespace drosh
 			return Builds.Where (b => b.Project == projectId).OrderBy (b => b.BuildStartedTimestamp).Skip (skip).Take (take);
 		}
 
-		public static IEnumerable<ProjectRevision> GetRevisions (string userid, string projectname, int skip, int take)
-		{
-			return Revisions.Where (r => r.Owner == userid && r.Project == projectname).OrderBy (r => r.CreatedTimestamp).Skip (skip).Take (take);
-		}
-
 		public static ProjectRevision GetRevision (string userid, string projectname, string revision)
 		{
 			revision = revision == "Head" ? null : revision;
@@ -174,8 +202,49 @@ namespace drosh
 
 		public static IEnumerable<Project> GetProjectsByKeyword (string keyword, int skip, int take)
 		{
-foreach (var p in Projects) Console.Error.WriteLine ("{0}/{1}:{4}:{2} {3}", p.Owner, p.Name, p.Owner.Contains (keyword), p.Name.Contains (keyword), keyword);
 			return Projects.Where (p => p.Name.Contains (keyword) || p.Owner.Contains (keyword)).Skip (skip).Take (take);
+		}
+
+		// Revisions related
+
+		public static IEnumerable<ProjectRevision> GetRevisions (string userid, string projectname, int skip, int take)
+		{
+			return Revisions.Where (r => r.Owner == userid && r.Project == projectname).OrderBy (r => r.CreatedTimestamp).Skip (skip).Take (take);
+		}
+
+		public static void RegisterRevision (ProjectRevision revision)
+		{
+			// FIXME: git commit here?
+			Revisions.Add (revision);
+		}
+
+		public static Project GetProjectWithRevision (ProjectReference project, RevisionReference revision)
+		{
+			// FIXME: make use of revision parameter
+			return GetProject (project);
+		}
+
+		// Build related
+
+		public static BuildRecord GetBuild (string buildId)
+		{
+			return Builds.First (b => b.BuildId == buildId);
+		}
+
+		public static BuildRecord GetLatestBuild (Project project, ArchType arch)
+		{
+			return (from b in Builds where b.Project == project.Name && b.TargetArch == arch && b.Status == BuildStatus.Success orderby b.BuildStartedTimestamp select b).FirstOrDefault ();
+		}
+
+		public static void RegisterBuildRecord (BuildRecord build)
+		{
+			Builds.Add (build);
+		}
+
+		public static void UpdateBuildRecord (BuildRecord build)
+		{
+			Builds.Remove (GetBuild (build.BuildId));
+			Builds.Add (build);
 		}
 	}
 }

@@ -8,7 +8,8 @@
   Project="Project"
   ForkOrigin="Project"
   Revisions="IEnumerable[[ProjectRevision]]"
-  Builds="IEnumerable[[BuildRecord]]" />
+  Builds="IEnumerable[[BuildRecord]]"
+  DownloadableBuilds="IEnumerable[[BuildRecord]]" />
 <global type="string" ident="string.Empty" />
 
 <content name="body">
@@ -57,8 +58,6 @@
   </tr><tr>
     <td>Target Arch: </td><td>${Project.TargetArchs}</td>
   </tr><tr>
-    <td>Download</td><td><a href="/download/${Project.ResultArchiveName}">${Project.ResultArchiveName}</a></td>
-  </tr><tr>
     <td>Project WebSite</td><td><a href="${Project.PrimaryLink}">${Project.PrimaryLink}</a></td>
   </tr><tr>
     <td>Build Type: </td><td>${Project.BuildType}</td>
@@ -87,6 +86,18 @@
 
 </div>
 
+
+<!-- list of downloads (by target arch) -->
+<div id="download-archives">
+
+<table>
+  <tr><th>Target Arch</th><th>Download Link</th></tr>
+<for each="var build in DownloadableBuilds">
+  <tr>
+    <td>${build.TargetArch}</td><td><a href="/download/${build.LocalResultArchive}">${build.PublicResultArchive}</a></td>
+  </tr>
+</for>
+</table>
 
 <!-- list of builds -->
 <div id="recent-builds" name="recent-builds">

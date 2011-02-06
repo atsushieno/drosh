@@ -121,13 +121,13 @@ namespace drosh
 		}
 	}
 
+	// FIXME: now I doubt if we want this record.
 	public class ProjectRevision
 	{
 		public UserReference Owner { get; set; }
 		public ProjectReference Project { get; set; }
 		public string RevisionId { get; set; }
 		public DateTime CreatedTimestamp { get; set; }
-		public string OutputArchiveName { get; set; }
 	}
 
 	public class ProjectSubscription // project builder users
@@ -173,9 +173,13 @@ namespace drosh
 		public NDKType TargetNDK { get; set; }
 		public ArchType TargetArch { get; set; }
 		public UserReference Builder { get; set; }
+		public DateTime BuildRecordedTimestamp { get; set; }
 		public DateTime BuildStartedTimestamp { get; set; }
+		public DateTime BuildFinishedTimestamp { get; set; }
 		public BuildStatus Status { get; set; }
 		public string Log { get; set; }
+		public string PublicResultArchive { get; set; }
+		public string LocalResultArchive { get; set; }
 	}
 }
 

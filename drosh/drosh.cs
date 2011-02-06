@@ -44,12 +44,14 @@ namespace drosh
 		}
 	}
 
-	public class drosh : ManosApp
+	public class DroshWeb : ManosApp
 	{
 		static readonly int id_prefix_length = Guid.NewGuid ().ToString ().Length;
-		public static readonly string DownloadTopdir = Path.GetFullPath ("pub");
+		public static string DownloadTopdir {
+			get { return Drosh.DownloadTopdir; }
+		}
 
-		public drosh ()
+		public DroshWeb ()
 		{
 			Route ("/default.css", new StaticContentModule ());
 			Route ("/images/", new StaticContentModule ());
