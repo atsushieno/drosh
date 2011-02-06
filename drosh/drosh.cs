@@ -10,6 +10,14 @@ using Manos.Spark;
 
 namespace drosh
 {
+	static class Extensions
+	{
+		public static V Get<K,V> (this Dictionary<K,V> dic, K key)
+		{
+			return dic.ContainsKey (key) ? dic [key] : default (V);
+		}
+	}
+
 	public enum UserManagementMode
 	{
 		New,
@@ -46,6 +54,7 @@ namespace drosh
 
 	public class DroshWeb : ManosApp
 	{
+		static ArchType [] target_archs = new ArchType [] { ArchType.Arm, ArchType.ArmV7a, ArchType.X86 };
 		static readonly int id_prefix_length = Guid.NewGuid ().ToString ().Length;
 		public static string DownloadTopdir {
 			get { return Drosh.DownloadTopdir; }
@@ -363,10 +372,16 @@ namespace drosh
 			} else {
 				var builds = DataStore.GetLatestBuildsByProject (project.Id, 0, 10);
 				var revs = DataStore.GetRevisions (project.Id, 0, 10);
+				var dlbuilds = new List<BuildRecord> ();
+				BuildRecord dlbuild = null;
+				foreach (var arch in target_archs)
+					if ((dlbuild = DataStore.GetLatestBuild (project, arch)) != null)
+						dlbuilds.Add (dlbuild);
+
 				// FIXME: better represented as ProjectRevision
 				var forkOrigin = project.ForkOrigin != null ? DataStore.GetProject (project.ForkOrigin) : null;
 
-				this.RenderSparkView (ctx, "Project.spark", new { Session = session, LoggedUser = session == null ? null : session.User, Notification = notification, Project = project, ForkOrigin = forkOrigin, Builds = builds, Revisions = revs});
+				this.RenderSparkView (ctx, "Project.spark", new { Session = session, LoggedUser = session == null ? null : session.User, Notification = notification, Project = project, ForkOrigin = forkOrigin, Builds = builds, DownloadableBuilds = dlbuilds, Revisions = revs});
 
 				ctx.Response.End ();
 			}
@@ -515,7 +530,7 @@ namespace drosh
 
 			// FIXME: fill everything else appropriate
 
-			var file = ctx.Request.Files ["source-archive"];
+			var file = ctx.Request.Files.Get ("source-archive");
 			if (file != null) {
 				p.PublicArchiveName = file.Name;
 				p.LocalArchiveName = SaveFileOnServer (p.Owner, p.Id, file);
@@ -572,11 +587,12 @@ namespace drosh
 		void KickBuild (IManosContext ctx, DroshSession session, string user, string project, string revision)
 		{
 			var proj = DataStore.GetProject (user, project);
+foreach (var revv in DataStore.Revisions) Console.WriteLine ("!! {0} {1}", revv.Project, revv.RevisionId);
 			var rev = DataStore.GetRevision (proj.Id, revision);
 			if (proj == null || rev == null) {
 				session.Notification = String.Format ("Project {0}/{1}/{2} could not be retrieved.", user, project, revision);
 				ShowProjectDetails (ctx, user, project, null, revision, session.Notification); // FIXME: use Response.Redirect()
-			} else if (!proj.Builders.Contains (session.User.Name)) {
+			} else if (proj.Owner != session.User.Name && !proj.Builders.Contains (session.User.Name)) {
 				session.Notification = String.Format ("You cannot build this project.", user, project);
 				ShowProjectDetails (ctx, user, project, null, revision, session.Notification); // FIXME: use Response.Redirect()
 			} else {

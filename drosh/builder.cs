@@ -24,7 +24,7 @@ namespace drosh
 			var project = DataStore.GetProjectWithRevision (rev.Project, rev.RevisionId);
 			if (project == null)
 				throw new Exception (String.Format ("Project {0} for ProjectRevision {1} was not found", rev.Project, rev.RevisionId));
-			if (!project.Builders.Contains (user))
+			if (project.Owner != user && !project.Builders.Contains (user))
 				throw new Exception (String.Format ("User {0} is not granted to build this project", user));
 
 			foreach (var ndkType in target_ndks) {
