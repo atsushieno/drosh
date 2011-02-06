@@ -333,6 +333,7 @@ namespace drosh
 		public void DownloadFile (IManosContext ctx, string filename)
 		{
 			var path = Path.Combine (DownloadTopdir, filename);
+
 			if (File.Exists (path)) {
 				ctx.Response.Headers.SetNormalizedHeader ("Content-Type", ManosMimeTypes.GetMimeType (path));
 				ctx.Response.Headers.SetNormalizedHeader ("Content-Disposition", "attachment;filename=" + filename.Substring (filename.LastIndexOf ('/') + 1).Substring (id_prefix_length + 1));
