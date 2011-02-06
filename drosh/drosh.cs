@@ -370,8 +370,8 @@ namespace drosh
 				session.Notification = String.Format ("Project '{0}' was not found. Make sure that the link is correct.", projectId ?? userid + "/" + projectname);
 				ctx.Response.Redirect ("/");
 			} else {
-				var builds = DataStore.GetLatestBuildsByProject (project.Id, 0, 10);
-				var revs = DataStore.GetRevisions (project.Id, 0, 10);
+				var builds = DataStore.GetLatestBuildsByProject (project.Owner, project.Name, 0, 10);
+				var revs = DataStore.GetRevisions (project.Owner, project.Name, 0, 10);
 				var dlbuilds = new List<BuildRecord> ();
 				BuildRecord dlbuild = null;
 				foreach (var arch in target_archs)
@@ -587,8 +587,8 @@ namespace drosh
 		void KickBuild (IManosContext ctx, DroshSession session, string user, string project, string revision)
 		{
 			var proj = DataStore.GetProject (user, project);
-foreach (var revv in DataStore.Revisions) Console.WriteLine ("!! {0} {1}", revv.Project, revv.RevisionId);
-			var rev = DataStore.GetRevision (proj.Id, revision);
+foreach (var revv in DataStore.Revisions) Console.WriteLine ("!! {0} {1} {2}", revv.ProjectOwner, revv.ProjectName, revv.RevisionId);
+			var rev = DataStore.GetRevision (proj.Owner, proj.Name, revision);
 			if (proj == null || rev == null) {
 				session.Notification = String.Format ("Project {0}/{1}/{2} could not be retrieved.", user, project, revision);
 				ShowProjectDetails (ctx, user, project, null, revision, session.Notification); // FIXME: use Response.Redirect()

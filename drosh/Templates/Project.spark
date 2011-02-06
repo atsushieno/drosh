@@ -114,11 +114,11 @@
 <for each="var build in Builds">
 <tr id="build-${build.BuildId}" name="build-${build.BuildId}">
   <td style="color: ${build.Status == BuildStatus.Failure ? 'red' : build.Status == BuildStatus.Success ? 'green' : build.Status == BuildStatus.Ongoing ? 'yellow' : null}">${build.Status}</td>
-  <td>${build.BuildStartedTimestamp}</td>
-  <td>${build.ProjectRevision}</td>
+  <td>${build.BuildRegisteredTimestamp.ToString ("s")}</td>
+  <td>${build.ProjectRevision.Substring (0, 8)}...</td>
   <td>${build.TargetNDK}</td>
   <td>${build.TargetArch}</td>
-  <td>${build.Builder}</td><!-- TODO: show link? -->
+  <td><a href="/user/${build.Builder}">${build.Builder}</td>
   <td><a href="/log/${build.BuildId}"><img alt="Log" src="/images/log.png" /></a></td>
 </tr>
 </for>

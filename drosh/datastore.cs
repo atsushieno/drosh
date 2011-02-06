@@ -183,7 +183,7 @@ namespace drosh
 
 		static void AddRevisionForProject (Project project)
 		{
-			var rev= new ProjectRevision () { Project = project.Id, RevisionId = Guid.NewGuid ().ToString (), CreatedTimestamp = project.LastUpdatedTimestamp };
+			var rev= new ProjectRevision () { ProjectOwner = project.Owner, ProjectName = project.Name, RevisionId = Guid.NewGuid ().ToString (), CreatedTimestamp = project.LastUpdatedTimestamp };
 			Revisions.Add (rev);
 		}
 
@@ -197,15 +197,15 @@ namespace drosh
 			return Builds.Where (b => b.Builder == user).OrderBy (b => b.BuildStartedTimestamp).Skip (skip).Take (take);
 		}
 
-		public static IEnumerable<BuildRecord> GetLatestBuildsByProject (string projectId, int skip, int take)
+		public static IEnumerable<BuildRecord> GetLatestBuildsByProject (string projectOwner, string projectName, int skip, int take)
 		{
-			return Builds.Where (b => b.Project == projectId).OrderBy (b => b.BuildStartedTimestamp).Skip (skip).Take (take);
+			return Builds.Where (b => b.ProjectOwner == projectOwner && b.ProjectName == projectName).OrderBy (b => b.BuildStartedTimestamp).Skip (skip).Take (take);
 		}
 
-		public static ProjectRevision GetRevision (ProjectReference projectId, string revision)
+		public static ProjectRevision GetRevision (string owner, string projectName, string revision)
 		{
 			revision = revision == "Head" ? null : revision;
-			return Revisions.OrderByDescending (r => r.CreatedTimestamp).FirstOrDefault (r => r.Project == projectId && (revision == null || r.RevisionId == revision));
+			return Revisions.OrderByDescending (r => r.CreatedTimestamp).FirstOrDefault (r => r.ProjectOwner == owner && r.ProjectName == projectName && (revision == null || r.RevisionId == revision));
 		}
 
 		public static IEnumerable<Project> GetProjectsByKeyword (string keyword, int skip, int take)
@@ -215,9 +215,9 @@ namespace drosh
 
 		// Revisions related
 
-		public static IEnumerable<ProjectRevision> GetRevisions (ProjectReference projectId, int skip, int take)
+		public static IEnumerable<ProjectRevision> GetRevisions (string owner, string projectName, int skip, int take)
 		{
-			return Revisions.Where (r => r.Project == projectId).OrderBy (r => r.CreatedTimestamp).Skip (skip).Take (take);
+			return Revisions.Where (r => r.ProjectOwner == owner && r.ProjectName == projectName).OrderBy (r => r.CreatedTimestamp).Skip (skip).Take (take);
 		}
 
 		public static void RegisterRevision (ProjectRevision revision)
@@ -226,10 +226,10 @@ namespace drosh
 			Revisions.Add (revision);
 		}
 
-		public static Project GetProjectWithRevision (ProjectReference project, RevisionReference revision)
+		public static Project GetProjectWithRevision (string owner, string project, RevisionReference revision)
 		{
 			// FIXME: make use of revision parameter
-			return GetProject (project);
+			return GetProject (owner, project);
 		}
 
 		// Build related
@@ -241,7 +241,7 @@ namespace drosh
 
 		public static BuildRecord GetLatestBuild (Project project, ArchType arch)
 		{
-			return (from b in Builds where b.Project == project.Name && b.TargetArch == arch && b.Status == BuildStatus.Success orderby b.BuildStartedTimestamp select b).FirstOrDefault ();
+			return (from b in Builds where b.ProjectOwner == project.Owner && b.ProjectName == project.Name && b.TargetArch == arch && b.Status == BuildStatus.Success orderby b.BuildStartedTimestamp select b).FirstOrDefault ();
 		}
 
 		public static void RegisterBuildRecord (BuildRecord build)

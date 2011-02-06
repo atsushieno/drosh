@@ -21,9 +21,9 @@ namespace drosh
 			if (rev == null)
 				throw new ArgumentNullException ("rev");
 
-			var project = DataStore.GetProjectWithRevision (rev.Project, rev.RevisionId);
+			var project = DataStore.GetProjectWithRevision (rev.ProjectOwner, rev.ProjectName, rev.RevisionId);
 			if (project == null)
-				throw new Exception (String.Format ("Project {0} for ProjectRevision {1} was not found", rev.Project, rev.RevisionId));
+				throw new Exception (String.Format ("Project {0}/{1} for ProjectRevision {2} was not found", rev.ProjectOwner, rev.ProjectName, rev.RevisionId));
 			if (project.Owner != user && !project.Builders.Contains (user))
 				throw new Exception (String.Format ("User {0} is not granted to build this project", user));
 
@@ -36,7 +36,8 @@ namespace drosh
 
 					var build = new BuildRecord () {
 						BuildId = Guid.NewGuid ().ToString (),
-						Project = rev.Project,
+						ProjectOwner = rev.ProjectOwner,
+						ProjectName = rev.ProjectName,
 						ProjectRevision = rev.RevisionId,
 						TargetNDK = ndkType,
 						TargetArch = archType,
@@ -89,7 +90,7 @@ namespace drosh
     * Then the server pushes the result to the registered sharehouses.
 */
 
-			var project = DataStore.GetProjectWithRevision (build.Project, build.ProjectRevision);
+			var project = DataStore.GetProjectWithRevision (build.ProjectOwner, build.ProjectName, build.ProjectRevision);
 			if (project == null)
 				throw new Exception ("Project was not found");
 			build.Status = BuildStatus.Ongoing;
@@ -158,7 +159,7 @@ namespace drosh
 
 			// Now that build and install is done successfully, pack the results into an archive.
 
-			string destArc = Path.Combine (buildDir, build.Project + "-bin.tar.bz2");
+			string destArc = Path.Combine (buildDir, build.ProjectName + "-bin.tar.bz2");
 			var pkpsi = new ProcessStartInfo () { FileName = "tar", Arguments = String.Format ("jcf {0} {1}/*", destArc, resultDir) };
 			var pkproc = Process.Start (pkpsi);
 			if (!pkproc.WaitForExit (10000)) {

@@ -124,8 +124,8 @@ namespace drosh
 	// FIXME: now I doubt if we want this record.
 	public class ProjectRevision
 	{
-		//public UserReference Owner { get; set; }
-		public ProjectReference Project { get; set; }
+		public UserReference ProjectOwner { get; set; }
+		public ProjectReference ProjectName { get; set; }
 		public string RevisionId { get; set; }
 		public DateTime CreatedTimestamp { get; set; }
 	}
@@ -168,7 +168,8 @@ namespace drosh
 	public class BuildRecord
 	{
 		public string BuildId { get; set; }
-		public ProjectReference Project { get; set; }
+		public string ProjectOwner { get; set; }
+		public string ProjectName { get; set; }
 		public ProjectRevisionReference ProjectRevision { get; set; }
 		public NDKType TargetNDK { get; set; }
 		public ArchType TargetArch { get; set; }

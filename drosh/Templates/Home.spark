@@ -46,7 +46,7 @@
 <tr id="build-${build.BuildId}" name="build-${build.BuildId}">
   <td style="color: ${build.Status == BuildStatus.Failure ? "red" : build.Status == BuildStatus.Success ? "green" : build.Status == BuildStatus.Ongoing ? "yellow" : null}">${build.Status}</td>
   <td>${build.BuildStartedTimestamp}</td>
-  <td><a href="/project/${build.Project}/${build.ProjectRevision}">${DataStore.GetProject (LoggedUser.Name, build.Project).Name}</td>
+  <td><a href="/project/${build.ProjectOwner}/${build.ProjectName}/${build.ProjectRevision}">${build.ProjectName}</td>
   <td>${build.ProjectRevision}</td>
   <td>${build.TargetNDK}</td>
   <td>${build.TargetArch}</td>
