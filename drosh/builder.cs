@@ -103,6 +103,8 @@ namespace drosh
 			string resultDir = Path.Combine (buildDir, "build");
 			string depsDir = Path.Combine (buildDir, "deps");
 			string buildSrcDir = Path.Combine (buildDir, "src");
+			if (Directory.Exists (buildDir))
+				Directory.Delete (buildDir, true);
 			Directory.CreateDirectory (buildDir);
 			Directory.CreateDirectory (resultDir);
 			Directory.CreateDirectory (depsDir);
@@ -116,12 +118,12 @@ namespace drosh
 					var b = DataStore.GetLatestBuild (dp, build.TargetArch);
 					if (b == null)
 						throw new Exception (String.Format ("Dependency project {0}/{1} has no successful result for {2} yet", dp.Owner, dp.Name, build.TargetArch));
-					var deppath = Path.Combine (Drosh.DownloadTopdir, dp.Owner, b.LocalResultArchive);
+					var deppath = Path.Combine (Drosh.DownloadTopdir, "user", dp.Owner, b.LocalResultArchive);
 					Unpack (deppath, depsDir);
 				}
 			}
 
-			string path = Path.Combine (Drosh.DownloadTopdir, project.LocalArchiveName);
+			string path = Path.Combine (Drosh.DownloadTopdir, "user", build.ProjectOwner, project.LocalArchiveName);
 			string srcCopied = Path.Combine (buildSrcDir, Path.GetFileName (path));
 			File.Copy (path, srcCopied);
 			Unpack (srcCopied, buildSrcDir);
@@ -187,21 +189,26 @@ namespace drosh
 		static void Unpack (string archive, string destDir)
 		{
 			Process proc;
-			var psi = new ProcessStartInfo () { UseShellExecute = true, RedirectStandardOutput = true, RedirectStandardError = true };
+			var psi = new ProcessStartInfo () { UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true };
 			psi.WorkingDirectory = destDir;
 			switch (Path.GetExtension (archive).ToLower ()) {
-			case "zip":
+			case ".zip":
 				psi.FileName = "unzip";
 				psi.Arguments = '"' + archive + '"';
 				proc = Process.Start (psi);
 				break;
-			case "bz2":
+			case ".gz":
+				psi.FileName = "tar";
+				psi.Arguments = "zxvf \"" + archive + '"';
+				proc = Process.Start (psi);
+				break;
+			case ".bz2":
 				psi.FileName = "tar";
 				psi.Arguments = "jxvf \"" + archive + '"';
-				Process.Start (psi);
+				proc = Process.Start (psi);
 				break;
 			default:
-				throw new NotSupportedException ();
+				throw new NotSupportedException (String.Format ("Not supported extension: {0}", Path.GetExtension (archive).ToLower ()));
 			}
 			if (!proc.WaitForExit (10000)) {
 				proc.Kill ();

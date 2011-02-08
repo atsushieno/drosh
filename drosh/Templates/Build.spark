@@ -19,17 +19,17 @@
 
 <table>
   <tr>
-    <td>Project</td><td><a href="/project/${Build.ProjectOwner}/${Build.ProjectName}/${Build.ProjectRevision}">@${Build.ProjectName} rev.${Build.ProjectRevision}</a></td>
+    <td>Project</td><td><a href="/project/${Build.ProjectOwner}/${Build.ProjectName}/${Build.ProjectRevision}">${Build.ProjectName}</a> rev.${Build.ProjectRevision}</td>
   </tr><tr>
-    <td>Status: </td><td>@(build.Status)</td>
+    <td>Status: </td><td>${Build.Status}</td>
   </tr><tr>
-    <td>Recorded: </td><td>${Build.BuildRecordedTimestamp)</td>
+    <td>Recorded: </td><td>${Build.BuildRecordedTimestamp}</td>
   </tr><tr>
-    <td>Started: </td><td>${Build.BuildStartedTimestamp)</td>
+    <td>Started: </td><td>${Build.BuildStartedTimestamp}</td>
   </tr><tr>
-    <td>Target NDK</td><td>@(Build.TargetNDK)</td>
+    <td>Target NDK</td><td>${Build.TargetNDK}</td>
   </tr><tr>
-    <td>Target Arch</td><td>@(Build.TargetArch)</td>
+    <td>Target Arch</td><td>${Build.TargetArch}</td>
   </tr><tr>
     <td>Results: </td><td><a href="/download/${Build.LocalResultArchive}">${Build.PublicResultArchive}</a></td>
   </tr><tr>
@@ -37,5 +37,4 @@
   </tr>
 </table>
 
-</body>
-</html>
+</content>

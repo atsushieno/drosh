@@ -2,6 +2,7 @@ Setup howto:
 
 	ln -s ../house/var/drosh/pub pub
 	ln -s ../house/var/drosh/builds builds
+	ln -s ../house/var/drosh/pub ../build-service/pub
 
 Run howto:
 	cd ..
