@@ -14,7 +14,7 @@ namespace drosh
 {
 	public class Drosh
 	{
-		static readonly string appbase = typeof (Drosh).Assembly.Location;
+		static readonly string appbase = Directory.GetParent (typeof (Drosh).Assembly.Location).FullName;
 		public static readonly string DownloadTopdir, BuildTopdir, AndroidNdkR5, AndroidNdkR4, AndroidNdkCrystaxR4;
 
 		static Drosh ()
