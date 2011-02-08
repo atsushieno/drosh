@@ -146,17 +146,23 @@ namespace drosh
 
 			foreach (var buildStep in build_steps) {
 				var scriptObj = project.Scripts.FirstOrDefault (s => s.Step == buildStep && (s.TargetNDKs & build.TargetNDK) != 0 && (s.TargetArchs & build.TargetArch) != 0);
-				string script = scriptObj != null ? scriptObj.Text : GetDefaultScript (buildStep, build.TargetNDK);
+				string script = scriptObj != null ? scriptObj.Text : GetDefaultScript (project.BuildType, buildStep, build.TargetNDK);
 
-				var psi = new ProcessStartInfo () { WorkingDirectory = actualSrcDir };
+				string scriptFile = Path.Combine (actualSrcDir, String.Format ("__build_command_{0}.sh", buildStep));
+				using (var fs = File.CreateText (scriptFile))
+					fs.WriteLine (script);
+				var psi = new ProcessStartInfo () { FileName = "bash", Arguments = scriptFile, WorkingDirectory = actualSrcDir, UseShellExecute = false };
 				psi.EnvironmentVariables.Add ("ANDROID_NDK_ROOT", Drosh.GetAndroidRoot (build.TargetNDK));
 				psi.EnvironmentVariables.Add ("DEPS_TOPDIR", depsDir);
 				psi.EnvironmentVariables.Add ("RESULT_TOPDIR", resultDir);
-				var proc = Process.Start (script);
+				psi.EnvironmentVariables.Add ("RUNNER_DIR", Drosh.ToolDir);
+				var proc = Process.Start (psi);
 				if (!proc.WaitForExit (1000 * 60 * 10)) {
 					proc.Kill ();
 					throw new Exception (String.Format ("Forcibly terminated build step: {0}", buildStep));
 				}
+				if (proc.ExitCode != 0)
+					throw new Exception (String.Format ("Process error at build step: {0} with exit code {1}", buildStep, proc.ExitCode));
 			}
 
 			// Now that build and install is done successfully, pack the results into an archive.
@@ -170,7 +176,7 @@ namespace drosh
 				pkproc.Kill ();
 				throw new Exception (String.Format ("Forcibly terminated packing step."));
 			}
-			string dlname = Path.Combine (project.Owner, Guid.NewGuid () + "_" + Path.GetFileName (destArc));
+			string dlname = Path.Combine ("user", project.Owner, Guid.NewGuid () + "_" + Path.GetFileName (destArc));
 			File.Move (destArc, Path.Combine (Drosh.DownloadTopdir, dlname));
 			build.PublicResultArchive = Path.GetFileName (destArc);
 			build.LocalResultArchive = dlname;
@@ -181,9 +187,9 @@ namespace drosh
 
 		static readonly ScriptStep [] build_steps = new ScriptStep [] { ScriptStep.Build, ScriptStep.PreInstall, ScriptStep.Install, ScriptStep.PostInstall };
 
-		static string GetDefaultScript (ScriptStep step, NDKType ndk)
+		static string GetDefaultScript (BuildType type, ScriptStep step, NDKType ndk)
 		{
-			return File.ReadAllText (Path.Combine (Drosh.BuildTopdir, String.Format ("__default_script_{0}_{1}.txt", step, ndk)));
+			return File.ReadAllText (Path.Combine (Drosh.BuildTopdir, String.Format ("__default_script_{0}_{1}_{2}.txt", type, step, ndk)));
 		}
 
 		static void Unpack (string archive, string destDir)

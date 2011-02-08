@@ -15,10 +15,11 @@ namespace drosh
 	public class Drosh
 	{
 		static readonly string appbase = Directory.GetParent (typeof (Drosh).Assembly.Location).FullName;
-		public static readonly string DownloadTopdir, BuildTopdir, AndroidNdkR5, AndroidNdkR4, AndroidNdkCrystaxR4;
+		public static readonly string ToolDir, DownloadTopdir, BuildTopdir, AndroidNdkR5, AndroidNdkR4, AndroidNdkCrystaxR4;
 
 		static Drosh ()
 		{
+			ToolDir = appbase;
 			DownloadTopdir = Path.Combine (appbase, "pub");
 			BuildTopdir = Path.Combine (appbase, "builds");
 			AndroidNdkR5 = Path.Combine (appbase, "ndk-r5");
