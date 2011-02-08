@@ -236,7 +236,7 @@ namespace drosh
 
 		public static BuildRecord GetBuild (string buildId)
 		{
-			return Builds.First (b => b.BuildId == buildId);
+			return Builds.FirstOrDefault (b => b.BuildId == buildId);
 		}
 
 		public static BuildRecord GetLatestBuild (Project project, ArchType arch)

@@ -44,6 +44,7 @@
 <table>
 <for each="var build in Builds">
 <tr id="build-${build.BuildId}" name="build-${build.BuildId}">
+  <td><a href="/build/show/${build.BuildId}"><img alt="build details" src="/images/build.png" /></a></td>
   <td style="color: ${build.Status == BuildStatus.Failure ? "red" : build.Status == BuildStatus.Success ? "green" : build.Status == BuildStatus.Ongoing ? "yellow" : null}">${build.Status}</td>
   <td>${build.BuildStartedTimestamp}</td>
   <td><a href="/project/${build.ProjectOwner}/${build.ProjectName}/${build.ProjectRevision}">${build.ProjectName}</td>

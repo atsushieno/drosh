@@ -109,10 +109,11 @@
 
 <h2>recent builds</h2>
 
-<!-- almost identical to Index.cshtml (contents differ; it is by user list) -->
+<!-- almost identical to Home.spark (contents differ; it is by user list) -->
 <table>
 <for each="var build in Builds">
 <tr id="build-${build.BuildId}" name="build-${build.BuildId}">
+  <td><a href="/build/show/${build.BuildId}"><img alt="build details" src="/images/build.png" /></a></td>
   <td style="color: ${build.Status == BuildStatus.Failure ? 'red' : build.Status == BuildStatus.Success ? 'green' : build.Status == BuildStatus.Ongoing ? 'yellow' : null}">${build.Status}</td>
   <td>${build.BuildRecordedTimestamp.ToString ("s")}</td>
   <td>${build.ProjectRevision.Substring (0, 8)}...</td>

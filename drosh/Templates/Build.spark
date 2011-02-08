@@ -1,0 +1,41 @@
+<use master="base.spark" />
+<use assembly="drosh" />
+<use namespace="drosh" />
+<use namespace="System.Collections.Generic" />
+
+<viewdata
+  Notification="string"
+  LoggedUser="User"
+  Build="BuildRecord" />
+
+<content name="body">
+
+<use file="login_status.spark" />
+
+<h1>Build status</h1>
+
+<div id="notification" name="notification"><p>$!{Notification}</p></div>
+
+
+<table>
+  <tr>
+    <td>Project</td><td><a href="/project/${Build.ProjectOwner}/${Build.ProjectName}/${Build.ProjectRevision}">@${Build.ProjectName} rev.${Build.ProjectRevision}</a></td>
+  </tr><tr>
+    <td>Status: </td><td>@(build.Status)</td>
+  </tr><tr>
+    <td>Recorded: </td><td>${Build.BuildRecordedTimestamp)</td>
+  </tr><tr>
+    <td>Started: </td><td>${Build.BuildStartedTimestamp)</td>
+  </tr><tr>
+    <td>Target NDK</td><td>@(Build.TargetNDK)</td>
+  </tr><tr>
+    <td>Target Arch</td><td>@(Build.TargetArch)</td>
+  </tr><tr>
+    <td>Results: </td><td><a href="/download/${Build.LocalResultArchive}">${Build.PublicResultArchive}</a></td>
+  </tr><tr>
+    <td>Log: </td><td><a href="/log/${Build.BuildId}"><img alt="Log" src="/images/log.png" /></a></td>
+  </tr>
+</table>
+
+</body>
+</html>

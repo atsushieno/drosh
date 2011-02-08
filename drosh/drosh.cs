@@ -577,6 +577,14 @@ namespace drosh
 			}
 		}
 
+		[Route ("/build/show/{buildId}")]
+		public void ShowBuild (IManosContext ctx, string buildId)
+		{
+			var build = DataStore.GetBuild (buildId);
+			this.RenderSparkView (ctx, "Build.spark", new { Build = build });
+			ctx.Response.End ();
+		}
+
 		[Route ("/build/kick/{user}/{project}/{revision}",
 			"/build/kick/{user}/{project}")]
 		public void KickBuild (IManosContext ctx, string user, string project, string revision)
