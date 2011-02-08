@@ -59,7 +59,7 @@ Logged in as ${LoggedUser.Name}<br />
   </tr><tr>
     <td>Build Type: </td>
     <td>
-      <select id="build-type" name="build-type" readonly="?{!Editable}">
+      <select name="build-type" readonly="?{!Editable}">
         <option value="prebuilt" selected="?{Project != null && Project.BuildType == BuildType.Prebuilt}">prebuilt</option>
         <option value="custom" selected="?{Project != null && Project.BuildType == BuildType.Custom}">custom</option>
         <option value="ndk-build" selected="?{Project != null && Project.BuildType == BuildType.NdkBuild}">ndk-build</option>
@@ -95,7 +95,10 @@ Logged in as ${LoggedUser.Name}<br />
 <test if="Editable">
       <input type="file" id="source-archive" name="source-archive" />
 </test>
-<else><input type="hidden" name="source-archive" value="$!{Project.PublicArchiveName}" />$!{Project.PublicArchiveName}</else>
+<else>
+  <input type="hidden" name="public-archive-name" value="$!{Project.PublicArchiveName}" />$!{Project.PublicArchiveName}
+  <input type="hidden" name="local-archive-name" value="$!{Project.LocalArchiveName}" />
+</else>
     </td>
   </tr>
 

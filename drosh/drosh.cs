@@ -218,7 +218,7 @@ namespace drosh
 		{
 			user.Status = UserStatus.Active;
 			DataStore.UpdateUser (user);
-			string path = Path.Combine (DownloadTopdir, user.Name);
+			string path = Path.Combine (DownloadTopdir, "user", user.Name);
 			if (!Directory.Exists (path))
 				Directory.CreateDirectory (path);
 
@@ -439,8 +439,8 @@ namespace drosh
 			var project = CreateProjectFromForm (session, ctx);
 			project.Owner = user.Name;
 			project.Id = Guid.NewGuid ().ToString ();
-			string newname = Path.Combine (user.Name, Guid.NewGuid () + "_" + project.LocalArchiveName.Substring (id_prefix_length));
-			File.Move (Path.Combine (DownloadTopdir, project.LocalArchiveName), Path.Combine (DownloadTopdir, newname));
+			string newname = Path.Combine (Guid.NewGuid () + "_" + project.LocalArchiveName.Substring (id_prefix_length));
+			//File.Move (Path.Combine (DownloadTopdir, "user", user.Name, project.LocalArchiveName), Path.Combine (DownloadTopdir, newname));
 			project.LocalArchiveName = newname;
 			DataStore.RegisterProject (project);
 			session.Notification = String.Format ("Registered project '{0}'", project.Name);
@@ -535,6 +535,9 @@ namespace drosh
 			if (file != null) {
 				p.PublicArchiveName = file.Name;
 				p.LocalArchiveName = SaveFileOnServer (p.Owner, p.Id, file);
+			} else {
+				p.PublicArchiveName = ctx.Request.Data ["public-archive-name"];
+				p.LocalArchiveName = ctx.Request.Data ["local-archive-name"];
 			}
 
 			return p;
