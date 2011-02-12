@@ -4,9 +4,14 @@ namespace drosh
 {
 	public class BuildService
 	{
-		public static void Main ()
+		public static void Main (string [] args)
 		{
-			Builder.ProcessBuilds ();
+			if (args.Length > 0) {
+				foreach (var arg in args)
+					Builder.ProcessBuild (arg);
+			}
+			else
+				Builder.ProcessBuilds ();
 		}
 	}
 }

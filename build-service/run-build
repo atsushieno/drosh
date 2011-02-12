@@ -1,0 +1,1 @@
+MONO_PATH=../drosh mono --debug build-service.exe $1 >logs/$1.log 2>logs/$1.log

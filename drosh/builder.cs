@@ -16,11 +16,12 @@ namespace drosh
 		static NDKType [] target_ndks = new NDKType [] { NDKType.R5, NDKType.CrystaxR4, NDKType.R4 };
 		static ArchType [] target_archs = new ArchType [] { ArchType.Arm, ArchType.ArmV7a, ArchType.X86 };
 
-		public static void QueueBuild (ProjectRevision rev, UserReference user)
+		public static List<string> QueueBuild (ProjectRevision rev, UserReference user)
 		{
 			if (rev == null)
 				throw new ArgumentNullException ("rev");
 
+			List<string> newIds = new List<string> ();
 			var project = DataStore.GetProjectWithRevision (rev.ProjectOwner, rev.ProjectName, rev.RevisionId);
 			if (project == null)
 				throw new Exception (String.Format ("Project {0}/{1} for ProjectRevision {2} was not found", rev.ProjectOwner, rev.ProjectName, rev.RevisionId));
@@ -34,8 +35,10 @@ namespace drosh
 					if ((project.TargetArchs & archType) == 0)
 						continue;
 
+					var newId = Guid.NewGuid ().ToString ();
+					newIds.Add (newId);
 					var build = new BuildRecord () {
-						BuildId = Guid.NewGuid ().ToString (),
+						BuildId = newId,
 						ProjectOwner = rev.ProjectOwner,
 						ProjectName = rev.ProjectName,
 						ProjectRevision = rev.RevisionId,
@@ -48,6 +51,7 @@ namespace drosh
 					DataStore.RegisterBuildRecord (build);
 				}
 			}
+			return newIds;
 		}
 
 		public static void ProcessBuilds ()
@@ -66,28 +70,19 @@ namespace drosh
 			}
 		}
 
+		public static void ProcessBuild (string buildId)
+		{
+			var build = DataStore.GetBuild (buildId);
+			if (build == null)
+				throw new Exception (String.Format ("Build '{0}' not found.", buildId));
+			else
+				ProcessBuild (build);
+		}
+
 		public static void ProcessBuild (BuildRecord build)
 		{
-/*
-    * It creates a dist directory for each build(-id). Name it as [topdir]. The directory layout looks like:
-
-    * build
-    * deps
-    * src
-          o target-src.[tar.gz|tar.bz2|tar.xz|zip]
-          o downloaded-deps-outputs.tar.bz2 …
-
-    * Then it pulls target project source and deps. Only a limited kinds of packages are supported. target source is expanded under src. Depds are immediately under [topdir].
-    * Then it adds deps/bin to $PATH, deps/lib to $LD_LIBRARY_PATH, deps/lib/pkgconfig to $PKG_CONFIG_PATH.
-    * Then it goes to src/{subdir} (in case there is only one subdir) or src (in case not found). Then it runs build script (typically configure and make), preinstall script, install script (typically make install) and then postinstall script, in order, where the runner gives these environment variables:
-          o ANDROID_NDK_ROOT: android NDK topdir
-          o DEPS_TOPDIR: the topdir for all extracted deps. PATH, LD_LIBRARY_PATH and PKG_CONFIG_PATH are added for this dir.
-          o RESULT_TOPDIR: the installation directory. Only files in this dir will be included in the results archive.
-    * Once all of them are successfully done, then the server packages everything in the topdir/build into the output archive, and then push to file server (so far it is just a copy to www dir, could be replaced with push to amazon s3 etc.).
-          o FIXME: should deps included in the resulting archive too?
-    * Then the server pushes the result to the registered sharehouses.
-*/
-
+			if (build == null)
+				throw new ArgumentNullException ("build");
 			var project = DataStore.GetProjectWithRevision (build.ProjectOwner, build.ProjectName, build.ProjectRevision);
 			if (project == null)
 				throw new Exception ("Project was not found");
@@ -188,7 +183,7 @@ namespace drosh
 
 		static string GetDefaultScript (BuildType type, ScriptStep step, NDKType ndk)
 		{
-			return File.ReadAllText (Path.Combine (Drosh.BuildTopdir, String.Format ("__default_script_{0}_{1}_{2}.txt", type, step, ndk)));
+			return File.ReadAllText (Path.Combine (Drosh.ScriptsTopdir, String.Format ("__default_script_{0}_{1}_{2}.txt", type, step, ndk)));
 		}
 
 		static void Unpack (string archive, string destDir)

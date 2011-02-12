@@ -2,7 +2,9 @@ Setup howto:
 
 	ln -s ../house/var/drosh/pub pub
 	ln -s ../house/var/drosh/builds builds
+	ln -s ../house/var/drosh/logs logs
 	ln -s ../house/var/drosh/pub ../build-service/pub
+	ln -s ../house/var/drosh/logs ../build-service/logs
 	ln -s ../../android-ndk-r5b ../build-service/ndk-r5
 	ln -s ../../android-ndk-r4b ../build-service/ndk-r4
 

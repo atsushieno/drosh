@@ -15,13 +15,18 @@ namespace drosh
 	public class Drosh
 	{
 		static readonly string appbase = Directory.GetParent (typeof (Drosh).Assembly.Location).FullName;
-		public static readonly string ToolDir, DownloadTopdir, BuildTopdir, AndroidNdkR5, AndroidNdkR4, AndroidNdkCrystaxR4;
+		public static readonly string ToolDir, BuildServiceToolDir,
+			DownloadTopdir, BuildTopdir, LogTopdir, ScriptsTopdir,
+			AndroidNdkR5, AndroidNdkR4, AndroidNdkCrystaxR4;
 
 		static Drosh ()
 		{
 			ToolDir = appbase;
+			BuildServiceToolDir = Path.GetFullPath (Path.Combine (appbase, "..", "build-service"));
 			DownloadTopdir = Path.Combine (appbase, "pub");
 			BuildTopdir = Path.Combine (appbase, "builds");
+			LogTopdir = Path.Combine (appbase, "logs");
+			ScriptsTopdir = Path.Combine (appbase, "scripts");
 			AndroidNdkR5 = Path.Combine (appbase, "ndk-r5");
 			AndroidNdkCrystaxR4 = Path.Combine (appbase, "ndk-crystax-r4");
 			AndroidNdkR4 = Path.Combine (appbase, "ndk-r4");
@@ -195,12 +200,12 @@ namespace drosh
 
 		public static IEnumerable<BuildRecord> GetLatestBuildsByUser (string user, int skip, int take)
 		{
-			return (from b in Builds where b.Builder == user orderby b.BuildStartedTimestamp descending select b).Skip (skip).Take (take);
+			return (from b in Builds where b.Builder == user orderby b.BuildRecordedTimestamp descending select b).Skip (skip).Take (take);
 		}
 
 		public static IEnumerable<BuildRecord> GetLatestBuildsByProject (string projectOwner, string projectName, int skip, int take)
 		{
-			return (from b in Builds where b.ProjectOwner == projectOwner && b.ProjectName == projectName orderby b.BuildStartedTimestamp descending select b).Skip (skip).Take (take);
+			return (from b in Builds where b.ProjectOwner == projectOwner && b.ProjectName == projectName orderby b.BuildRecordedTimestamp descending select b).Skip (skip).Take (take);
 		}
 
 		public static ProjectRevision GetRevision (string owner, string projectName, string revision)

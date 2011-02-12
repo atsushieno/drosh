@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -619,7 +620,15 @@ foreach (var revv in DataStore.Revisions) Console.WriteLine ("!! {0} {1} {2}", r
 				session.Notification = String.Format ("You cannot build this project.", user, project);
 				ShowProjectDetails (ctx, user, project, null, revision, session.Notification); // FIXME: use Response.Redirect()
 			} else {
-				Builder.QueueBuild (rev, session.User.Name);
+				var ids = Builder.QueueBuild (rev, session.User.Name);
+				foreach (var id in ids) {
+					var psi = new ProcessStartInfo () { FileName = "bash", Arguments = Path.Combine (Drosh.BuildServiceToolDir, "run-build") + " " + id, WorkingDirectory = Drosh.BuildServiceToolDir };
+					var proc = Process.Start (psi);
+					System.Threading.Thread.Sleep (300);
+					if (proc.HasExited)
+						Console.Error.WriteLine (proc.ExitCode);
+				}
+
 				if (proj.Owner == session.User.Name) {
 					session.Notification = "A new build has started.";
 					ctx.Response.Redirect (String.Format ("/register/project/edit/{0}/{1}", proj.Owner, proj.Name));
@@ -630,6 +639,17 @@ foreach (var revv in DataStore.Revisions) Console.WriteLine ("!! {0} {1} {2}", r
 			}
 		}
 
+		[Route ("/log/{buildId}")]
+		public void ShowLog (IManosContext ctx, string buildId)
+		{
+			var path = Path.Combine (Drosh.LogTopdir, buildId + ".log");
+			if (File.Exists (path))
+				ctx.Response.SendFile (path);
+			else
+				ctx.Response.WriteLine ("log not found for {0}", buildId);
+			ctx.Response.End ();
+		}
+
 		string SaveFileOnServer (string user, string id, UploadedFile file)
 		{
 			string uniqueName = id + "_" + file.Name;
@@ -637,23 +657,6 @@ foreach (var revv in DataStore.Revisions) Console.WriteLine ("!! {0} {1} {2}", r
 				file.Contents.CopyTo (fs);
 			return uniqueName;
 		}
-
-		/*
-		NDKType GetNDKTarget (IManosContext ctx, string prefix, int count)
-		{
-			var s = ctx.Request.Data [prefix + "target-ndk" + (count > 0 ? "-" + count : String.Empty)];
-			if (s != null)
-				return (NDKType) Enum.Parse (typeof (NDKType), s);
-			NDKType ret = NDKType.None;
-			if (ctx.Request.Data [prefix + "target-ndk-" + (count > 0 ? count + "-" : String.Empty) + "r5"] != null)
-				ret |= NDKType.R5;
-			if (ctx.Request.Data [prefix + "target-ndk-" + (count > 0 ? count + "-" : String.Empty) + "crystaxR4"] != null)
-				ret |= NDKType.CrystaxR4;
-			if (ctx.Request.Data [prefix + "target-ndk-" + (count > 0 ? count + "-" : String.Empty) + "r4"] != null)
-				ret |= NDKType.R4;
-			return ret;
-		}
-		*/
 
 		ArchType GetArchTarget (IManosContext ctx, string prefix, int count)
 		{
