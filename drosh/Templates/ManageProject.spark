@@ -72,7 +72,7 @@ Logged in as ${LoggedUser.Name}<br />
     <td>
       <select name="target-ndk" readonly="?{!Editable}">
         <option value="r5" selected="?{Project != null && Project.TargetNDKs == NDKType.R5}">r5</option>
-        <option value="crystaxR4" selected="?{Project != null && Project.TargetNDKs == NDKType.CrystaxR4}">crystax r4</option>
+        <option value="crystax-r4" selected="?{Project != null && Project.TargetNDKs == NDKType.CrystaxR4}">crystax r4</option>
         <option value="r4" selected="?{Project != null && Project.TargetNDKs == NDKType.R4}">r4</option>
       </select>
     </td>

@@ -447,7 +447,7 @@ namespace drosh
 			project.Owner = user.Name;
 			project.Id = Guid.NewGuid ().ToString ();
 			string newname = Path.Combine (Guid.NewGuid () + "_" + project.LocalArchiveName.Substring (id_prefix_length));
-			File.Move (Path.Combine (DownloadTopdir, "user", user.Name, project.LocalArchiveName), Path.Combine (DownloadTopdir, newname));
+			File.Move (Path.Combine (DownloadTopdir, "user", user.Name, project.LocalArchiveName), Path.Combine (DownloadTopdir, "user", user.Name, newname));
 			project.LocalArchiveName = newname;
 			DataStore.RegisterProject (project);
 			session.Notification = String.Format ("Registered project '{0}'", project.Name);
