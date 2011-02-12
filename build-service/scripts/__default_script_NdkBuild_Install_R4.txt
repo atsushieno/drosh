@@ -1,0 +1,5 @@
+mkdir -p $RESULT_TOPDIR/libs
+for amk in `find . -name Android.mk`; do
+cd `dirname $amk`; cd ../libs; cp -R * $RESULT_TOPDIR/libs
+done
+

@@ -83,13 +83,23 @@ namespace drosh
 		{
 			if (build == null)
 				throw new ArgumentNullException ("build");
-			var project = DataStore.GetProjectWithRevision (build.ProjectOwner, build.ProjectName, build.ProjectRevision);
-			if (project == null)
-				throw new Exception ("Project was not found");
 			build.Status = BuildStatus.Ongoing;
 			build.BuildStartedTimestamp = DateTime.Now;
 			DataStore.UpdateBuildRecord (build);
+			try {
+				ProcessBuildCore (build);
+			} catch (Exception ex) {
+				build.Status = BuildStatus.Failure;
+				DataStore.UpdateBuildRecord (build);
+				throw;
+			}
+		}
 
+		static void ProcessBuildCore (BuildRecord build)
+		{
+			var project = DataStore.GetProjectWithRevision (build.ProjectOwner, build.ProjectName, build.ProjectRevision);
+			if (project == null)
+				throw new Exception ("Project was not found");
 
 			// Create a build directory
 			string buildDir = Path.Combine (Drosh.BuildTopdir, build.BuildId);

@@ -549,7 +549,7 @@ namespace drosh
 				p.LocalArchiveName = SaveFileOnServer (p.Owner, p.Id, file);
 			} else {
 				p.PublicArchiveName = ctx.Request.Data ["public-archive-name"] ?? p.PublicArchiveName;
-				p.LocalArchiveName = ctx.Request.Data ["local-archive-name"];
+				p.LocalArchiveName = ctx.Request.Data ["local-archive-name"] ?? p.LocalArchiveName;
 			}
 
 			return p;

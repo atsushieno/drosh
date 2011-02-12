@@ -1,0 +1,3 @@
+for amk in `find . -name Android.mk`; do
+cd `dirname $amk`; $ANDROID_NDK_ROOT/ndk-build
+done
