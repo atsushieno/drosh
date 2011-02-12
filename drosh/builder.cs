@@ -170,7 +170,7 @@ namespace drosh
 			// FIXME: handle filesbypkg
 
 			string destArc = Path.Combine (buildDir, build.ProjectName + "-bin.tar.bz2");
-			var pkpsi = new ProcessStartInfo () { FileName = "tar", Arguments = String.Format ("jcf {0} build", destArc), WorkingDirectory = buildDir, UseShellExecute = false };
+			var pkpsi = new ProcessStartInfo () { FileName = "tar", Arguments = String.Format ("jcf {0} .", destArc), WorkingDirectory = resultDir, UseShellExecute = false };
 			var pkproc = Process.Start (pkpsi);
 			if (!pkproc.WaitForExit (10000)) {
 				pkproc.Kill ();

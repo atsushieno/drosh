@@ -18,6 +18,7 @@
 
 <div id="notification" name="notification"><p>$!{Notification}</p></div>
 
+<test if="Projects != null">
 <div id="accessible-projects" name="accessible-projects">
 <h2>Your Projects</h2>
 
@@ -33,7 +34,11 @@
 
 </table>
 
+</div>
+</test>
 
+
+<test if="Builds != null">
 <!-- FIXME: do we need this? -->
 <div id="recent-builds" name="recent-builds">
 
@@ -58,5 +63,6 @@
 <!-- TODO: page controller links -->
 
 </div>
+</test>
 
 </content>

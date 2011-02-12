@@ -114,7 +114,7 @@ namespace drosh
 		{
 			var session = GetSession (ctx);
 			string notification = session != null ? session.PullNotification () : null;
-			this.RenderSparkView (ctx, "Index.spark", new { Notification = notification});
+			this.RenderSparkView (ctx, "Home.spark", new { Notification = notification});
 			ctx.Response.End ();
 		}
 

@@ -200,7 +200,7 @@ namespace drosh
 
 		public static IEnumerable<BuildRecord> GetLatestBuildsByProject (string projectOwner, string projectName, int skip, int take)
 		{
-			return Builds.Where (b => b.ProjectOwner == projectOwner && b.ProjectName == projectName).OrderBy (b => b.BuildStartedTimestamp).Skip (skip).Take (take);
+			return (from b in Builds where b.ProjectOwner == projectOwner && b.ProjectName == projectName orderby b.BuildStartedTimestamp descending select b).Skip (skip).Take (take);
 		}
 
 		public static ProjectRevision GetRevision (string owner, string projectName, string revision)
