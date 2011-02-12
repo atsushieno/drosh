@@ -27,8 +27,6 @@
   </tr><tr>
     <td>Started: </td><td>${Build.BuildStartedTimestamp}</td>
   </tr><tr>
-    <td>Target NDK</td><td>${Build.TargetNDK}</td>
-  </tr><tr>
     <td>Target Arch</td><td>${Build.TargetArch}</td>
   </tr><tr>
     <td>Results: </td><td><a href="/download/${Build.LocalResultArchive}">${Build.PublicResultArchive}</a></td>

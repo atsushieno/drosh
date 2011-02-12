@@ -61,7 +61,6 @@ namespace drosh
 		}
 
 		public string Id { get; set; }
-		public NDKType TargetNDKs { get; set; }
 		public ArchType TargetArchs { get; set; }
 		public string Text { get; set; }
 
@@ -80,7 +79,6 @@ namespace drosh
 
 		public string Id { get; set; }
 		public ScriptStep Step { get; set; }
-		public NDKType TargetNDKs { get; set; }
 		public ArchType TargetArchs { get; set; }
 		public string Text { get; set; }
 
@@ -198,7 +196,6 @@ namespace drosh
 		public string ProjectOwner { get; set; }
 		public string ProjectName { get; set; }
 		public ProjectRevisionReference ProjectRevision { get; set; }
-		public NDKType TargetNDK { get; set; }
 		public ArchType TargetArch { get; set; }
 		public UserReference Builder { get; set; }
 		public DateTime BuildRecordedTimestamp { get; set; }

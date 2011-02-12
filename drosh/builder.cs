@@ -39,7 +39,6 @@ namespace drosh
 						ProjectOwner = rev.ProjectOwner,
 						ProjectName = rev.ProjectName,
 						ProjectRevision = rev.RevisionId,
-						TargetNDK = ndkType,
 						TargetArch = archType,
 						Builder = user,
 						Status = BuildStatus.Queued,
@@ -54,7 +53,7 @@ namespace drosh
 		public static void ProcessBuilds ()
 		{
 			DateTime lastBuild = DateTime.MinValue;
-			foreach (var build in DataStore.Builds.Where (b => b.Status == BuildStatus.Queued)) {
+			foreach (var build in (from b in DataStore.Builds where b.Status == BuildStatus.Queued orderby b.BuildRecordedTimestamp select b)) {
 				if (DateTime.Now - lastBuild < TimeSpan.FromMilliseconds (100))
 					break; // too short. Very likely something bad happens.
 				if (build == null)
@@ -130,8 +129,8 @@ namespace drosh
 			var dirs = Directory.GetDirectories (buildSrcDir);
 			string actualSrcDir = dirs.Length == 1 ? dirs [0] : buildSrcDir;
 
-			foreach (var patch in from p in project.Patches where (p.TargetNDKs & build.TargetNDK) != 0 && (p.TargetArchs & build.TargetArch) != 0 select p) {
-				var patchFile = Path.Combine (actualSrcDir, String.Format ("__drosh_patch_{0}_{1}.patch", build.TargetNDK, build.TargetArch));
+			foreach (var patch in from p in project.Patches where (p.TargetArchs & build.TargetArch) != 0 select p) {
+				var patchFile = Path.Combine (actualSrcDir, String.Format ("__drosh_patch_{0}_{1}.patch", project.TargetNDKs, build.TargetArch));
 				using (var fs = File.CreateText (patchFile))
 					fs.Write (patch.Text);
 				var psi = new ProcessStartInfo () { FileName = "patch", Arguments = "-i -p0 \"" + patchFile + "\"", WorkingDirectory = actualSrcDir };
@@ -145,14 +144,14 @@ namespace drosh
 			// Go to srcdir and start build
 
 			foreach (var buildStep in build_steps) {
-				var scriptObj = project.Scripts.FirstOrDefault (s => s.Step == buildStep && (s.TargetNDKs & build.TargetNDK) != 0 && (s.TargetArchs & build.TargetArch) != 0);
-				string script = scriptObj != null ? scriptObj.Text : GetDefaultScript (project.BuildType, buildStep, build.TargetNDK);
+				var scriptObj = project.Scripts.FirstOrDefault (s => s.Step == buildStep && (s.TargetArchs & build.TargetArch) != 0);
+				string script = scriptObj != null ? scriptObj.Text : GetDefaultScript (project.BuildType, buildStep, project.TargetNDKs);
 
 				string scriptFile = Path.Combine (actualSrcDir, String.Format ("__build_command_{0}.sh", buildStep));
 				using (var fs = File.CreateText (scriptFile))
 					fs.WriteLine (script);
 				var psi = new ProcessStartInfo () { FileName = "bash", Arguments = scriptFile, WorkingDirectory = actualSrcDir, UseShellExecute = false };
-				psi.EnvironmentVariables.Add ("ANDROID_NDK_ROOT", Drosh.GetAndroidRoot (build.TargetNDK));
+				psi.EnvironmentVariables.Add ("ANDROID_NDK_ROOT", Drosh.GetAndroidRoot (project.TargetNDKs));
 				psi.EnvironmentVariables.Add ("DEPS_TOPDIR", depsDir);
 				psi.EnvironmentVariables.Add ("RESULT_TOPDIR", resultDir);
 				psi.EnvironmentVariables.Add ("RUNNER_DIR", Drosh.ToolDir);

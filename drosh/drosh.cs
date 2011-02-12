@@ -507,8 +507,13 @@ namespace drosh
 			case "cmake": p.BuildType = BuildType.CMake; break;
 			default: throw new Exception (String.Format ("Unexpected build type: '{0}'", ctx.Request.Data ["build-type"]));
 			}
+			switch (ctx.Request.Data ["target-ndk"].Trim ()) {
+			case "r5": p.TargetNDKs = NDKType.R5; break;
+			case "crystax-r4": p.TargetNDKs = NDKType.CrystaxR4; break;
+			case "r4": p.TargetNDKs = NDKType.R4; break;
+			default: throw new Exception (String.Format ("Unexpected target NDK: '{0}'", ctx.Request.Data ["target-ndk"]));
+			}
 
-			p.TargetNDKs = GetNDKTarget (ctx, null, 0);
 			p.TargetArchs = GetArchTarget (ctx, null, 0);
 
 			// FIXME: handle source-archive
@@ -517,7 +522,6 @@ namespace drosh
 			p.Patches = new List<Patch> ();
 			while (ctx.Request.Data ["patch-target-" + ++n_patch + "-text"] != null) {
 				var patch = new Patch ();
-				patch.TargetNDKs = GetNDKTarget (ctx, "patch-", n_patch);
 				patch.TargetArchs = GetArchTarget (ctx, "patch-", n_patch);
 				p.Patches.Add (patch);
 			}
@@ -532,7 +536,6 @@ namespace drosh
 				case "install": script.Step = ScriptStep.Install; break;
 				case "postinstall": script.Step = ScriptStep.PostInstall; break;
 				}
-				script.TargetNDKs = GetNDKTarget (ctx, "script-", n_patch);
 				script.TargetArchs = GetArchTarget (ctx, "script-", n_patch);
 				p.Scripts.Add (script);
 			}
@@ -635,6 +638,7 @@ foreach (var revv in DataStore.Revisions) Console.WriteLine ("!! {0} {1} {2}", r
 			return uniqueName;
 		}
 
+		/*
 		NDKType GetNDKTarget (IManosContext ctx, string prefix, int count)
 		{
 			var s = ctx.Request.Data [prefix + "target-ndk" + (count > 0 ? "-" + count : String.Empty)];
@@ -649,6 +653,7 @@ foreach (var revv in DataStore.Revisions) Console.WriteLine ("!! {0} {1} {2}", r
 				ret |= NDKType.R4;
 			return ret;
 		}
+		*/
 
 		ArchType GetArchTarget (IManosContext ctx, string prefix, int count)
 		{

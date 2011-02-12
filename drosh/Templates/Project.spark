@@ -71,7 +71,7 @@
   </tr><tr>
     <td>Patches: </td><td>
 <for each="var patch in Project.Patches">
-  <set ident="patch.TargetNDKs + '-' + patch.TargetArchs" />
+  <set ident="'' + patch.TargetArchs" />
   <div id="patch-${ident}" name="patch-${ident}">
     <p>${ident}<br/><textarea id="patch-text-${ident}" name="patch-text-${ident}" rows="4" cols="80">${patch.Text}</textarea></p>
     </td>
@@ -79,7 +79,7 @@
   </tr><tr>
     <td>Build Scripts: </td><td>
 <for each="var script in Project.Scripts">
-  <set ident="script.TargetNDKs + '-' + script.TargetArchs + '-' + script.Step" />
+  <set ident="script.TargetArchs + '-' + script.Step" />
   <div id="script-${ident}" name="script-${ident}">
     <p>${ident}<br/><textarea id="script-text-${ident}" name="script-text-${ident}" rows="4" cols="80">${script.Text}</textarea></p>
   </div>
@@ -117,7 +117,6 @@
   <td style="color: ${build.Status == BuildStatus.Failure ? 'red' : build.Status == BuildStatus.Success ? 'green' : build.Status == BuildStatus.Ongoing ? 'yellow' : null}">${build.Status}</td>
   <td>${build.BuildRecordedTimestamp.ToString ("s")}</td>
   <td>${build.ProjectRevision.Substring (0, 8)}...</td>
-  <td>${build.TargetNDK}</td>
   <td>${build.TargetArch}</td>
   <td><a href="/user/${build.Builder}">${build.Builder}</td>
   <td><a href="/log/${build.BuildId}"><img alt="Log" src="/images/log.png" /></a></td>

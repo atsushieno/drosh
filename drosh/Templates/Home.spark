@@ -54,7 +54,6 @@
   <td>${build.BuildStartedTimestamp}</td>
   <td><a href="/project/${build.ProjectOwner}/${build.ProjectName}/${build.ProjectRevision}">${build.ProjectName}</td>
   <td>${build.ProjectRevision}</td>
-  <td>${build.TargetNDK}</td>
   <td>${build.TargetArch}</td>
 </tr>
 </for>
