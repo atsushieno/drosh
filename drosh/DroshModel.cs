@@ -15,8 +15,8 @@ namespace drosh
 	{
 		None = 0,
 		R5 = 1,
-		CrystaxR4b = 2,
-		R4b = 4
+		CrystaxR4 = 2,
+		R4 = 4
 	}
 	
 	[Flags]

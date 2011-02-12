@@ -13,7 +13,7 @@ namespace drosh
 {
 	public class Builder
 	{
-		static NDKType [] target_ndks = new NDKType [] { NDKType.R5, NDKType.CrystaxR4b, NDKType.R4b };
+		static NDKType [] target_ndks = new NDKType [] { NDKType.R5, NDKType.CrystaxR4, NDKType.R4 };
 		static ArchType [] target_archs = new ArchType [] { ArchType.Arm, ArchType.ArmV7a, ArchType.X86 };
 
 		public static void QueueBuild (ProjectRevision rev, UserReference user)
@@ -113,11 +113,12 @@ namespace drosh
 
 			if (project.Dependencies != null) {
 				foreach (var dep in project.Dependencies) {
-					var dp = DataStore.GetProject (dep);
+					// user/projectname or projectId
+					var dp = dep.Contains ('/') ? DataStore.GetProject (dep.Substring (0, dep.IndexOf ('/')), dep.Substring (dep.IndexOf ('/') + 1)) : DataStore.GetProject (dep);
 					var b = DataStore.GetLatestBuild (dp, build.TargetArch);
 					if (b == null)
 						throw new Exception (String.Format ("Dependency project {0}/{1} has no successful result for {2} yet", dp.Owner, dp.Name, build.TargetArch));
-					var deppath = Path.Combine (Drosh.DownloadTopdir, "user", dp.Owner, b.LocalResultArchive);
+					var deppath = Path.Combine (Drosh.DownloadTopdir, b.LocalResultArchive);
 					Unpack (deppath, depsDir);
 				}
 			}
@@ -196,6 +197,7 @@ namespace drosh
 			Process proc;
 			var psi = new ProcessStartInfo () { UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true };
 			psi.WorkingDirectory = destDir;
+Console.Error.WriteLine ("Unpacking {0} in {1}", archive, psi.WorkingDirectory);
 			switch (Path.GetExtension (archive).ToLower ()) {
 			case ".zip":
 				psi.FileName = "unzip";

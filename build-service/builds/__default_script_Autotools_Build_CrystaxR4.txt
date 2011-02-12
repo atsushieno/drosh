@@ -1,0 +1,18 @@
+echo "Current directory is $RUNNER_DIR"
+echo "ANDROID_NDK_ROOT is $ANDROID_NDK_ROOT"
+echo "DEPS_TOPDIR is $DEPS_TOPDIR"
+echo "RESULT_TOPDIR is $RESULT_TOPDIR"
+export ANDROID_NDK_ROOT=$RUNNER_DIR/../../android-ndk-r4-crystax
+export TOOLCHAIN=$ANDROID_NDK_ROOT/build/prebuilt/linux-x86/arm-eabi-4.2.1
+export ANDROID_VER=8 # could be 3, 4, 5 or 8
+export PLATFORM=$ANDROID_NDK_ROOT/build/platforms/android-$ANDROID_VER/arch-arm/usr
+export PATH=$TOOLCHAIN/bin:$DEPS_TOPDIR/bin:$PATH
+export LD_LIBRARY_PATH=$TOOLCHAIN/lib:$DEPS_TOPDIR/lib:$LD_LIBRARY_PATH
+export PKG_CONFIG_PATH=$TOOLCHAIN/lib/pkgconfig:$DEPS_TOPDIR/lib/pkgconfig:$LD_LIBRARY_PATH
+./configure --host=arm-eabi CC=arm-eabi-gcc CFLAGS="-I$PLATFORM/include -nostdlib" LDFLAGS="-Wl,-rpath-link=$PLATFORM/lib/ -L$PLATFORM/lib/" LIBS="-lc " --prefix=$RESULT_TOPDIR || exit 1
+echo NOTE: to link with libc, use: -L $PLATFORM/lib -lc
+echo NOTE: to generate shared library from static library, run:
+echo $ arm-eabi-gcc -nostdlib -shared -s -o YOUR_LIBRARY.so --whole-archive -Wl,-whole-archive libogg-1.2.0/src/.libs/YOUR_LIBRARY.a -Wl,-no-whole-archive --no-whole-archive -L $PLATFORM/lib -lc
+make || exit 1
+
+

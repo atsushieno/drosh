@@ -296,7 +296,14 @@ namespace drosh
 				SetSession (ctx, session);
 				ctx.Response.Redirect ("/register/user/recovery");
 			} else {
-				session.Notification = "Your account is temporarily suspended and verification email is sent to you";
+				//user.Status = UserStatus.Pending;
+				//user.Verification = Guid.NewGuid ().ToString ();
+				//DataStore.UpdateUser (user);
+				//MailManager.SendActivation (user);
+				user.PasswordHash = DataStore.HashPassword (String.Empty);
+				DataStore.UpdateUser (user);
+
+				session.Notification = "<del>Your account is temporarily suspended and verification email is sent to you</del> Your password is reset to be empty. Change it immediately.";
 				SetSession (ctx, session);
 				ctx.Response.Redirect ("/");
 			}
@@ -440,7 +447,7 @@ namespace drosh
 			project.Owner = user.Name;
 			project.Id = Guid.NewGuid ().ToString ();
 			string newname = Path.Combine (Guid.NewGuid () + "_" + project.LocalArchiveName.Substring (id_prefix_length));
-			//File.Move (Path.Combine (DownloadTopdir, "user", user.Name, project.LocalArchiveName), Path.Combine (DownloadTopdir, newname));
+			File.Move (Path.Combine (DownloadTopdir, "user", user.Name, project.LocalArchiveName), Path.Combine (DownloadTopdir, newname));
 			project.LocalArchiveName = newname;
 			DataStore.RegisterProject (project);
 			session.Notification = String.Format ("Registered project '{0}'", project.Name);
@@ -491,13 +498,14 @@ namespace drosh
 			p.Dependencies = (ctx.Request.Data ["deps"] ?? String.Empty).Split (new char [] {' '}, StringSplitOptions.RemoveEmptyEntries);
 			p.Builders = (ctx.Request.Data ["builders"] ?? String.Empty).Split (new char [] {' '}, StringSplitOptions.RemoveEmptyEntries);
 
-			switch (ctx.Request.Data ["build-type"]) {
+			// FIXME: this trim should not be required, probably manos issue.
+			switch (ctx.Request.Data ["build-type"].Trim ()) {
 			case "prebuilt": p.BuildType = BuildType.Prebuilt; break;
 			case "custom": p.BuildType = BuildType.Custom; break;
 			case "ndk-build": p.BuildType = BuildType.NdkBuild; break;
 			case "autotools": p.BuildType = BuildType.Autotools; break;
 			case "cmake": p.BuildType = BuildType.CMake; break;
-			default: throw new Exception (ctx.Request.Data ["build-type"]);
+			default: throw new Exception (String.Format ("Unexpected build type: '{0}'", ctx.Request.Data ["build-type"]));
 			}
 
 			p.TargetNDKs = GetNDKTarget (ctx, null, 0);
@@ -536,7 +544,7 @@ namespace drosh
 				p.PublicArchiveName = file.Name;
 				p.LocalArchiveName = SaveFileOnServer (p.Owner, p.Id, file);
 			} else {
-				p.PublicArchiveName = ctx.Request.Data ["public-archive-name"];
+				p.PublicArchiveName = ctx.Request.Data ["public-archive-name"] ?? p.PublicArchiveName;
 				p.LocalArchiveName = ctx.Request.Data ["local-archive-name"];
 			}
 
@@ -635,10 +643,10 @@ foreach (var revv in DataStore.Revisions) Console.WriteLine ("!! {0} {1} {2}", r
 			NDKType ret = NDKType.None;
 			if (ctx.Request.Data [prefix + "target-ndk-" + (count > 0 ? count + "-" : String.Empty) + "r5"] != null)
 				ret |= NDKType.R5;
-			if (ctx.Request.Data [prefix + "target-ndk-" + (count > 0 ? count + "-" : String.Empty) + "crystaxR4b"] != null)
-				ret |= NDKType.CrystaxR4b;
-			if (ctx.Request.Data [prefix + "target-ndk-" + (count > 0 ? count + "-" : String.Empty) + "r4b"] != null)
-				ret |= NDKType.R4b;
+			if (ctx.Request.Data [prefix + "target-ndk-" + (count > 0 ? count + "-" : String.Empty) + "crystaxR4"] != null)
+				ret |= NDKType.CrystaxR4;
+			if (ctx.Request.Data [prefix + "target-ndk-" + (count > 0 ? count + "-" : String.Empty) + "r4"] != null)
+				ret |= NDKType.R4;
 			return ret;
 		}
 

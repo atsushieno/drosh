@@ -72,8 +72,8 @@ Logged in as ${LoggedUser.Name}<br />
     <td>
 <test if="Editable">
       <input type="checkbox" name="target-ndk-r5" checked="?{Project == null || (Project.TargetNDKs & NDKType.R5) != 0}" />r5
-      <input type="checkbox" name="target-ndk-crystaxR4b"  checked="?{Project == null || (Project.TargetNDKs & NDKType.CrystaxR4b) != 0}" />crystax r4b
-      <input type="checkbox" name="target-ndk-r4b"  checked="?{Project == null || (Project.TargetNDKs & NDKType.R4b) != 0}" />r4b
+      <input type="checkbox" name="target-ndk-crystaxR4"  checked="?{Project == null || (Project.TargetNDKs & NDKType.CrystaxR4) != 0}" />crystax r4
+      <input type="checkbox" name="target-ndk-r4"  checked="?{Project == null || (Project.TargetNDKs & NDKType.R4) != 0}" />r4
 </test><else>
   <input type="hidden" name="target-ndk" value="${Project.TargetNDKs}" />${Project.TargetNDKs}
 </else>
@@ -112,8 +112,8 @@ Logged in as ${LoggedUser.Name}<br />
       <!-- patch #${++n_patch} -->
       NDK version:
       <input type="checkbox" name="patch-target-ndk-${n_patch}-r5" checked="?{(patch.TargetNDKs & NDKType.R5) != 0}" />r5
-      <input type="checkbox" name="patch-target-ndk-${n_patch}-crystaxR4b" checked="?{(patch.TargetNDKs & NDKType.CrystaxR4b) != 0}" />crystax r4b
-      <input type="checkbox" name="patch-target-ndk-${n_patch}-r4b" checked="?{(patch.TargetNDKs & NDKType.R4b) != 0}" />r4b
+      <input type="checkbox" name="patch-target-ndk-${n_patch}-crystaxR4" checked="?{(patch.TargetNDKs & NDKType.CrystaxR4) != 0}" />crystax r4
+      <input type="checkbox" name="patch-target-ndk-${n_patch}-r4" checked="?{(patch.TargetNDKs & NDKType.R4) != 0}" />r4
       <br />
       Arch:
       <input type="checkbox" name="patch-target-arch-${n_patch}-arm" checked="?{(patch.TargetArchs & ArchType.Arm) != 0}" />armeabi
@@ -130,8 +130,8 @@ Logged in as ${LoggedUser.Name}<br />
 <div style="${Editable ? 'display: none' : ''}">
       NDK version:
       <input type="checkbox" name="patch-target-ndk-r5" checked="" />r5
-      <input type="checkbox" name="patch-target-ndk-crystaxR4b" checked="" />crystax r4b
-      <input type="checkbox" name="patch-target-ndk-r4b" checked="" />r4b
+      <input type="checkbox" name="patch-target-ndk-crystaxR4" checked="" />crystax r4
+      <input type="checkbox" name="patch-target-ndk-r4" checked="" />r4
       <br />
       Arch:
       <input type="checkbox" name="patch-target-arch-arm" checked="" />armeabi
@@ -160,8 +160,8 @@ Logged in as ${LoggedUser.Name}<br />
       </select><br />
       NDK version:
       <input type="checkbox" name="script-target-ndk-${n_script}-r5" checked="?{(script.TargetNDKs & NDKType.R5) != 0}" />r5
-      <input type="checkbox" name="script-target-ndk-${n_script}-crystaxR4b" checked="?{(script.TargetNDKs & NDKType.CrystaxR4b) != 0}" />crystax r4b
-      <input type="checkbox" name="script-target-ndk-${n_script}-r4b" checked="?{(script.TargetNDKs & NDKType.R4b) != 0}" />r4b
+      <input type="checkbox" name="script-target-ndk-${n_script}-crystaxR4" checked="?{(script.TargetNDKs & NDKType.CrystaxR4) != 0}" />crystax r4
+      <input type="checkbox" name="script-target-ndk-${n_script}-r4" checked="?{(script.TargetNDKs & NDKType.R4) != 0}" />r4
       <br />
       Arch:
       <input type="checkbox" name="script-target-arch-${n_script}-arm" checked="?{(script.TargetArchs & ArchType.Arm) != 0}" />armeabi
@@ -185,8 +185,8 @@ Logged in as ${LoggedUser.Name}<br />
       </select><br />
       NDK version:
       <input type="checkbox" name="script-target-ndk-r5" checked="" />r5
-      <input type="checkbox" name="script-target-ndk-crystaxR4b" checked="" />crystax r4b
-      <input type="checkbox" name="script-target-ndk-r4b" checked="" />r4b
+      <input type="checkbox" name="script-target-ndk-crystaxR4" checked="" />crystax r4
+      <input type="checkbox" name="script-target-ndk-r4" checked="" />r4
       <br />
       Arch:
       <input type="checkbox" name="script-target-arch-arm" checked="" />armeabi

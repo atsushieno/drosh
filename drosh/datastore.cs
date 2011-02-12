@@ -32,9 +32,9 @@ namespace drosh
 			switch (type) {
 			case NDKType.R5:
 				return AndroidNdkR5;
-			case NDKType.CrystaxR4b:
+			case NDKType.CrystaxR4:
 				return AndroidNdkCrystaxR4;
-			case NDKType.R4b:
+			case NDKType.R4:
 				return AndroidNdkR4;
 			default:
 				throw new ArgumentOutOfRangeException ("type");
@@ -242,6 +242,8 @@ namespace drosh
 
 		public static BuildRecord GetLatestBuild (Project project, ArchType arch)
 		{
+			if (project == null)
+				throw new ArgumentNullException ("project");
 			return (from b in Builds where b.ProjectOwner == project.Owner && b.ProjectName == project.Name && b.TargetArch == arch && b.Status == BuildStatus.Success orderby b.BuildStartedTimestamp descending select b).FirstOrDefault ();
 		}
 
