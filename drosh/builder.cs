@@ -53,9 +53,8 @@ namespace drosh
 
 		public static void ProcessBuilds ()
 		{
-			BuildRecord build;
 			DateTime lastBuild = DateTime.MinValue;
-			while ((build = DataStore.Builds.FirstOrDefault (b => b.Status == BuildStatus.Queued)) != null) {
+			foreach (var build in DataStore.Builds.Where (b => b.Status == BuildStatus.Queued)) {
 				if (DateTime.Now - lastBuild < TimeSpan.FromMilliseconds (100))
 					break; // too short. Very likely something bad happens.
 				if (build == null)
@@ -170,7 +169,7 @@ namespace drosh
 			// FIXME: handle filesbypkg
 
 			string destArc = Path.Combine (buildDir, build.ProjectName + "-bin.tar.bz2");
-			var pkpsi = new ProcessStartInfo () { FileName = "tar", Arguments = String.Format ("jcf {0} {1}/*", destArc, resultDir) };
+			var pkpsi = new ProcessStartInfo () { FileName = "tar", Arguments = String.Format ("jcf {0} build", destArc), WorkingDirectory = buildDir, UseShellExecute = false };
 			var pkproc = Process.Start (pkpsi);
 			if (!pkproc.WaitForExit (10000)) {
 				pkproc.Kill ();

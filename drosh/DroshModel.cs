@@ -55,6 +55,12 @@ namespace drosh
 	
 	public class Patch
 	{
+		public Patch ()
+		{
+			Id = Guid.NewGuid ().ToString ();
+		}
+
+		public string Id { get; set; }
 		public NDKType TargetNDKs { get; set; }
 		public ArchType TargetArchs { get; set; }
 		public string Text { get; set; }
@@ -67,6 +73,12 @@ namespace drosh
 	
 	public class Script
 	{
+		public Script ()
+		{
+			Id = Guid.NewGuid ().ToString ();
+		}
+
+		public string Id { get; set; }
 		public ScriptStep Step { get; set; }
 		public NDKType TargetNDKs { get; set; }
 		public ArchType TargetArchs { get; set; }
@@ -124,6 +136,10 @@ namespace drosh
 	// FIXME: now I doubt if we want this record.
 	public class ProjectRevision
 	{
+		public string Id {
+			get { return RevisionId; }
+		}
+
 		public UserReference ProjectOwner { get; set; }
 		public ProjectReference ProjectName { get; set; }
 		public string RevisionId { get; set; }
@@ -132,6 +148,9 @@ namespace drosh
 
 	public class ProjectSubscription // project builder users
 	{
+		public string Id {
+			get { return Project + "/" + User + "/" + SubscriptionKind; }
+		}
 		public ProjectReference Project { get; set; }
 		public UserReference User { get; set; }
 		public SubscriptionKind SubscriptionKind { get; set; }
@@ -139,6 +158,10 @@ namespace drosh
 
 	public class User
 	{
+		public string Id {
+			get { return Name; }
+		}
+
 		public string Name { get; set; }
 		public string OpenID { get; set; }
 		public string Email { get; set; }
@@ -167,6 +190,10 @@ namespace drosh
 
 	public class BuildRecord
 	{
+		public string Id {
+			get { return BuildId; }
+		}
+
 		public string BuildId { get; set; }
 		public string ProjectOwner { get; set; }
 		public string ProjectName { get; set; }

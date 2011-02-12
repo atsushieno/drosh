@@ -242,7 +242,7 @@ namespace drosh
 
 		public static BuildRecord GetLatestBuild (Project project, ArchType arch)
 		{
-			return (from b in Builds where b.ProjectOwner == project.Owner && b.ProjectName == project.Name && b.TargetArch == arch && b.Status == BuildStatus.Success orderby b.BuildStartedTimestamp select b).FirstOrDefault ();
+			return (from b in Builds where b.ProjectOwner == project.Owner && b.ProjectName == project.Name && b.TargetArch == arch && b.Status == BuildStatus.Success orderby b.BuildStartedTimestamp descending select b).FirstOrDefault ();
 		}
 
 		public static void RegisterBuildRecord (BuildRecord build)
