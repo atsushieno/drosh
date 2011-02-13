@@ -11,6 +11,6 @@ find $RESULT_TOPDIR -name *.a
 
 mkdir -p $RESULT_TOPDIR/libs
 for alib in `find $RESULT_TOPDIR -name *.a`; do
-arm-eabi-gcc -nostdlib -shared -s -o $RESULT_TOPDIR/libs/`basename $alib`.so --whole-archive -Wl,-whole-archive $alib -Wl,-no-whole-archive --no-whole-archive -L $PLATFORM/lib -lc
+arm-eabi-gcc -nostdlib -shared -s -o $RESULT_TOPDIR/libs/`basename $alib | sed -e "s/.a$/.so/"` --whole-archive -Wl,-whole-archive $alib -Wl,-no-whole-archive --no-whole-archive -L $PLATFORM/lib -lc
 done
 
