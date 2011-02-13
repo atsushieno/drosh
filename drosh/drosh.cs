@@ -447,9 +447,11 @@ namespace drosh
 			var project = CreateProjectFromForm (session, ctx);
 			project.Owner = user.Name;
 			project.Id = Guid.NewGuid ().ToString ();
-			string newname = Path.Combine (Guid.NewGuid () + "_" + project.LocalArchiveName.Substring (id_prefix_length));
-			File.Move (Path.Combine (DownloadTopdir, "user", user.Name, project.LocalArchiveName), Path.Combine (DownloadTopdir, "user", user.Name, newname));
-			project.LocalArchiveName = newname;
+			if (!String.IsNullOrEmpty (project.LocalArchiveName)) {
+				string newname = Path.Combine (Guid.NewGuid () + "_" + project.LocalArchiveName.Substring (id_prefix_length));
+				File.Move (Path.Combine (DownloadTopdir, "user", user.Name, project.LocalArchiveName), Path.Combine (DownloadTopdir, "user", user.Name, newname));
+				project.LocalArchiveName = newname;
+			}
 			DataStore.RegisterProject (project);
 			session.Notification = String.Format ("Registered project '{0}'", project.Name);
 			SetSession (ctx, session);
@@ -523,12 +525,16 @@ namespace drosh
 			p.Patches = new List<Patch> ();
 			while (ctx.Request.Data ["patch-target-" + ++n_patch + "-text"] != null) {
 				var patch = new Patch ();
-				patch.TargetArchs = GetArchTarget (ctx, "patch-", n_patch);
 				p.Patches.Add (patch);
 			}
 
 			int n_script = 0;
 			p.Scripts = new List<Script> ();
+			p.Scripts.Add (new Script () { Step = ScriptStep.Build, Text = ctx.Request.Data ["script-text-build"] });
+			p.Scripts.Add (new Script () { Step = ScriptStep.PreInstall, Text = ctx.Request.Data ["script-text-preinstall"] });
+			p.Scripts.Add (new Script () { Step = ScriptStep.Install, Text = ctx.Request.Data ["script-text-install"] });
+			p.Scripts.Add (new Script () { Step = ScriptStep.PostInstall, Text = ctx.Request.Data ["script-text-postinstall"] });
+/*
 			while (ctx.Request.Data ["script-target-" + ++n_script + "-text"] != null) {
 				var script = new Script ();
 				switch (ctx.Request.Data ["script-step-" + n_script]) {
@@ -537,11 +543,9 @@ namespace drosh
 				case "install": script.Step = ScriptStep.Install; break;
 				case "postinstall": script.Step = ScriptStep.PostInstall; break;
 				}
-				script.TargetArchs = GetArchTarget (ctx, "script-", n_patch);
 				p.Scripts.Add (script);
 			}
-
-			// FIXME: fill everything else appropriate
+*/
 
 			var file = ctx.Request.Files.Get ("source-archive");
 			if (file != null) {

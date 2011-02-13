@@ -134,7 +134,7 @@ namespace drosh
 			var dirs = Directory.GetDirectories (buildSrcDir);
 			string actualSrcDir = dirs.Length == 1 ? dirs [0] : buildSrcDir;
 
-			foreach (var patch in from p in project.Patches where (p.TargetArchs & build.TargetArch) != 0 select p) {
+			foreach (var patch in from p in project.Patches select p) {
 				var patchFile = Path.Combine (actualSrcDir, String.Format ("__drosh_patch_{0}_{1}.patch", project.TargetNDKs, build.TargetArch));
 				using (var fs = File.CreateText (patchFile))
 					fs.Write (patch.Text);
@@ -149,7 +149,7 @@ namespace drosh
 			// Go to srcdir and start build
 
 			foreach (var buildStep in build_steps) {
-				var scriptObj = project.Scripts.FirstOrDefault (s => s.Step == buildStep && (s.TargetArchs & build.TargetArch) != 0);
+				var scriptObj = project.Scripts.FirstOrDefault (s => s.Step == buildStep);
 				string script = scriptObj != null ? scriptObj.Text : GetDefaultScript (project.BuildType, buildStep, project.TargetNDKs);
 
 				string scriptFile = Path.Combine (actualSrcDir, String.Format ("__build_command_{0}.sh", buildStep));

@@ -103,29 +103,19 @@ Logged in as ${LoggedUser.Name}<br />
   <tr>
     <td>Patches: </td>
     <td>
-<test if="Project != null && Project.Patches != null">
 <div style="${Editable ? 'display: none' : ''}">
+<test if="Project != null && Project.Patches != null">
 <for each="var patch in Project.Patches">
       <div>
-      Arch:
-      <input type="checkbox" name="patch-target-arch-${n_patch}-arm" checked="?{(patch.TargetArchs & ArchType.Arm) != 0}" />armeabi
-      <input type="checkbox" name="patch-target-arch-${n_patch}-armV7a" checked="?{(patch.TargetArchs & ArchType.ArmV7a) != 0}" />armeabi-v7a
-      <input type="checkbox" name="patch-target-arch-${n_patch}-x86" checked="?{(patch.TargetArchs & ArchType.X86) != 0}" />x86
-      <br />
-      <textarea cols="80" rows="5" id="patch-text" name="patch-${n_patch}-text" readonly="?{!Editable}">${patch.Text}</textarea><br />
+      <textarea cols="80" rows="5" name="patch-${n_patch}-text" readonly="?{!Editable}">${patch.Text}</textarea><br />
       <test if="Editable">To remove patch, just clear patch text.</test>
       </div>
 </for>
-</div>
 </test>
+</div>
 
-<div style="${Editable ? 'display: none' : ''}">
-      Arch:
-      <input type="checkbox" name="patch-target-arch-arm" checked="" />armeabi
-      <input type="checkbox" name="patch-target-arch-armV7a" checked="" />armeabi-v7a
-      <input type="checkbox" name="patch-target-arch-x86" checked="" />x86
-      <br />
-      <textarea cols="80" rows="5" id="patch-text" name="patch-text"></textarea><br />
+<div style="${Editable ? '' : 'display: none'}">
+      <textarea cols="80" rows="1" id="patch-text" name="patch-text"></textarea><br />
       <input type="button" value="TODO: Add more..." />
 </div>
     </td>
@@ -134,46 +124,18 @@ Logged in as ${LoggedUser.Name}<br />
   <tr>
     <td>Build Script:</td>
     <td>
-<test if="Project != null && Project.Scripts != null">
-<for each="var script in Project.Scripts">
-      <!-- script #${++n_script} -->
-      <div>
-      Phase:
-      <select name="script-step-${n_script}">
-        <option value="build">build</option>
-        <option value="preinstall">preinstall</option>
-        <option value="install">install</option>
-        <option value="postinstall">postinstall</option>
-      </select><br />
-      Arch:
-      <input type="checkbox" name="script-target-arch-${n_script}-arm" checked="?{(script.TargetArchs & ArchType.Arm) != 0}" />armeabi
-      <input type="checkbox" name="script-target-arch-${n_script}-armV7a" checked="?{(script.TargetArchs & ArchType.ArmV7a) != 0}" />armeabi-v7a
-      <input type="checkbox" name="script-target-arch-${n_script}-x86" checked="?{(script.TargetArchs & ArchType.X86) != 0}" />x86
-      <br />
-      <textarea cols="80" rows="5" id="script-text" name="script-${n_script}-text" readonly="?{!Editable}">${script.Text}</textarea><br />
-      To remove script, just clear script text.
-      </div>
-</for>
-</test>
 
-<test if="Editable">
+      <test if="Editable"><p>Make it empty to use default script. To not do anything, just insert some dummy operation (e.g. echo dummy).</p></test>
       <div>
-      Phase:
-      <select name="script-step">
-        <option value="build">build</option>
-        <option value="preinstall">preinstall</option>
-        <option value="install">install</option>
-        <option value="postinstall">postinstall</option>
-      </select><br />
-      Arch:
-      <input type="checkbox" name="script-target-arch-arm" checked="" />armeabi
-      <input type="checkbox" name="script-target-arch-armV7a" checked="" />armeabi-v7a
-      <input type="checkbox" name="script-target-arch-x86" checked="" />x86
-      <br />
-      <textarea cols="80" rows="5" id="script-text" name="script-text"></textarea><br />
+      <p>Build<br />
+      <textarea cols="80" rows="1" name="script-text-build" readonly="?{!Editable}">$!{Project.Scripts[0].Text}</textarea></p>
+      <p>Preinstall<br />
+      <textarea cols="80" rows="1" name="script-text-preinstall" readonly="?{!Editable}">$!{Project.Scripts[1].Text}</textarea></p>
+      <p>Install<br />
+      <textarea cols="80" rows="1" name="script-text-install" readonly="?{!Editable}">$!{Project.Scripts[2].Text}</textarea></p>
+      <p>PostInstall<br />
+      <textarea cols="80" rows="1" name="script-text-postinstall" readonly="?{!Editable}">$!{Project.Scripts[3].Text}</textarea></p>
       </div>
-      <input type="button" value="TODO: Add more... (javascript)" />
-</test>
     </td>
   </tr>
 

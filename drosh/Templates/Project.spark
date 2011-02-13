@@ -11,6 +11,7 @@
   Builds="IEnumerable[[BuildRecord]]"
   DownloadableBuilds="IEnumerable[[BuildRecord]]" />
 <global type="string" ident="string.Empty" />
+<global type="int" count="0" />
 
 <content name="body">
 
@@ -70,8 +71,10 @@
     <td>Source: </td><td><a href="/download/user/${Project.Owner}/${Project.LocalArchiveName}">${Project.PublicArchiveName}</td>
   </tr><tr>
     <td>Patches: </td><td>
+<set count="0" />
 <for each="var patch in Project.Patches">
-  <set ident="'' + patch.TargetArchs" />
+  <set count="count + 1" />
+  <set ident="count.ToString ()" />
   <div id="patch-${ident}" name="patch-${ident}">
     <p>${ident}<br/><textarea id="patch-text-${ident}" name="patch-text-${ident}" rows="4" cols="80">${patch.Text}</textarea></p>
     </td>
@@ -79,11 +82,10 @@
   </tr><tr>
     <td>Build Scripts: </td><td>
 <for each="var script in Project.Scripts">
-  <set ident="script.TargetArchs + '-' + script.Step" />
+  <set ident="'' + script.Step" />
   <div id="script-${ident}" name="script-${ident}">
     <p>${ident}<br/><textarea id="script-text-${ident}" name="script-text-${ident}" rows="4" cols="80">${script.Text}</textarea></p>
   </div>
-}
 </for>
     </td>
   </tr>

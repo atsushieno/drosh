@@ -61,7 +61,6 @@ namespace drosh
 		}
 
 		public string Id { get; set; }
-		public ArchType TargetArchs { get; set; }
 		public string Text { get; set; }
 
 		public Patch Clone ()
@@ -79,7 +78,6 @@ namespace drosh
 
 		public string Id { get; set; }
 		public ScriptStep Step { get; set; }
-		public ArchType TargetArchs { get; set; }
 		public string Text { get; set; }
 
 		public Script Clone ()
