@@ -503,17 +503,17 @@ namespace drosh
 
 			// FIXME: this trim should not be required, probably manos issue.
 			switch (ctx.Request.Data ["build-type"].Trim ()) {
-			case "prebuilt": p.BuildType = BuildType.Prebuilt; break;
-			case "custom": p.BuildType = BuildType.Custom; break;
-			case "ndk-build": p.BuildType = BuildType.NdkBuild; break;
-			case "autotools": p.BuildType = BuildType.Autotools; break;
-			case "cmake": p.BuildType = BuildType.CMake; break;
+			case "Prebuilt": p.BuildType = BuildType.Prebuilt; break;
+			case "Custom": p.BuildType = BuildType.Custom; break;
+			case "NdkBuild": p.BuildType = BuildType.NdkBuild; break;
+			case "Autotools": p.BuildType = BuildType.Autotools; break;
+			case "CMake": p.BuildType = BuildType.CMake; break;
 			default: throw new Exception (String.Format ("Unexpected build type: '{0}'", ctx.Request.Data ["build-type"]));
 			}
 			switch (ctx.Request.Data ["target-ndk"].Trim ()) {
-			case "r5": p.TargetNDKs = NDKType.R5; break;
-			case "crystax-r4": p.TargetNDKs = NDKType.CrystaxR4; break;
-			case "r4": p.TargetNDKs = NDKType.R4; break;
+			case "R5": p.TargetNDKs = NDKType.R5; break;
+			case "CrystaxR4": p.TargetNDKs = NDKType.CrystaxR4; break;
+			case "R4": p.TargetNDKs = NDKType.R4; break;
 			default: throw new Exception (String.Format ("Unexpected target NDK: '{0}'", ctx.Request.Data ["target-ndk"]));
 			}
 
@@ -528,7 +528,6 @@ namespace drosh
 				p.Patches.Add (patch);
 			}
 
-			int n_script = 0;
 			p.Scripts = new List<Script> ();
 			p.Scripts.Add (new Script () { Step = ScriptStep.Build, Text = ctx.Request.Data ["script-text-build"] });
 			p.Scripts.Add (new Script () { Step = ScriptStep.PreInstall, Text = ctx.Request.Data ["script-text-preinstall"] });
@@ -588,6 +587,9 @@ namespace drosh
 				}
 				fork.Id = Guid.NewGuid ().ToString ();
 				fork.ForkOrigin = src.Id;
+				var newfile = Guid.NewGuid ().ToString () + fork.PublicArchiveName;
+				File.Copy (Path.Combine (Drosh.DownloadTopdir, "user", src.Owner, src.LocalArchiveName), Path.Combine (Drosh.DownloadTopdir, "user", fork.Owner, newfile));
+				fork.LocalArchiveName = newfile;
 				// FIXME: reject null srcrev to avoid complication.
 				fork.ForkOriginRevision = srcrev;
 				fork.RegisteredTimestamp = DateTime.Now;

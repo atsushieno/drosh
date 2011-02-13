@@ -12,6 +12,7 @@
   Editable="bool"
   Notification="string" />
 <var n_script="0" n_patch="0" />
+<var tmpstr="''" />
 
 <content name="body">
 
@@ -44,37 +45,69 @@ Logged in as ${LoggedUser.Name}<br />
 
 <table>
   <tr>
-    <td>Name: </td><td><input id="projectname" name="projectname" value="$!{Project.Name}" readonly="?{!Editable}" /></td>
+    <td>Name: </td>
+    <td>
+<test if="Project == null">
+      <input id="projectname" name="projectname" value="$!{Project.Name}" />
+</test><else>
+      <input type="hidden" name="projectname", value="${Project.Name}" />${Project.Name}
+</else>
+    </td>
   </tr><tr>
-    <td>Brief Description: </td><td><textarea id="description" name="description" rows="2" cols="80" readonly="?{!Editable}">$!{Project.Description}</textarea></td>
+    <td>Description: </td><td><textarea id="description" name="description" rows="2" cols="80" readonly="?{!Editable}">$!{Project.Description}</textarea></td>
   </tr><tr>
-    <td>Project WebSite</td><td><input type="text" id="website" name="website" size="80" value="$!{Project.PrimaryLink}" readonly="?{!Editable}" /></td>
+    <td>Project WebSite</td>
+    <td>
+<test if="Editable">
+      <input type="text" name="website" size="80" value="$!{Project.PrimaryLink}" />
+</test><else>
+      <input type="hidden" name="website" value="${Project.PrimaryLink}" />${Project.PrimaryLink}
+</else>
+    </td>
   </tr><tr>
     <td>Dependencies:</td>
-    <td><input type="text" id="deps" name="deps" size="80" value="$!{string.Join (' ', Project.Dependencies.ToArray ())}" readonly="?{!Editable}" /><br />enter whitespace-separated list of project names</td>
+    <td>
+      <set tmpstr="Project != null ? string.Join (' ', Project.Dependencies.ToArray ()) : null" />
+      <input type="${Editable ? 'text' : 'hidden'}" name="deps" size="80" value="${tmpstr}" />
+      <test if="Editable"><br />enter whitespace-separated list of project names</test>
+      <else>${tmpstr}</else>
+    </td>
     </td>
   </tr><tr>
     <td>Builder Users:</td>
-    <td><input type="text" id="builders" name="builders" size="80" value="$!{Project.Builders != null ? string.Join (' ', Project.Builders.ToArray ()) : null}" readonly="?{!Editable}" /><br />enter whitespace-separated list of user names</td>
+    <td>
+      <set tmpstr="Project != null && Project.Builders != null ? string.Join (' ', Project.Builders.ToArray ()) : null" />
+      <input type="${Editable ? 'text' : 'hidden'}" name="builders" size="80" value="${tmpstr}" readonly="?{!Editable}" />
+      <test if="Editable"><br />enter whitespace-separated list of user names</test>
+      <else>${tmpstr}</else>
+    </td>
   </tr><tr>
     <td>Build Type: </td>
     <td>
-      <select name="build-type" readonly="?{!Editable}">
-        <option value="prebuilt" selected="?{Project != null && Project.BuildType == BuildType.Prebuilt}">prebuilt</option>
-        <option value="custom" selected="?{Project != null && Project.BuildType == BuildType.Custom}">custom</option>
-        <option value="ndk-build" selected="?{Project != null && Project.BuildType == BuildType.NdkBuild}">ndk-build</option>
-        <option value="autotools" selected="?{Project != null && Project.BuildType == BuildType.Autotools}">autotools</option>
-        <option value="cmake" selected="?{Project != null && Project.BuildType == BuildType.CMake}">cmake</option>
+<test if="Editable">
+      <select name="build-type">
+        <option value="Prebuilt" selected="?{Project != null && Project.BuildType == BuildType.Prebuilt}">prebuilt</option>
+        <option value="Custom" selected="?{Project != null && Project.BuildType == BuildType.Custom}">custom</option>
+        <option value="NdkBuild" selected="?{Project != null && Project.BuildType == BuildType.NdkBuild}">ndk-build</option>
+        <option value="Autotools" selected="?{Project != null && Project.BuildType == BuildType.Autotools}">autotools</option>
+        <option value="CMake" selected="?{Project != null && Project.BuildType == BuildType.CMake}">cmake</option>
       </select>
+</test><else>
+      <input type="hidden" name="build-type" value="${Project.BuildType}" />${Project.BuildType}
+</else>
     </td>
   </tr><tr>
     <td>Target NDK: </td>
     <td>
-      <select name="target-ndk" readonly="?{!Editable}">
-        <option value="r5" selected="?{Project != null && Project.TargetNDKs == NDKType.R5}">r5</option>
-        <option value="crystax-r4" selected="?{Project != null && Project.TargetNDKs == NDKType.CrystaxR4}">crystax r4</option>
-        <option value="r4" selected="?{Project != null && Project.TargetNDKs == NDKType.R4}">r4</option>
+<test if="Editable">
+      <select name="target-ndk">
+        <option value="R5" selected="?{Project != null && Project.TargetNDKs == NDKType.R5}">r5</option>
+        <option value="CrystaxR4" selected="?{Project != null && Project.TargetNDKs == NDKType.CrystaxR4}">crystax r4</option>
+        <option value="R4" selected="?{Project != null && Project.TargetNDKs == NDKType.R4}">r4</option>
       </select>
+</test><else>
+        <input type="hidden" name="target-ndk" value="${Project.TargetNDKs}" />${Project.TargetNDKs}
+</else>
     </td>
   </tr><tr>
     <td>Target Arch: </td>
