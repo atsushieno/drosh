@@ -150,7 +150,9 @@ namespace drosh
 
 			foreach (var buildStep in build_steps) {
 				var scriptObj = project.Scripts.FirstOrDefault (s => s.Step == buildStep);
-				string script = scriptObj != null ? scriptObj.Text : GetDefaultScript (project.BuildType, buildStep, project.TargetNDKs);
+				string script = scriptObj != null ? scriptObj.Text : null;
+				script = script != null ? script.Trim () : null;
+				script = String.IsNullOrEmpty (script) ? GetDefaultScript (project.BuildType, buildStep, project.TargetNDKs) : script;
 
 				string scriptFile = Path.Combine (actualSrcDir, String.Format ("__build_command_{0}.sh", buildStep));
 				using (var fs = File.CreateText (scriptFile))
@@ -174,7 +176,9 @@ namespace drosh
 			// FIXME: handle filesbypkg
 
 			string destArc = Path.Combine (buildDir, build.ProjectName + "-bin.tar.bz2");
-			var pkpsi = new ProcessStartInfo () { FileName = "tar", Arguments = String.Format ("jcf {0} .", destArc), WorkingDirectory = resultDir, UseShellExecute = false };
+			string files = String.Join (" ", from fsi in new DirectoryInfo (resultDir).GetFileSystemInfos () select "\"" + fsi.Name + "\"");
+			var pkpsi = new ProcessStartInfo () { FileName = "tar", Arguments = String.Format ("jcf {0} {1}", destArc, files), WorkingDirectory = resultDir };
+Console.WriteLine (pkpsi.Arguments);
 			var pkproc = Process.Start (pkpsi);
 			if (!pkproc.WaitForExit (10000)) {
 				pkproc.Kill ();

@@ -1,2 +1,16 @@
+export ANDROID_NDK_ROOT=$RUNNER_DIR/../../android-ndk-r5b
+export TOOLCHAIN=$ANDROID_NDK_ROOT/toolchains/arm-eabi-4.4.0/prebuilt/linux-x86
+export ANDROID_VER=9 # could be 3, 4, 5 or 8
+export PLATFORM=$ANDROID_NDK_ROOT/platforms/android-$ANDROID_VER/arch-arm/usr
+export PATH=$TOOLCHAIN/bin:$DEPS_TOPDIR/bin:$PATH
+export LD_LIBRARY_PATH=$TOOLCHAIN/lib:$DEPS_TOPDIR/lib:$LD_LIBRARY_PATH
+export PKG_CONFIG_PATH=$TOOLCHAIN/lib/pkgconfig:$DEPS_TOPDIR/lib/pkgconfig:$LD_LIBRARY_PATH
 
+echo building shared library from static library...
+find $RESULT_TOPDIR -name *.a
+
+mkdir -p $RESULT_TOPDIR/libs
+for alib in `find $RESULT_TOPDIR -name *.a`; do
+arm-eabi-gcc -nostdlib -shared -s -o $RESULT_TOPDIR/libs/`basename $alib`.so --whole-archive -Wl,-whole-archive $alib -Wl,-no-whole-archive --no-whole-archive -L $PLATFORM/lib -lc
+done
 
