@@ -5,5 +5,6 @@ export PLATFORM=$ANDROID_NDK_ROOT/platforms/android-$ANDROID_VER/arch-arm/usr
 export PATH=$TOOLCHAIN/bin:$DEPS_TOPDIR/bin:$PATH
 export LD_LIBRARY_PATH=$TOOLCHAIN/lib:$DEPS_TOPDIR/lib:$LD_LIBRARY_PATH
 export PKG_CONFIG_PATH=$TOOLCHAIN/lib/pkgconfig:$DEPS_TOPDIR/lib/pkgconfig:$LD_LIBRARY_PATH
+
 make install || exit 1
 
