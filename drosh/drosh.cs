@@ -522,9 +522,12 @@ namespace drosh
 			// FIXME: handle source-archive
 
 			int n_patch = 0;
+			string patchText = "";
 			p.Patches = new List<Patch> ();
-			while (ctx.Request.Data ["patch-target-" + ++n_patch + "-text"] != null) {
-				var patch = new Patch ();
+			while ((patchText = ctx.Request.Data ["patch-" + n_patch++ + "-text"]) != null) {
+				if (patchText.Trim ().Length == 0)
+					continue;
+				var patch = new Patch () { Text = patchText.Replace ("\r\n", "\n") };
 				p.Patches.Add (patch);
 			}
 

@@ -136,19 +136,18 @@ Logged in as ${LoggedUser.Name}<br />
   <tr>
     <td>Patches: </td>
     <td>
-<div style="${Editable ? 'display: none' : ''}">
 <test if="Project != null && Project.Patches != null">
 <for each="var patch in Project.Patches">
       <div>
       <textarea cols="80" rows="5" name="patch-${n_patch}-text" readonly="?{!Editable}">${patch.Text}</textarea><br />
       <test if="Editable">To remove patch, just clear patch text.</test>
       </div>
+      <set n_patch="n_patch+1" />
 </for>
 </test>
-</div>
 
 <div style="${Editable ? '' : 'display: none'}">
-      <textarea cols="80" rows="1" id="patch-text" name="patch-text"></textarea><br />
+      <textarea cols="80" rows="1" name="patch-${n_patch}-text"></textarea><br />
       <input type="button" value="TODO: Add more..." />
 </div>
     </td>

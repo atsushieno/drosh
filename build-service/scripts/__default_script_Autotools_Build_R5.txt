@@ -11,6 +11,6 @@ echo "ANDROID_NDK_ROOT is $ANDROID_NDK_ROOT"
 echo "DEPS_TOPDIR is $DEPS_TOPDIR"
 echo "RESULT_TOPDIR is $RESULT_TOPDIR"
 
-./configure --host=arm-eabi CC=arm-eabi-gcc CFLAGS="-I$PLATFORM/include -nostdlib" LDFLAGS="-Wl,-rpath-link=$PLATFORM/lib/ -L$PLATFORM/lib/" LIBS="-lc " --enable-shared --prefix=$RESULT_TOPDIR || exit 1
+./configure --host=arm-eabi CFLAGS="-I$PLATFORM/include -nostdlib -mandroid" LDFLAGS="-Wl,-rpath-link=$PLATFORM/lib/ -L$PLATFORM/lib/" LIBS="-lc " --enable-shared --prefix=$RESULT_TOPDIR || exit 1
 make || exit 1
 
