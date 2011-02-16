@@ -138,7 +138,7 @@ namespace drosh
 				var patchFile = Path.Combine (actualSrcDir, String.Format ("__drosh_patch_{0}_{1}.patch", project.TargetNDKs, build.TargetArch));
 				using (var fs = File.CreateText (patchFile))
 					fs.Write (patch.Text);
-				var psi = new ProcessStartInfo () { FileName = "patch", Arguments = "-i -p0 \"" + patchFile + "\"", WorkingDirectory = actualSrcDir };
+				var psi = new ProcessStartInfo () { FileName = "patch", Arguments = String.Format ("-p{0} -i \"{1}\"", patch.Text.StartsWith ("diff --git") ? 1 : 0, patchFile), WorkingDirectory = actualSrcDir };
 				var proc = Process.Start (psi);
 				if (!proc.WaitForExit (10000)) {
 					proc.Kill ();
@@ -203,7 +203,7 @@ Console.WriteLine (pkpsi.Arguments);
 		static void Unpack (string archive, string destDir)
 		{
 			Process proc;
-			var psi = new ProcessStartInfo () { UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true };
+			var psi = new ProcessStartInfo ();
 			psi.WorkingDirectory = destDir;
 Console.Error.WriteLine ("Unpacking {0} in {1}", archive, psi.WorkingDirectory);
 			switch (Path.GetExtension (archive).ToLower ()) {
@@ -225,7 +225,7 @@ Console.Error.WriteLine ("Unpacking {0} in {1}", archive, psi.WorkingDirectory);
 			default:
 				throw new NotSupportedException (String.Format ("Not supported extension: {0}", Path.GetExtension (archive).ToLower ()));
 			}
-			if (!proc.WaitForExit (10000)) {
+			if (!proc.WaitForExit (1000 * 60)) {
 				proc.Kill ();
 				throw new Exception (String.Format ("Forcibly terminated {0} for timeout.", psi.FileName));
 			}
