@@ -522,9 +522,10 @@ namespace drosh
 			// FIXME: handle source-archive
 
 			int n_patch = 0;
-			string patchText = "";
 			p.Patches = new List<Patch> ();
-			while ((patchText = ctx.Request.Data ["patch-" + n_patch++ + "-text"]) != null) {
+			dynamic patchForm;
+			while ((patchForm = ctx.Request.Data.Get ("patch-" + n_patch++ + "-text")) != null) {
+				var patchText = patchForm.UnsafeValue;
 				if (patchText.Trim ().Length == 0)
 					continue;
 				var patch = new Patch () { Text = patchText.Replace ("\r\n", "\n") };
@@ -610,6 +611,18 @@ namespace drosh
 			ctx.Response.End ();
 		}
 
+		[Route ("/build/register/{user}/{project}/{revision}",
+			"/build/register/{user}/{project}")]
+		public void RegisterBuild (IManosContext ctx, string user, string project, string revision)
+		{
+			AssertLoggedIn (ctx, (c, session) => RegisterBuild (c, session, user, project, revision));
+		}
+
+		void RegisterBuild (IManosContext ctx, DroshSession session, string user, string project, string revision)
+		{
+			RegisterAndOrKickBuild (ctx, session, user, project, revision, false);
+		}
+		
 		[Route ("/build/kick/{user}/{project}/{revision}",
 			"/build/kick/{user}/{project}")]
 		public void KickBuild (IManosContext ctx, string user, string project, string revision)
@@ -619,8 +632,12 @@ namespace drosh
 
 		void KickBuild (IManosContext ctx, DroshSession session, string user, string project, string revision)
 		{
+			RegisterAndOrKickBuild (ctx, session, user, project, revision, true);
+		}
+
+		void RegisterAndOrKickBuild (IManosContext ctx, DroshSession session, string user, string project, string revision, bool kickBuild)
+		{
 			var proj = DataStore.GetProject (user, project);
-foreach (var revv in DataStore.Revisions) Console.WriteLine ("!! {0} {1} {2}", revv.ProjectOwner, revv.ProjectName, revv.RevisionId);
 			var rev = DataStore.GetRevision (proj.Owner, proj.Name, revision);
 			if (proj == null || rev == null) {
 				session.Notification = String.Format ("Project {0}/{1}/{2} could not be retrieved.", user, project, revision);
@@ -630,21 +647,17 @@ foreach (var revv in DataStore.Revisions) Console.WriteLine ("!! {0} {1} {2}", r
 				ShowProjectDetails (ctx, user, project, null, revision, session.Notification); // FIXME: use Response.Redirect()
 			} else {
 				var ids = Builder.QueueBuild (rev, session.User.Name);
-				foreach (var id in ids) {
-					var psi = new ProcessStartInfo () { FileName = "bash", Arguments = Path.Combine (Drosh.BuildServiceToolDir, "run-build") + " " + id, WorkingDirectory = Drosh.BuildServiceToolDir };
-					var proc = Process.Start (psi);
-					System.Threading.Thread.Sleep (300);
-					if (proc.HasExited)
-						Console.Error.WriteLine (proc.ExitCode);
+				if (kickBuild) {
+					foreach (var id in ids) {
+						var psi = new ProcessStartInfo () { FileName = "bash", Arguments = Path.Combine (Drosh.BuildServiceToolDir, "run-build") + " " + id, WorkingDirectory = Drosh.BuildServiceToolDir };
+						var proc = Process.Start (psi);
+						System.Threading.Thread.Sleep (300);
+						if (proc.HasExited)
+							Console.Error.WriteLine (proc.ExitCode);
+					}
 				}
-
-				if (proj.Owner == session.User.Name) {
-					session.Notification = "A new build has started.";
-					ctx.Response.Redirect (String.Format ("/register/project/edit/{0}/{1}", proj.Owner, proj.Name));
-				} else {
-					session.Notification = "A new build has started.";
-					ShowProjectDetails (ctx, user, project, null, revision, session.Notification); // FIXME: use Response.Redirect()
-				}
+				session.Notification = "A new build has started.";
+				ShowProjectDetails (ctx, user, project, null, revision, session.Notification); // FIXME: use Response.Redirect()
 			}
 		}
 
