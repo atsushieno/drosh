@@ -178,7 +178,6 @@ namespace drosh
 			string destArc = Path.Combine (buildDir, build.ProjectName + "-bin.tar.bz2");
 			string files = String.Join (" ", from fsi in new DirectoryInfo (resultDir).GetFileSystemInfos () select "\"" + fsi.Name + "\"");
 			var pkpsi = new ProcessStartInfo () { FileName = "tar", Arguments = String.Format ("jcf {0} {1}", destArc, files), WorkingDirectory = resultDir };
-Console.WriteLine (pkpsi.Arguments);
 			var pkproc = Process.Start (pkpsi);
 			if (!pkproc.WaitForExit (10000)) {
 				pkproc.Kill ();
@@ -205,7 +204,6 @@ Console.WriteLine (pkpsi.Arguments);
 			Process proc;
 			var psi = new ProcessStartInfo ();
 			psi.WorkingDirectory = destDir;
-Console.Error.WriteLine ("Unpacking {0} in {1}", archive, psi.WorkingDirectory);
 			switch (Path.GetExtension (archive).ToLower ()) {
 			case ".zip":
 				psi.FileName = "unzip";
