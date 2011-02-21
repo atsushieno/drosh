@@ -28,7 +28,7 @@ namespace drosh
 			LogTopdir = Path.Combine (appbase, "logs");
 			ScriptsTopdir = Path.Combine (appbase, "scripts");
 			AndroidNdkR5 = Path.Combine (appbase, "ndk-r5");
-			AndroidNdkCrystaxR4 = Path.Combine (appbase, "ndk-crystax-r4");
+			AndroidNdkCrystaxR4 = Path.Combine (appbase, "ndk-r4-crystax");
 			AndroidNdkR4 = Path.Combine (appbase, "ndk-r4");
 		}
 

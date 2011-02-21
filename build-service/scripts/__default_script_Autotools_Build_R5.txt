@@ -1,4 +1,6 @@
-export ANDROID_NDK_ROOT=$RUNNER_DIR/../../android-ndk-r5b
+if test -z $ANDROID_NDK_ROOT; then
+export ANDROID_NDK_ROOT=$RUNNER_DIR/ndk-r5
+fi
 export TOOLCHAIN=$ANDROID_NDK_ROOT/toolchains/arm-eabi-4.4.0/prebuilt/linux-x86
 export ANDROID_VER=9 # could be 3, 4, 5 or 8
 export PLATFORM=$ANDROID_NDK_ROOT/platforms/android-$ANDROID_VER/arch-arm/usr
@@ -11,6 +13,6 @@ echo "ANDROID_NDK_ROOT is $ANDROID_NDK_ROOT"
 echo "DEPS_TOPDIR is $DEPS_TOPDIR"
 echo "RESULT_TOPDIR is $RESULT_TOPDIR"
 
-./configure --host=arm-eabi CFLAGS="-I$PLATFORM/include -nostdlib -mandroid" LDFLAGS="-Wl,-rpath-link=$PLATFORM/lib/ -L$PLATFORM/lib/" LIBS="-lc " --enable-shared --prefix=$RESULT_TOPDIR || exit 1
+./configure --host=arm-eabi CFLAGS="-I$PLATFORM/include -nostdlib" LDFLAGS="-Wl,-rpath-link=$PLATFORM/lib/ -L$PLATFORM/lib/" LIBS="-lc " --enable-shared --prefix=$RESULT_TOPDIR || exit 1
 make || exit 1
 

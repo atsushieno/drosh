@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using Mono.Unix;
 using Manos;
 using Manos.Http;
 using Manos.Spark;
@@ -220,8 +221,10 @@ namespace drosh
 			user.Status = UserStatus.Active;
 			DataStore.UpdateUser (user);
 			string path = Path.Combine (DownloadTopdir, "user", user.Name);
-			if (!Directory.Exists (path))
+			if (!Directory.Exists (path)) {
 				Directory.CreateDirectory (path);
+				new UnixDirectoryInfo (path).FileAccessPermissions = FileAccessPermissions.AllPermissions;
+			}
 
 			string sessionId = Guid.NewGuid ().ToString ();
 			var session = new DroshSession (sessionId, user);
@@ -657,7 +660,8 @@ namespace drosh
 					}
 				}
 				session.Notification = "A new build has started.";
-				ShowProjectDetails (ctx, user, project, null, revision, session.Notification); // FIXME: use Response.Redirect()
+				//ShowProjectDetails (ctx, user, project, null, revision, session.Notification); // FIXME: use Response.Redirect()
+				ctx.Response.Redirect (String.Format ("/project/{0}/{1}", user, project));
 			}
 		}
 

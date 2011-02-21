@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using Mono.Unix;
 
 using ProjectReference = System.String; // Project.Id
 using UserReference = System.String; // user.Name
@@ -106,13 +107,12 @@ namespace drosh
 			string resultDir = Path.Combine (buildDir, "build");
 			string depsDir = Path.Combine (buildDir, "deps");
 			string buildSrcDir = Path.Combine (buildDir, "src");
-			if (Directory.Exists (buildDir))
-				Directory.Delete (buildDir, true);
+/*
 			Directory.CreateDirectory (buildDir);
 			Directory.CreateDirectory (resultDir);
 			Directory.CreateDirectory (depsDir);
 			Directory.CreateDirectory (buildSrcDir);
-			
+*/
 			// pull source and deps
 
 			if (project.Dependencies != null) {

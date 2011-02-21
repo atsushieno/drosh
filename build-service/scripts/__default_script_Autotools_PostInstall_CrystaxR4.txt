@@ -1,4 +1,6 @@
-export ANDROID_NDK_ROOT=$RUNNER_DIR/../../android-ndk-r5b
+if test -z $ANDROID_NDK_ROOT; then
+export ANDROID_NDK_ROOT=$RUNNER_DIR/ndk-r4-crystax
+fi
 export TOOLCHAIN=$ANDROID_NDK_ROOT/toolchains/arm-eabi-4.4.0/prebuilt/linux-x86
 export ANDROID_VER=9 # could be 3, 4, 5 or 8
 export PLATFORM=$ANDROID_NDK_ROOT/platforms/android-$ANDROID_VER/arch-arm/usr

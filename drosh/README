@@ -1,5 +1,7 @@
 Setup howto:
 
+	mkdir ../ndks
+	# expand all ndks under ndks.
 	mkdir -p ../house/var/drosh/builds
 	mkdir -p ../house/var/drosh/pub/user
 	ln -s ../house/var/drosh/pub pub
@@ -8,8 +10,8 @@ Setup howto:
 	ln -s ../house/var/drosh/builds ../build-service/builds
 	ln -s ../house/var/drosh/pub ../build-service/pub
 	ln -s ../house/var/drosh/logs ../build-service/logs
-	ln -s ../../android-ndk-r5b ../build-service/ndk-r5
-	ln -s ../../android-ndk-r4b ../build-service/ndk-r4
+	ln -s ../ndks/android-ndk-r5b ../build-service/ndk-r5
+	ln -s ../ndks/android-ndk-r4b ../build-service/ndk-r4
 
 Run howto:
 	cd ..

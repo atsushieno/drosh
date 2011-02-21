@@ -1,1 +1,12 @@
-MONO_PATH=../drosh mono --debug build-service.exe $1 &>logs/$1.log
+#!/bin/bash
+if test -z $1; then
+exit 255
+fi
+
+mkdir -p -m 777 builds/$1
+mkdir -p -m 777 builds/$1/build
+mkdir -p -m 777 builds/$1/deps
+mkdir -p -m 777 builds/$1/src
+
+MONO_PATH=../drosh sudo -u droshbuilder MONO_PATH=../drosh mono --debug build-service.exe $1 &>logs/$1.log
+
