@@ -1,7 +1,12 @@
 Setup howto:
 
+	sudo visudo, and then add a following line:
+
+	  yourname ALL=(droshbuilder) ALL
+
 	mkdir ../ndks
 	# expand all ndks under ndks.
+
 	mkdir -p ../house/var/drosh/builds
 	mkdir -p ../house/var/drosh/pub/user
 	ln -s ../house/var/drosh/pub pub
