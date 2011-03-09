@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Security;
 using System.Security.Cryptography;
 using System.Text;
 using Mono.Unix;
@@ -652,11 +654,28 @@ namespace drosh
 				var ids = Builder.QueueBuild (rev, session.User.Name);
 				if (kickBuild) {
 					foreach (var id in ids) {
-						var psi = new ProcessStartInfo () { FileName = "bash", Arguments = Path.Combine (Drosh.BuildServiceToolDir, "run-build") + " " + id, WorkingDirectory = Drosh.BuildServiceToolDir };
+/*
+						Directory.CreateDirectory (Path.Combine (Drosh.BuildTopdir, id));
+						Directory.CreateDirectory (Path.Combine (Drosh.BuildTopdir, id, "build"));
+						Directory.CreateDirectory (Path.Combine (Drosh.BuildTopdir, id, "deps"));
+						Directory.CreateDirectory (Path.Combine (Drosh.BuildTopdir, id, "src"));
+*/
+#if false
+						var wc = new WebClient ();
+						wc.DownloadStringCompleted += delegate (object o, DownloadStringCompletedEventArgs e) {
+							if (e.Error != null)
+								Console.Error.WriteLine (e.UserState + " : " + e.Error);
+						};
+						var uri = new Uri ("http://localhost:8931/build/" + id);
+						wc.DownloadStringAsync (uri, uri);
+						System.Threading.Thread.Sleep (300);
+#else
+						var psi = new ProcessStartInfo () { FileName = "bash", Arguments = Path.Combine (Drosh.BuildServiceToolDir, "run-build") + " " + id, WorkingDirectory = Drosh.BuildServiceToolDir};
 						var proc = Process.Start (psi);
 						System.Threading.Thread.Sleep (300);
 						if (proc.HasExited)
 							Console.Error.WriteLine (proc.ExitCode);
+#endif
 					}
 				}
 				session.Notification = "A new build has started.";

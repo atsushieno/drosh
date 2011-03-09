@@ -2,7 +2,7 @@ Setup howto:
 
 	sudo visudo, and then add a following line:
 
-	  yourname ALL=(droshbuilder) ALL
+	  yourname ALL=(droshbuilder) NOPASWD: ALL
 
 	mkdir ../ndks
 	# expand all ndks under ndks.

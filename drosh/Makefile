@@ -3,6 +3,7 @@ all:
 
 SOURCES = \
 	drosh.cs \
+	consts.cs \
 	datastore.cs \
 	builder.cs \
 	DroshModel.cs \

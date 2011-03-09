@@ -8,5 +8,6 @@ mkdir -p -m 777 builds/$1/build
 mkdir -p -m 777 builds/$1/deps
 mkdir -p -m 777 builds/$1/src
 
-sudo -A -u droshbuilder -n ./run-build-core $1
+PATH=srv-tools/bin:/srv-tools/bin:/usr/bin LD_LIBRARY_PATH=srv-tools/lib:/srv-tools/lib:/usr/lib PKG_CONFIG_PATH=srv-tools/lib/pkgconfig:/srv-tools/lib/pkgconfig:/usr/lib/pkgconfig sudo -u droshbuilder ./run-build-core $1
+# sudo chroot /home/atsushi/external/drosharehouse/build-service env PATH=srv-tools/bin:/srv-tools/bin:/usr/bin LD_LIBRARY_PATH=srv-tools/lib:/srv-tools/lib:/usr/lib PKG_CONFIG_PATH=srv-tools/lib/pkgconfig:/srv-tools/lib/pkgconfig:/usr/lib/pkgconfig sudo -u droshbuilder ./run-build-core $1
 
