@@ -579,10 +579,12 @@ namespace drosh
 			var src = DataStore.GetProject (srcuser, srcproj);
 			if (src == null) {
 				session.Notification = String.Format ("Project {0}/{1} could not be retrieved.", srcuser, srcproj);
-				ShowProjectDetails (ctx, srcuser, srcproj, null, srcrev, session.Notification); // FIXME: use Response.Redirect()
+				ctx.Response.Redirect (String.Format ("/project/{userid}/{projectname}/{revision}", srcuser, srcproj, srcrev));
+				ctx.Response.End ();
 			} else if (src.Owner == session.User.Name) {
 				session.Notification = String.Format ("You cannot fork your own project.", srcuser, srcproj);
-				ShowProjectDetails (ctx, srcuser, srcproj, null, srcrev, session.Notification); // FIXME: use Response.Redirect()
+				ctx.Response.Redirect (String.Format ("/project/{userid}/{projectname}/{revision}", srcuser, srcproj, srcrev));
+				ctx.Response.End ();
 			} else {
 				var user = session.User;
 				var fork = src.Clone ();
