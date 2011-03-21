@@ -33,6 +33,14 @@ namespace drosh
 						throw new DroshInvalidInputException (String.Format ("{0} must be in {1} characters", ra.ReportedItemName, ra.MaxLength));
 					pi.SetValue (t, val, null);
 				}
+
+				var fra = pi.GetCustomAttribute<FileRequestItemAttribute> (true);
+				if (fra != null) {
+					var f = ctx.Request.Files.Get (fra.FormItemName);
+					if (f != null && f.Length > fra.MaxLength)
+						throw new DroshInvalidInputException (String.Format ("{0} must be in {1} bytes", fra.ReportedItemName, fra.MaxLength));
+					pi.SetValue (t, val, null);
+				}
 			}
 			return t;
 		}
@@ -578,6 +586,9 @@ namespace drosh
 
 		public class ManageProjectRequest
 		{
+			[FileRequestItem ("source-archive", "source archive", 0x8000000)]
+			public ManosFile SourceArchive { get; set; }
+
 			[RequestItem ("projectname", "project name", 32)]
 			public string ProjectName { get; set; }
 			[RequestItem ("description", "project description", 140)]
@@ -674,7 +685,7 @@ namespace drosh
 			p.Scripts.Add (new Script () { Step = ScriptStep.Install, Text = req.ScriptInstall });
 			p.Scripts.Add (new Script () { Step = ScriptStep.PostInstall, Text = req.ScriptPostInstall });
 
-			var file = ctx.Request.Files.Get ("source-archive");
+			var file = req.SourceArchive;
 			if (file != null) {
 				p.PublicArchiveName = file.Name;
 				p.LocalArchiveName = SaveFileOnServer (p.Owner, p.Id, file);
@@ -872,6 +883,10 @@ namespace drosh
 			: base (message, innerException)
 		{
 		}
+	}
+	
+	public class FileRequestItemAttribute : RequestItemAttribute
+	{
 	}
 	
 	public class RequestItemAttribute : Attribute
