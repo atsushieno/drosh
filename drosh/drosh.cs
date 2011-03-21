@@ -39,7 +39,7 @@ namespace drosh
 					var f = ctx.Request.Files.Get (fra.FormItemName);
 					if (f != null && f.Length > fra.MaxLength)
 						throw new DroshInvalidInputException (String.Format ("{0} must be in {1} bytes", fra.ReportedItemName, fra.MaxLength));
-					pi.SetValue (t, val, null);
+					pi.SetValue (t, f, null);
 				}
 			}
 			return t;
@@ -586,8 +586,8 @@ namespace drosh
 
 		public class ManageProjectRequest
 		{
-			[FileRequestItem ("source-archive", "source archive", 0x8000000)]
-			public ManosFile SourceArchive { get; set; }
+			[FileRequestItem ("source-archive", "source archive", 0x2000000)]
+			public UploadedFile SourceArchive { get; set; }
 
 			[RequestItem ("projectname", "project name", 32)]
 			public string ProjectName { get; set; }
@@ -887,6 +887,15 @@ namespace drosh
 	
 	public class FileRequestItemAttribute : RequestItemAttribute
 	{
+		public FileRequestItemAttribute (string name)
+			: base (name)
+		{
+		}
+
+		public FileRequestItemAttribute (string formItemName, string reportedItemName, int maxLength)
+			: base (formItemName, reportedItemName, maxLength)
+		{
+		}
 	}
 	
 	public class RequestItemAttribute : Attribute
