@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
@@ -19,6 +20,28 @@ namespace drosh
 		public static V Get<K,V> (this Dictionary<K,V> dic, K key)
 		{
 			return dic.ContainsKey (key) ? dic [key] : default (V);
+		}
+
+		public static T FromRequest<T> (this IManosContext ctx) where T : new()
+		{
+			var t = new T ();
+			foreach (var pi in typeof (T).GetProperties ()) {
+				var ra = pi.GetCustomAttribute<RequestItemAttribute> (true);
+				if (ra != null) {
+					string val = ctx.Request.Data [ra.FormItemName];
+					if (val != null && val.Length > ra.MaxLength)
+						throw new DroshInvalidInputException (String.Format ("{0} must be in {1} characters", ra.ReportedItemName, ra.MaxLength));
+					pi.SetValue (t, val, null);
+				}
+			}
+			return t;
+		}
+
+		public static T GetCustomAttribute<T> (this MemberInfo mi, bool inherit) where T : Attribute
+		{
+			foreach (T a in mi.GetCustomAttributes (typeof (T), inherit))
+				return a;
+			return null;
 		}
 	}
 
@@ -122,13 +145,22 @@ namespace drosh
 			ctx.Response.End ();
 		}
 
+		public class LoginRequest
+		{
+			[RequestItem ("login_user", "login user name", 16)]
+			public string UserId { get; set; }
+			[RequestItem ("login_password", "password", 64)]
+			public string Password { get; set; }
+		}
+
 		[Route ("/login")]
 		public void Login (IManosContext ctx, string link)
 		{
 			var session = GetSession (ctx) ?? new DroshSession (Guid.NewGuid ().ToString (), null);
 			if (session.User == null) {
-				var userid = ctx.Request.Data ["login_user"];
-				var passraw = ctx.Request.Data ["login_password"];
+				var req = ctx.FromRequest<LoginRequest> ();
+				var userid = req.UserId;
+				var passraw = req.Password;
 				var user = DataStore.GetUser (userid);
 				bool error = user == null || passraw == null || user.PasswordHash != DataStore.HashPassword (passraw);
 				session.Notification = error ? String.Format ("User name '{0}' does not exist or password is wrong", userid) : String.Format ("Welcome, {0}!", user.Name);
@@ -160,22 +192,31 @@ namespace drosh
 		{
 			var session = GetSession (ctx);
 			string notification = session != null ? session.PullNotification () : null;
-			this.RenderSparkView (ctx, "ManageUser.spark", new {ManagementMode = UserManagementMode.New, Editable = true, Notification = notification, User = CreateUserFromForm (ctx)});
+			this.RenderSparkView (ctx, "ManageUser.spark", new {ManagementMode = UserManagementMode.New, Editable = true, Notification = notification, User = CreateUserFromForm (ctx.FromRequest<ManageUserRequest> ())});
 			ctx.Response.End ();
+		}
+
+		public class ConfirmUserRegistrationRequest : ManageUserRequest
+		{
+			[RequestItem ("password", "password", 64)]
+			public string Password { get; set; }
+			[RequestItem ("password-verified", "password", 64)]
+			public string PasswordVerified { get; set; }
 		}
 
 		[Route ("/register/user/confirm")]
 		public void ConfirmUserRegistration (IManosContext ctx)
 		{
 			// FIXME: validate inputs more.
+			var req = ctx.FromRequest<ConfirmUserRegistrationRequest> ();
 			string error = null;
-			if (ctx.Request.Data ["password"] != ctx.Request.Data ["password-verified"])
+			if (req.Password != req.PasswordVerified)
 				error = "Password inputs don't match.";
-			else if (DataStore.GetUser (ctx.Request.Data ["username"]) != null)
+			else if (DataStore.GetUser (req.UserId) != null)
 				error = "The same user name is already registered. Please pick another name.";
-			var user = CreateUserFromForm (ctx);
+			var user = CreateUserFromForm (req);
 			var mode = error == null ? UserManagementMode.Confirm : UserManagementMode.New;
-			user.PasswordHash = DataStore.HashPassword (ctx.Request.Data ["password"]);
+			user.PasswordHash = DataStore.HashPassword (req.Password);
 			this.RenderSparkView (ctx, "ManageUser.spark", new {ManagementMode = mode, User = user, Editable = (error != null), Notification = error});
 			ctx.Response.End ();
 		}
@@ -192,7 +233,7 @@ namespace drosh
 
 			// FIXME: validate inputs.
 
-			var user = CreateUserFromForm (ctx);
+			var user = CreateUserFromForm (ctx.FromRequest<ManageUserRequest> ());
 			user.Status = UserStatus.Pending;
 			user.Verification = Guid.NewGuid ().ToString ();
 			DataStore.RegisterUser (user);
@@ -247,16 +288,27 @@ namespace drosh
 			ctx.Response.End ();
 		}
 
+		public class UpdateUserRequest : ManageUserRequest
+		{
+			[RequestItem ("old-password", "old password", 64)]
+			public string OldPassword { get; set; }
+			[RequestItem ("password", "password", 64)]
+			public string Password { get; set; }
+			[RequestItem ("password-verified", "password", 64)]
+			public string PasswordVerified { get; set; }
+		}
+
 		[Route ("/register/user/update")]
 		public void ExecuteUserUpdate (IManosContext ctx, DroshSession session)
 		{
-			var user = CreateUserFromForm (ctx);
+			var req = ctx.FromRequest<UpdateUserRequest> ();
+			var user = CreateUserFromForm (req);
 			// process password change request with care: check existing password
-			var rawpwd = ctx.Request.Data ["old-password"];
-			if (ctx.Request.Data ["password"] != null && ctx.Request.Data ["password"] != ctx.Request.Data ["password-verified"] || rawpwd != null && DataStore.HashPassword (rawpwd) != user.PasswordHash) {
+			var rawpwd = req.OldPassword;
+			if (req.Password != null && req.Password != req.PasswordVerified || rawpwd != null && DataStore.HashPassword (rawpwd) != user.PasswordHash) {
 				this.RenderSparkView (ctx, "ManageUser.spark", new {Session = session, ManagementMode = UserManagementMode.Update, User = user, LoggedUser = user, Editable = true, Notification = "Password didn't match"});
 			} else {
-				user.PasswordHash = DataStore.HashPassword (ctx.Request.Data ["password"]) ?? user.PasswordHash;
+				user.PasswordHash = DataStore.HashPassword (req.Password) ?? user.PasswordHash;
 				DataStore.UpdateUser (user);
 				this.RenderSparkView (ctx, "ManageUser.spark", new {ManagementMode = UserManagementMode.Update, User = user, LoggedUser = user, Editable = true, Notification = "updated!"});
 			}
@@ -268,6 +320,8 @@ namespace drosh
 		{
 			AssertLoggedIn (ctx, (c, session) => DeleteUser (c, session));
 		}
+
+		// DeleteUserRequest type is not necessary.
 
 		void DeleteUser (IManosContext ctx, DroshSession session)
 		{ 
@@ -290,6 +344,8 @@ namespace drosh
 			this.RenderSparkView (ctx, "PasswordRecovery.spark", new {Notification = notification});
 			ctx.Response.End ();
 		}
+
+		// PasswordRecoveryRequest class is not necessary.
 
 		[Route ("/register/user/recovery/execute")]
 		public void ExecutePasswordRecovery (IManosContext ctx)
@@ -314,10 +370,22 @@ namespace drosh
 				ctx.Response.Redirect ("/");
 			}
 		}
-
-		User CreateUserFromForm (IManosContext ctx)
+		
+		public class ManageUserRequest
 		{
-			var name = ctx.Request.Data ["username"];
+			[RequestItem ("username", "login user name", 16)]
+			public string UserId { get; set; }
+			[RequestItem ("password-hash", "password hash", 64)]
+			public string PasswordHash { get; set; }
+			[RequestItem ("openid", "OpenID", 256)]
+			public string OpenID { get; set; }
+			[RequestItem ("profile", "profile", 2000)]
+			public string Profile { get; set; }
+		}
+
+		User CreateUserFromForm (ManageUserRequest req)
+		{
+			var name = req.UserId;
 			var u = new User ();
 			var existing = name != null ? DataStore.GetUser (name) : null;
 			if (existing != null) {
@@ -326,10 +394,10 @@ namespace drosh
 				u.Status = existing.Status;
 			}
 			else 
-				u.PasswordHash = ctx.Request.Data ["password-hash"];
+				u.PasswordHash = req.PasswordHash;
 			u.Name = name;
-			u.OpenID = ctx.Request.Data ["openid"];
-			u.Profile = ctx.Request.Data ["profile"];
+			u.OpenID = req.OpenID;
+			u.Profile = req.Profile;
 
 			return u;
 		}
@@ -341,6 +409,8 @@ namespace drosh
 		}
 		
 		// anonymous accesses
+		
+		// DownloadFileRequest class wouldn't be necessary.
 		
 		[Route ("/download/{filename}")]
 		public void DownloadFile (IManosContext ctx, string filename)
@@ -355,6 +425,8 @@ namespace drosh
 				ctx.Response.StatusCode = 404;
 			ctx.Response.End ();
 		}
+		
+		// ShowUserDetailsRequest class wouldn't be necessary.
 		
 		[Route ("/user/{userid}")]
 		public void ShowUserDetails (IManosContext ctx, string userid)
@@ -371,6 +443,8 @@ namespace drosh
 			ctx.Response.End ();
 		}
 
+		// ShowProjectDetailsRequest class wouldn't be necessary.
+		
 		[Route ("/project/{userid}/{projectname}/{revision}",
 			"/project/{userid}/{projectname}",
 			"/project-by-id/{projectId}/{revision}",
@@ -401,12 +475,22 @@ namespace drosh
 			}
 		}
 		
+		public class SearchProjectsRequest
+		{
+			[RequestItem ("keyword", "search keyword", 64)]
+			public string Keyword { get; set; }
+			[RequestItem ("page", "page", 3)]
+			public string Page { get; set; }
+		}
+		
 		[Route ("/projects")]
-		public void SearchProjects (IManosContext ctx, string keyword)
+		public void SearchProjects (IManosContext ctx)
 		{
 			var session = GetSession (ctx);
-			var projects = DataStore.GetProjectsByKeyword (keyword, 0, 10);
-			this.RenderSparkView (ctx, "Projects.spark", new { LoggedUser = session != null ? session.User : null, Notification = session != null ? session.Notification : null, SearchKeyword = keyword, Projects = projects });
+			var req = ctx.FromRequest<SearchProjectsRequest> ();
+			var page = req.Page != null ? int.Parse (req.Page) : 0;
+			var projects = DataStore.GetProjectsByKeyword (req.Keyword, 10 * page, 10 * (page + 1));
+			this.RenderSparkView (ctx, "Projects.spark", new { LoggedUser = session != null ? session.User : null, Notification = session != null ? session.Notification : null, SearchKeyword = req.Keyword, Projects = projects });
 			ctx.Response.End ();
 		}
 
@@ -433,7 +517,8 @@ namespace drosh
 		void ConfirmProjectRegistration (IManosContext ctx, DroshSession session)
 		{
 			// FIXME: validate inputs more.
-			var project = CreateProjectFromForm (session, ctx);
+			var req = ctx.FromRequest<ManageProjectRequest> ();
+			var project = CreateProjectFromForm (session, req, ctx);
 			this.RenderSparkView (ctx, "ManageProject.spark", new {Session = session, ManagementMode = ProjectManagementMode.Confirm, LoggedUser = session.User, Editable = false, Project = project});
 			ctx.Response.End ();
 		}
@@ -449,7 +534,8 @@ namespace drosh
 			// FIXME: validate inputs.
 
 			var user = session.User;
-			var project = CreateProjectFromForm (session, ctx);
+			var req = ctx.FromRequest<ManageProjectRequest> ();
+			var project = CreateProjectFromForm (session, req, ctx);
 			project.Owner = user.Name;
 			project.Id = Guid.NewGuid ().ToString ();
 			if (!String.IsNullOrEmpty (project.LocalArchiveName)) {
@@ -483,16 +569,61 @@ namespace drosh
 
 		void ExecuteProjectUpdate (IManosContext ctx, DroshSession session)
 		{
-			var project = CreateProjectFromForm (session, ctx);
+			var req = ctx.FromRequest<ManageProjectRequest> ();
+			var project = CreateProjectFromForm (session, req, ctx);
 			DataStore.UpdateProject (session.User.Name, project);
 			this.RenderSparkView (ctx, "ManageProject.spark", new {Session = session, ManagementMode = ProjectManagementMode.Update, Project = project, LoggedUser = session.User, Editable = true, Notification = "updated!"});
 			ctx.Response.End ();
 		}
 
-		Project CreateProjectFromForm (DroshSession session, IManosContext ctx)
+		public class ManageProjectRequest
+		{
+			[RequestItem ("projectname", "project name", 32)]
+			public string ProjectName { get; set; }
+			[RequestItem ("description", "project description", 140)]
+			public string Description { get; set; }
+			[RequestItem ("website", "website", 250)]
+			public string WebSite { get; set; }
+			[RequestItem ("deps", "dependencies", 4000)]
+			public string Dependencies { get; set; }
+			[RequestItem ("builders", "builders", 2000)]
+			public string Builders { get; set; }
+
+			[RequestItem ("build-type", "build type", 10)]
+			public string BuildType { get; set; }
+
+			[RequestItem ("target-ndk", "target NDK", 10)]
+			public string TargetNdk { get; set; }
+			[RequestItem ("target-arch", "target arch", 10)]
+			public string TargetArch { get; set; }
+			[RequestItem ("target-arch-arm", "target arch arm", 10)]
+			public string TargetArchArm { get; set; }
+			[RequestItem ("target-arch-armV7a", "target arch arm-V7a", 10)]
+			public string TargetArchArmV7a { get; set; }
+			[RequestItem ("target-arch-x86", "target arch x86", 10)]
+			public string TargetArchX86 { get; set; }
+
+			[RequestItem ("script-text-build", "build script", 10000)]
+			public string ScriptBuild { get; set; }
+			[RequestItem ("script-text-preinstall", "pre-install script", 10000)]
+			public string ScriptPreInstall { get; set; }
+			[RequestItem ("script-text-install", "install script", 10000)]
+			public string ScriptInstall { get; set; }
+			[RequestItem ("script-text-postinstall", "post-install script", 10000)]
+			public string ScriptPostInstall { get; set; }
+
+			[RequestItem ("public-archive", "public archive name", 1024)]
+			public string PublicArchiveName { get; set; }
+			[RequestItem ("local-archive", "local archive name", 1024)]
+			public string LocalArchiveName { get; set; }
+
+			// FIXME: patch-*-text is not here (unfinished length)
+		}
+		
+		Project CreateProjectFromForm (DroshSession session, ManageProjectRequest req, IManosContext ctx)
 		{
 			var user = session.User.Name;
-			var name = ctx.Request.Data ["projectname"];
+			var name = req.ProjectName;
 			var existing = name != null ? DataStore.GetProject (user, name) : null;
 			var p = existing != null ? existing.Clone () : new Project () { Id = Guid.NewGuid ().ToString () };
 			if (existing != null) {
@@ -501,36 +632,36 @@ namespace drosh
 			}
 			p.Name = name;
 			p.Owner = user;
-			p.Description = ctx.Request.Data ["description"];
-			p.PrimaryLink = ctx.Request.Data ["website"];
-			p.Dependencies = (ctx.Request.Data ["deps"] ?? String.Empty).Split (new char [] {' '}, StringSplitOptions.RemoveEmptyEntries);
-			p.Builders = (ctx.Request.Data ["builders"] ?? String.Empty).Split (new char [] {' '}, StringSplitOptions.RemoveEmptyEntries);
+			p.Description = req.Description;
+			p.PrimaryLink = req.WebSite;
+			p.Dependencies = (req.Dependencies ?? String.Empty).Split (new char [] {' '}, StringSplitOptions.RemoveEmptyEntries);
+			p.Builders = (req.Builders ?? String.Empty).Split (new char [] {' '}, StringSplitOptions.RemoveEmptyEntries);
 
 			// FIXME: this trim should not be required, probably manos issue.
-			switch (ctx.Request.Data ["build-type"].Trim ()) {
+			switch (req.BuildType.Trim ()) {
 			case "Prebuilt": p.BuildType = BuildType.Prebuilt; break;
 			case "Custom": p.BuildType = BuildType.Custom; break;
 			case "NdkBuild": p.BuildType = BuildType.NdkBuild; break;
 			case "Autotools": p.BuildType = BuildType.Autotools; break;
 			case "CMake": p.BuildType = BuildType.CMake; break;
-			default: throw new Exception (String.Format ("Unexpected build type: '{0}'", ctx.Request.Data ["build-type"]));
+			default: throw new Exception (String.Format ("Unexpected build type: '{0}'", req.BuildType));
 			}
-			switch (ctx.Request.Data ["target-ndk"].Trim ()) {
+			switch (req.TargetNdk.Trim ()) {
 			case "R5": p.TargetNDKs = NDKType.R5; break;
 			case "CrystaxR4": p.TargetNDKs = NDKType.CrystaxR4; break;
 			case "R4": p.TargetNDKs = NDKType.R4; break;
-			default: throw new Exception (String.Format ("Unexpected target NDK: '{0}'", ctx.Request.Data ["target-ndk"]));
+			default: throw new Exception (String.Format ("Unexpected target NDK: '{0}'", req.TargetNdk));
 			}
 
-			p.TargetArchs = GetArchTarget (ctx, null, 0);
-
-			// FIXME: handle source-archive
+			p.TargetArchs = GetArchTarget (req);
 
 			int n_patch = 0;
 			p.Patches = new List<Patch> ();
 			dynamic patchForm;
 			while ((patchForm = ctx.Request.Data.Get ("patch-" + n_patch++ + "-text")) != null) {
 				var patchText = patchForm.UnsafeValue;
+				if (patchText.Length > 10000)
+					throw new DroshInvalidInputException ("patch text length must be less than 10000 characters.");
 				if (patchText.Trim ().Length == 0)
 					continue;
 				var patch = new Patch () { Text = patchText.Replace ("\r\n", "\n") };
@@ -538,30 +669,18 @@ namespace drosh
 			}
 
 			p.Scripts = new List<Script> ();
-			p.Scripts.Add (new Script () { Step = ScriptStep.Build, Text = ctx.Request.Data ["script-text-build"] });
-			p.Scripts.Add (new Script () { Step = ScriptStep.PreInstall, Text = ctx.Request.Data ["script-text-preinstall"] });
-			p.Scripts.Add (new Script () { Step = ScriptStep.Install, Text = ctx.Request.Data ["script-text-install"] });
-			p.Scripts.Add (new Script () { Step = ScriptStep.PostInstall, Text = ctx.Request.Data ["script-text-postinstall"] });
-/*
-			while (ctx.Request.Data ["script-target-" + ++n_script + "-text"] != null) {
-				var script = new Script ();
-				switch (ctx.Request.Data ["script-step-" + n_script]) {
-				case "build": script.Step = ScriptStep.Build; break;
-				case "preinstall": script.Step = ScriptStep.PreInstall; break;
-				case "install": script.Step = ScriptStep.Install; break;
-				case "postinstall": script.Step = ScriptStep.PostInstall; break;
-				}
-				p.Scripts.Add (script);
-			}
-*/
+			p.Scripts.Add (new Script () { Step = ScriptStep.Build, Text = req.ScriptBuild });
+			p.Scripts.Add (new Script () { Step = ScriptStep.PreInstall, Text = req.ScriptPreInstall });
+			p.Scripts.Add (new Script () { Step = ScriptStep.Install, Text = req.ScriptInstall });
+			p.Scripts.Add (new Script () { Step = ScriptStep.PostInstall, Text = req.ScriptPostInstall });
 
 			var file = ctx.Request.Files.Get ("source-archive");
 			if (file != null) {
 				p.PublicArchiveName = file.Name;
 				p.LocalArchiveName = SaveFileOnServer (p.Owner, p.Id, file);
 			} else {
-				p.PublicArchiveName = ctx.Request.Data ["public-archive-name"] ?? p.PublicArchiveName;
-				p.LocalArchiveName = ctx.Request.Data ["local-archive-name"] ?? p.LocalArchiveName;
+				p.PublicArchiveName = req.PublicArchiveName ?? p.PublicArchiveName;
+				p.LocalArchiveName = req.LocalArchiveName ?? p.LocalArchiveName;
 			}
 
 			return p;
@@ -705,17 +824,17 @@ namespace drosh
 			return uniqueName;
 		}
 
-		ArchType GetArchTarget (IManosContext ctx, string prefix, int count)
+		ArchType GetArchTarget (ManageProjectRequest req)
 		{
-			var s = ctx.Request.Data [prefix + "target-arch" + (count > 0 ? "-" + count : String.Empty)];
+			var s = req.TargetArch;
 			if (s != null)
 				return (ArchType) Enum.Parse (typeof (ArchType), s);
 			ArchType ret = ArchType.None;
-			if (ctx.Request.Data [prefix + "target-arch-" + (count > 0 ? count + "-" : String.Empty) + "arm"] != null)
+			if (req.TargetArchArm != null)
 				ret |= ArchType.Arm;
-			if (ctx.Request.Data [prefix + "target-arch-" + (count > 0 ? count + "-" : String.Empty) + "armV7a"] != null)
+			if (req.TargetArchArmV7a != null)
 				ret |= ArchType.ArmV7a;
-			if (ctx.Request.Data [prefix + "target-arch-" + (count > 0 ? count + "-" : String.Empty) + "x86"] != null)
+			if (req.TargetArchX86 != null)
 				ret |= ArchType.X86;
 			return ret;
 		}
@@ -736,6 +855,44 @@ namespace drosh
 			// FIXME: implement
 		}
 	}
+	
+	public class DroshInvalidInputException : Exception
+	{
+		public DroshInvalidInputException ()
+			: this ("Invalid Web form input")
+		{
+		}
+		
+		public DroshInvalidInputException (string message)
+			: base (message)
+		{
+		}
+		
+		public DroshInvalidInputException (string message, Exception innerException)
+			: base (message, innerException)
+		{
+		}
+	}
+	
+	public class RequestItemAttribute : Attribute
+	{
+		public RequestItemAttribute (string name)
+			: this (name, name, 512)
+		{
+		}
+		
+		public RequestItemAttribute (string formItemName, string reportedItemName, int maxLength)
+		{
+			FormItemName = formItemName;
+			ReportedItemName = reportedItemName;
+			MaxLength = maxLength;
+		}
+		
+		public string FormItemName { get; set; }
+		public string ReportedItemName { get; set; }
+		public int MaxLength { get; set; }
+	}
 }
+
 
 
