@@ -7,6 +7,7 @@ SOURCES = \
 	datastore.cs \
 	builder.cs \
 	DroshModel.cs \
+	Manos.Mustache.cs \
 	Manos.Spark.cs \
 	StaticContentModule.cs
 
@@ -19,5 +20,6 @@ REFS = \
 	-r:ServiceStack.Messaging.dll \
 	-r:ServiceStack.Redis.dll \
 	-r:ServiceStack.Text.dll \
+	-r:Nustache.Core.dll \
 	-r:Spark.dll
 

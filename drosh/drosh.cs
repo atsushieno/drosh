@@ -11,6 +11,7 @@ using System.Text;
 using Mono.Unix;
 using Manos;
 using Manos.Http;
+using Manos.Mustache;
 using Manos.Spark;
 
 namespace drosh
