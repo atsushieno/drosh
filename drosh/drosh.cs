@@ -150,7 +150,8 @@ namespace drosh
 		{
 			var session = GetSession (ctx);
 			string notification = session != null ? session.PullNotification () : null;
-			this.RenderSparkView (ctx, "Home.spark", new { Notification = notification});
+//			this.RenderSparkView (ctx, "Home.spark", new { Notification = notification});
+			this.RenderStache (ctx, "Home.mustache", new { Notification = notification});
 			ctx.Response.End ();
 		}
 

@@ -1,0 +1,58 @@
+{{> page-preceding }}
+
+{{> login_status.mustache }}
+
+
+<h1>Drosh: Android Shared Library House</h1>
+
+<div id="notification" name="notification"><p>$!{Notification}</p></div>
+
+<test if="Projects != null">
+<div id="accessible-projects" name="accessible-projects">
+<h2>Your Projects</h2>
+
+<p><a href="/register/project/new">Create new Project</a></p>
+
+<table>
+
+{{#Projects}}
+  <tr id="project-{{Name}}" name="project-{{Name}}">
+    <td><a href="/project/{{Owner}}/{{Name}}/Head">{{Name}}</td>
+  </tr>
+{{/Projects}}
+
+</table>
+
+</div>
+</test>
+
+
+{{#Builds?}}
+<!-- FIXME: do we need this? -->
+<div id="recent-builds" name="recent-builds">
+
+<!-- list of builds -->
+
+<h2>recent builds</h2>
+
+<table>
+{{#Builds}}
+<tr id="build-{{BuildId}}" name="build-{{BuildId}}">
+  <td><a href="/build/show/{{BuildId}}"><img alt="build details" src="/images/build.png" /></a></td>
+  <td>{{Status}}</td>
+  <td>{{BuildStartedTimestamp}}</td>
+  <td><a href="/project/{{ProjectOwner}}/{{ProjectName}}/{{ProjectRevision}}">{{ProjectName}}</td>
+  <td>{{ProjectRevision}}</td>
+  <td>{{TargetArch}}</td>
+</tr>
+{{/Builds}}
+</table>
+
+<!-- TODO: page controller links -->
+
+</div>
+{{/Builds}}
+
+</body>
+</html>
+
