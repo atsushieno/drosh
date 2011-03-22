@@ -11,7 +11,6 @@ using System.Text;
 using Mono.Unix;
 using Manos;
 using Manos.Http;
-using Manos.Mustache;
 using Manos.Spark;
 
 namespace drosh
@@ -150,8 +149,7 @@ namespace drosh
 		{
 			var session = GetSession (ctx);
 			string notification = session != null ? session.PullNotification () : null;
-//			this.RenderSparkView (ctx, "Home.spark", new { Notification = notification});
-			this.RenderStache (ctx, "Home.mustache", new { Notification = notification});
+			this.RenderSparkView (ctx, "Home.spark", new { Notification = notification});
 			ctx.Response.End ();
 		}
 
@@ -746,8 +744,7 @@ namespace drosh
 		public void ShowBuild (IManosContext ctx, string buildId)
 		{
 			var build = DataStore.GetBuild (buildId);
-//			this.RenderSparkView (ctx, "Build.spark", new { Build = build });
-			this.RenderStache (ctx, "Build.spark", new { Build = build });
+			this.RenderSparkView (ctx, "Build.spark", new { Build = build });
 			ctx.Response.End ();
 		}
 
