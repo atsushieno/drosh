@@ -1,0 +1,32 @@
+<div id="common-toolbox" style="float: right">
+{{#LoggedUser}}
+  <div id="logout" name="logout">
+    <form action="/logout">
+      Logged in as {{LoggedUser.Name}}<br />
+      <a href="/register/user/edit">manage account</a><br />
+      <input type="submit" value="Logout" />
+    </form>
+  </div>
+{{/LoggedUser}}
+
+{{^LoggedUser}}
+  <div id="login" name="login">
+    <form action="/login" method="POST">
+      Account ID <input type="text" name="login_user" /><br />
+      Password <input type="password" name="login_password" /><br />
+      <input type="submit" value="Login" /><br />
+      <a href="/register/user/new">new account</a> / <a href="/register/user/recovery">forgot password?</a>
+    </form>
+  </div>
+{{/LoggedUser}}
+
+<div id="project-search" name="project-search">
+<form action="/projects" method="POST">
+Search project: <input type="text" name="keyword" />
+<input type="submit" value="Search" />
+</form>
+</div>
+
+</div>
+
+<div style="clear: left"></div>

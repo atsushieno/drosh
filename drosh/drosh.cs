@@ -744,7 +744,8 @@ namespace drosh
 		public void ShowBuild (IManosContext ctx, string buildId)
 		{
 			var build = DataStore.GetBuild (buildId);
-			this.RenderSparkView (ctx, "Build.spark", new { Build = build });
+//			this.RenderSparkView (ctx, "Build.spark", new { Build = build });
+			this.RenderStache (ctx, "Build.spark", new { Build = build });
 			ctx.Response.End ();
 		}
 
