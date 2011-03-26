@@ -8,6 +8,7 @@ SOURCES = \
 	builder.cs \
 	DroshModel.cs \
 	Manos.Spark.cs \
+	Dynamic.Json.cs \
 	StaticContentModule.cs
 
 REFS = \
@@ -19,6 +20,8 @@ REFS = \
 	-r:ServiceStack.Messaging.dll \
 	-r:ServiceStack.Redis.dll \
 	-r:ServiceStack.Text.dll \
+	-r:System.Xml.Linq.dll \
+	-r:System.Runtime.Serialization.dll \
 	-r:Spark.dll
 
 

@@ -181,7 +181,7 @@ namespace drosh
 
 		public static IEnumerable<Project> GetProjectsByKeyword (string keyword, int skip, int take)
 		{
-			return Projects.Where (p => p.Name.Contains (keyword) || p.Owner.Contains (keyword)).Skip (skip).Take (take);
+			return (keyword != null ? Projects.Where (p => p.Name.Contains (keyword) || p.Owner.Contains (keyword)) : Projects).Skip (skip).Take (take);
 		}
 
 		// Revisions related

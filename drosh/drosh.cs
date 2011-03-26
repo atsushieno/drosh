@@ -12,6 +12,7 @@ using Mono.Unix;
 using Manos;
 using Manos.Http;
 using Manos.Spark;
+using Codeplex.Data;
 
 namespace drosh
 {
@@ -50,6 +51,11 @@ namespace drosh
 			foreach (T a in mi.GetCustomAttributes (typeof (T), inherit))
 				return a;
 			return null;
+		}
+
+		public static string ToJsonString (this object o)
+		{
+			return DynamicJson.Serialize (o);
 		}
 	}
 
@@ -489,6 +495,8 @@ namespace drosh
 			public string Keyword { get; set; }
 			[RequestItem ("page", "page", 3)]
 			public string Page { get; set; }
+			[RequestItem ("format", "format", 5)]
+			public string Format { get; set; }
 		}
 		
 		[Route ("/projects")]
@@ -498,7 +506,10 @@ namespace drosh
 			var req = ctx.FromRequest<SearchProjectsRequest> ();
 			var page = req.Page != null ? int.Parse (req.Page) : 0;
 			var projects = DataStore.GetProjectsByKeyword (req.Keyword, 10 * page, 10 * (page + 1));
-			this.RenderSparkView (ctx, "Projects.spark", new { LoggedUser = session != null ? session.User : null, Notification = session != null ? session.Notification : null, SearchKeyword = req.Keyword, Projects = projects });
+			if (req.Format == "json")
+				ctx.Response.Write (projects.ToJsonString ());
+			else
+				this.RenderSparkView (ctx, "Projects.spark", new { LoggedUser = session != null ? session.User : null, Notification = session != null ? session.Notification : null, SearchKeyword = req.Keyword, Projects = projects });
 			ctx.Response.End ();
 		}
 
