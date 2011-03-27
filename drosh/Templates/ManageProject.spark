@@ -68,9 +68,49 @@ Logged in as ${LoggedUser.Name}<br />
     <td>Dependencies:</td>
     <td>
       <set tmpstr="Project != null ? string.Join (' ', Project.Dependencies.ToArray ()) : null" />
-      <input type="${Editable ? 'text' : 'hidden'}" name="deps" size="80" value="${tmpstr}" />
-      <test if="Editable"><br />enter whitespace-separated list of project names</test>
-      <else>${tmpstr}</else>
+      <div id="deps-noscript" class="noscript">
+        <input type="${Editable ? 'text' : 'hidden'}" name="deps" size="80" value="${tmpstr}" />
+        <test if="Editable"><br />enter whitespace-separated list of project names</test>
+        <else>${tmpstr}</else>
+      </div>
+      <div id="deps-script" class="script-dep">
+        <test if="Editable">
+          <a href="#" onclick="showProjectsDialog()">Select Projects</a>
+          <div id="project-selector-dialog">
+            <p>Search keyword: <input type="text" name="project-search-keyword" length="60" /> <input type="submit" onclick="runSearch()" />
+            <div id="project-query-result">
+               <p><span id="searched-keyword" /></p>
+            </div>
+          </div>
+        </test>
+<script type="text/javascript">
+$("#project-selector-dialog").dialog({autoopen:false});
+
+function showProjectDialog() {
+  $("#project-selector-dialog").dialog("open");
+}
+function closeProjectDialog() {
+  $("#project-selector-dialog").dialog("close");
+}
+function runSearch() {
+  kwd = $("#project-search-keyword").value;
+  resultsDiv = $("#project-query-result");
+  $.ajax({
+    url: "/projects,
+    cache: false,
+    data: {keyword: kwd}
+    success: function(json) {
+      resultsDiv.append (json);
+    },
+    error: function() {
+      alert("error");
+    }
+  });
+}
+
+</script>
+        <else>${tmpstr}</else>
+      </div>
     </td>
     </td>
   </tr><tr>
