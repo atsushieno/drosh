@@ -105,6 +105,8 @@ namespace drosh
 		{
 			Route ("/default.css", new StaticContentModule ());
 			Route ("/images/", new StaticContentModule ());
+			Route ("/css/", new StaticContentModule ());
+			Route ("/js/", new StaticContentModule ());
 		}
 
 		DroshSession GetSession (IManosContext ctx)
@@ -418,7 +420,7 @@ namespace drosh
 
 		void LoggedHome (IManosContext ctx, DroshSession session)
 		{
-			this.RenderSparkView (ctx, "Home.spark", new { Session = session, LoggedUser = session.User, Notification = session.PullNotification (), Builds = DataStore.GetLatestBuildsByUser (session.User.Name, 0, 10), Projects = DataStore.GetProjectsByUser (session.User.Name) });
+			this.RenderSparkView (ctx, "Home.spark", new { Session = session, LoggedUser = session.User, Notification = session.PullNotification (), Builds = DataStore.GetLatestBuildsByUser (session.User.Name, 0, 20), Projects = DataStore.GetProjectsByUser (session.User.Name) });
 			ctx.Response.End ();
 		}
 		
@@ -472,8 +474,8 @@ namespace drosh
 				session.Notification = String.Format ("Project '{0}' was not found. Make sure that the link is correct.", projectId ?? userid + "/" + projectname);
 				ctx.Response.Redirect ("/");
 			} else {
-				var builds = DataStore.GetLatestBuildsByProject (project.Owner, project.Name, 0, 10);
-				var revs = DataStore.GetRevisions (project.Owner, project.Name, 0, 10);
+				var builds = DataStore.GetLatestBuildsByProject (project.Owner, project.Name, 0, 20);
+				var revs = DataStore.GetRevisions (project.Owner, project.Name, 0, 100);
 				var dlbuilds = new List<BuildRecord> ();
 				BuildRecord dlbuild = null;
 				foreach (var arch in target_archs)
@@ -505,7 +507,7 @@ namespace drosh
 			var session = GetSession (ctx);
 			var req = ctx.FromRequest<SearchProjectsRequest> ();
 			var page = req.Page != null ? int.Parse (req.Page) : 0;
-			var projects = DataStore.GetProjectsByKeyword (req.Keyword, 10 * page, 10 * (page + 1));
+			var projects = DataStore.GetProjectsByKeyword (req.Keyword, 100 * page, 100 * (page + 1));
 			if (req.Format == "json")
 				ctx.Response.Write (projects.ToJsonString ());
 			else
