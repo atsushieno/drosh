@@ -68,11 +68,9 @@ Logged in as ${LoggedUser.Name}<br />
     <td>Dependencies:</td>
     <td>
       <set tmpstr="Project != null ? string.Join (' ', Project.Dependencies.ToArray ()) : null" />
-      <div id="deps-noscript" class="noscript">
-        <input type="${Editable ? 'text' : 'hidden'}" name="deps" size="80" value="${tmpstr}" />
-        <test if="Editable"><br />enter whitespace-separated list of project names</test>
-        <else>${tmpstr}</else>
-      </div>
+      <input type="${Editable ? 'text' : 'hidden'}" id="deps" name="deps" size="80" value="${tmpstr}" />
+      <test if="Editable"><br />enter whitespace-separated list of project names</test>
+      <else>${tmpstr}</else>
       <div id="deps-script" class="script-dep">
         <test if="Editable">
           <a href="#" onclick="showProjectsDialog()">Select Projects</a>
@@ -81,8 +79,8 @@ Logged in as ${LoggedUser.Name}<br />
             <div id="project-query-result">
                <p><span id="searched-keyword" /></p>
             </div>
-            <table id="project-query-result-table">
-            </table>
+            <ul id="project-query-result-list">
+            </ul>
           </div>
         </test>
         <else>${tmpstr}</else>
@@ -202,7 +200,6 @@ Logged in as ${LoggedUser.Name}<br />
 
 </div>
 
-<script type="text/javascript" src="js/flexigrid.js"></script>
 <script type="text/javascript">
 function showProjectsDialog() {
   $("#project-selector-dialog").dialog("open");
@@ -219,23 +216,30 @@ function runSearch() {
     data: {keyword: kwd, format: "json"},
     success: function(json) {
       projects = jQuery.parseJSON (json);
-      table = $("#project-query-result-table");
-      table.removeAll();
-      table.append ("<tr><th>ID</th><th>Name</th><th>Owner</th></tr>");
+      list = $("#project-query-result-list");
+      list.text("");
       for (i in projects) {
-        proj = projects [i];
-        tr = $("<tr/>");
-        tr.append ($("<td />").text(proj.Id));
-        tr.append ($("<td />").text(proj.Owner));
-        tr.append ($("<td />").text(proj.Name));
-        table.append (tr);
+        list.append (createProjectItem (projects [i]));
       }
-      table.flexigrid();
     },
     error: function() {
       alert("error");
     }
   });
+}
+function createProjectItem(proj) {
+  var pname = proj.Owner + "/" + proj.Name;
+  var li = $("<li/>");
+  var a = $("<a href=\"#\" />");
+  a.text(pname);
+  a.click(function() { selectProject(pname); });
+  li.append (a);
+  return li;
+}
+function selectProject(p) {
+  var f = $("#deps");
+  f.val(f.val() + " " + p);
+  $("#project-selector-dialog").dialog("close");
 }
 $(document).ready (function() {
   $("#deps-script").show();
