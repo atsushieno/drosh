@@ -82,11 +82,6 @@ Logged in as ${LoggedUser.Name}<br />
                <p><span id="searched-keyword" /></p>
             </div>
             <table id="project-query-result-table">
-              <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Owner</th>
-              </tr>
             </table>
           </div>
         </test>
@@ -207,6 +202,7 @@ Logged in as ${LoggedUser.Name}<br />
 
 </div>
 
+<script type="text/javascript" src="js/flexigrid.js"></script>
 <script type="text/javascript">
 function showProjectsDialog() {
   $("#project-selector-dialog").dialog("open");
@@ -224,6 +220,8 @@ function runSearch() {
     success: function(json) {
       projects = jQuery.parseJSON (json);
       table = $("#project-query-result-table");
+      table.removeAll();
+      table.append ("<tr><th>ID</th><th>Name</th><th>Owner</th></tr>");
       for (i in projects) {
         proj = projects [i];
         tr = $("<tr/>");
@@ -232,6 +230,7 @@ function runSearch() {
         tr.append ($("<td />").text(proj.Name));
         table.append (tr);
       }
+      table.flexigrid();
     },
     error: function() {
       alert("error");
