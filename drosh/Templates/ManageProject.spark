@@ -75,7 +75,7 @@ Logged in as ${LoggedUser.Name}<br />
         <test if="Editable">
           <a href="#" onclick="showProjectsDialog()">Select Projects</a>
           <div id="project-selector-dialog">
-            <p>Search keyword: <input type="text" name="project-search-keyword" length="60" /> <input type="submit" id="project-search-button" onclick="runSearch()" />
+            <p>Search keyword: <input type="text" id="project-search-keyword" length="60" /> <input type="submit" id="project-search-button" onclick="runSearch()" />
             <div id="project-query-result">
                <p><span id="searched-keyword" /></p>
             </div>
@@ -208,7 +208,7 @@ function closeProjectsDialog() {
   $("#project-selector-dialog").dialog("close");
 }
 function runSearch() {
-  kwd = $("#project-search-keyword").value;
+  kwd = $("#project-search-keyword").val();
   resultsDiv = $("#project-query-result");
   $.ajax({
     url: "/projects",
