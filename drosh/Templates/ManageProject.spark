@@ -81,39 +81,16 @@ Logged in as ${LoggedUser.Name}<br />
             <div id="project-query-result">
                <p><span id="searched-keyword" /></p>
             </div>
+            <table id="project-query-result-table">
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Owner</th>
+              </tr>
+            </table>
           </div>
         </test>
         <else>${tmpstr}</else>
-<script type="text/javascript">
-function showProjectsDialog() {
-  $("#project-selector-dialog").dialog("open");
-}
-function closeProjectsDialog() {
-  $("#project-selector-dialog").dialog("close");
-}
-function runSearch() {
-  kwd = $("#project-search-keyword").value;
-  resultsDiv = $("#project-query-result");
-  $.ajax({
-    url: "/projects",
-    cache: false,
-    data: {keyword: kwd, format: "json"},
-    success: function(json) {
-      resultsDiv.append (json);
-alert("OK");
-    },
-    error: function() {
-      alert("error");
-    }
-  });
-}
-$(document).ready (function() {
-  $("#deps-script").show();
-  $("#deps-noscript").hide();
-  $("#project-selector-dialog").dialog({autoOpen:false});
-});
-
-</script>
       </div>
     </td>
     </td>
@@ -230,5 +207,44 @@ $(document).ready (function() {
 
 </div>
 
+<script type="text/javascript">
+function showProjectsDialog() {
+  $("#project-selector-dialog").dialog("open");
+}
+function closeProjectsDialog() {
+  $("#project-selector-dialog").dialog("close");
+}
+function runSearch() {
+  kwd = $("#project-search-keyword").value;
+  resultsDiv = $("#project-query-result");
+  $.ajax({
+    url: "/projects",
+    cache: false,
+    data: {keyword: kwd, format: "json"},
+    success: function(json) {
+      projects = jQuery.parseJSON (json);
+      table = $("#project-query-result-table");
+      for (i in projects) {
+        proj = projects [i];
+        tr = $("<tr/>");
+        tr.append ($("<td />").text(proj.Id));
+        tr.append ($("<td />").text(proj.Owner));
+        tr.append ($("<td />").text(proj.Name));
+        table.append (tr);
+      }
+    },
+    error: function() {
+      alert("error");
+    }
+  });
+}
+$(document).ready (function() {
+  $("#deps-script").show();
+  $("#deps-noscript").hide();
+  $("#project-selector-dialog").dialog({autoOpen:false});
+});
+
+</script>
 
 </content>
+

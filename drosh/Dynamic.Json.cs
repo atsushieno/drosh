@@ -96,6 +96,9 @@ namespace Codeplex.Data
         {
             if (obj == null) return JsonType.@null;
 
+            if (obj.GetType().IsEnum)
+                return JsonType.@string;
+
             switch (Type.GetTypeCode(obj.GetType()))
             {
                 case TypeCode.Boolean:
