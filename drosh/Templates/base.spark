@@ -4,6 +4,8 @@
 <meta http-equiv="Cache-Control" content="no-cache">
 <link rel="stylesheet" type="text/css" href="/default.css" />
 <link rel="stylesheet" type="text/css" href="/css/smoothness/jquery-ui-1.8.11.custom.css" />
+<link rel="stylesheet" type="text/css" href="/css/flexigrid/flexigrid.css" />
+
 <script type="text/javascript" src="/js/jquery-1.4.4.min.js"></script>
 <script type="text/javascript" src="/js/jquery-ui-1.8.11.custom.min.js"></script>
 </head>
