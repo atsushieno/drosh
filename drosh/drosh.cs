@@ -618,7 +618,7 @@ namespace drosh
 
 			[RequestItem ("target-ndk", "target NDK", 10)]
 			public string TargetNdk { get; set; }
-			[RequestItem ("target-arch", "target arch", 10)]
+			[RequestItem ("target-arch", "target arch", 30)]
 			public string TargetArch { get; set; }
 			[RequestItem ("target-arch-arm", "target arch arm", 10)]
 			public string TargetArchArm { get; set; }
@@ -636,9 +636,9 @@ namespace drosh
 			[RequestItem ("script-text-postinstall", "post-install script", 10000)]
 			public string ScriptPostInstall { get; set; }
 
-			[RequestItem ("public-archive", "public archive name", 1024)]
+			[RequestItem ("public-archive-name", "public archive name", 1024)]
 			public string PublicArchiveName { get; set; }
-			[RequestItem ("local-archive", "local archive name", 1024)]
+			[RequestItem ("local-archive-name", "local archive name", 1024)]
 			public string LocalArchiveName { get; set; }
 
 			// FIXME: patch-*-text is not here (unfinished length)
