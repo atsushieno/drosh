@@ -3,7 +3,8 @@ export ANDROID_NDK_ROOT=$RUNNER_DIR/ndk-r5
 fi
 export TOOLCHAIN=$ANDROID_NDK_ROOT/toolchains/arm-eabi-4.4.0/prebuilt/linux-x86
 export ANDROID_VER=9 # could be 3, 4, 5 or 8
-export PLATFORM=$ANDROID_NDK_ROOT/platforms/android-$ANDROID_VER/arch-arm/usr
+export SYSROOT=$ANDROID_NDK_ROOT/platforms/android-$ANDROID_VER/arch-arm
+export PLATFORM=$SYSROOT/usr
 export PATH=$TOOLCHAIN/bin:$DEPS_TOPDIR/bin:$PATH
 export LD_LIBRARY_PATH=$TOOLCHAIN/lib:$DEPS_TOPDIR/lib:$LD_LIBRARY_PATH
 export PKG_CONFIG_PATH=$TOOLCHAIN/lib/pkgconfig:$DEPS_TOPDIR/lib/pkgconfig:$LD_LIBRARY_PATH
