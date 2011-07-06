@@ -30,7 +30,7 @@ namespace drosh
 				var ra = pi.GetCustomAttribute<RequestItemAttribute> (true);
 				if (ra != null) {
 					string val = ctx.Request.Data [ra.FormItemName];
-					val = val != null ? val.Trim () : null;
+					val = val != null ? val.Replace ("\r\n", "\n").Trim () : null;
 					if (val != null && val.Length > ra.MaxLength)
 						throw new DroshInvalidInputException (String.Format ("{0} must be in {1} characters: {2}", ra.ReportedItemName, ra.MaxLength, val));
 					pi.SetValue (t, val, null);
