@@ -54,7 +54,11 @@
     <td>Fork Origin: </td><td><a href="/user/${ForkOrigin.Owner}">${ForkOrigin.Owner}/<a href="/project/${ForkOrigin.Owner}/${ForkOrigin.Name}">${ForkOrigin.Name}</a></td>
   </tr><tr>
 </test>
-    <td>Dependencies: </td><td>${string.Join (', ', (from dep in Project.Dependencies select dep).ToArray ())}</td>
+    <td>Dependencies: </td><td>
+      <for each="var dep in Project.Dependencies">
+        <a href="/project/${dep}">${dep}</a>
+      </for>
+    </td>
   </tr><tr>
     <td>Owner: </td><td>${Project.Owner}</td>
   </tr><tr>
